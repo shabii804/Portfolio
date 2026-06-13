@@ -30,16 +30,52 @@ function findBestMatch(userMessage) {
   let bestMatch = null;
   let bestScore = 0;
 
-  // Direct check for specific project names to ensure high accuracy
+  // Direct check for specific project names or topics to ensure high accuracy
+  if (messageLower.includes("why") && (messageLower.includes("hire") || messageLower.includes("choose") || messageLower.includes("select") || messageLower.includes("recruit"))) {
+    const whyFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("why should i hire"));
+    if (whyFAQ) return whyFAQ;
+  }
+  if (messageLower.includes("database") || messageLower.includes("sql server") || messageLower.includes("oracle") || messageLower.includes("postgres") || messageLower.includes("mysql") || messageLower.includes("nosql")) {
+    const dbFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("databases"));
+    if (dbFAQ) return dbFAQ;
+  }
+  if (messageLower.includes("who built") || messageLower.includes("who made") || messageLower.includes("who designed") || messageLower.includes("creator") || messageLower.includes("create this") || messageLower.includes("develop this")) {
+    const creatorFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("who built this"));
+    if (creatorFAQ) return creatorFAQ;
+  }
+  if (messageLower.includes("swing") || messageLower.includes("flatdarklaf") || (messageLower.includes("java") && messageLower.includes("desktop"))) {
+    const swingFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("swing"));
+    if (swingFAQ) return swingFAQ;
+  }
+  if (messageLower.includes("voice") || messageLower.includes("speech") || messageLower.includes("speak") || messageLower.includes("recognition")) {
+    const voiceFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("voice"));
+    if (voiceFAQ) return voiceFAQ;
+  }
+  if (messageLower.includes("how") && messageLower.includes("cgpa") && (messageLower.includes("get") || messageLower.includes("maintain") || messageLower.includes("achieve") || messageLower.includes("perfect"))) {
+    const cgpaFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("how did he get"));
+    if (cgpaFAQ) return cgpaFAQ;
+  }
+  if (messageLower.includes("riphah")) {
+    const riphahFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("riphah"));
+    if (riphahFAQ) return riphahFAQ;
+  }
+  if (messageLower.includes("custom") && (messageLower.includes("website") || messageLower.includes("web") || messageLower.includes("site") || messageLower.includes("dev"))) {
+    const customFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("custom website"));
+    if (customFAQ) return customFAQ;
+  }
+  if (messageLower.includes("farooq") && (messageLower.includes("result") || messageLower.includes("impact") || messageLower.includes("outcome") || messageLower.includes("benefit") || messageLower.includes("metrics"))) {
+    const farooqResFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("results"));
+    if (farooqResFAQ) return farooqResFAQ;
+  }
   if (messageLower.includes("farooq") || messageLower.includes("medical")) {
-    const farooqFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("farooq"));
+    const farooqFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("farooq agencies."));
     if (farooqFAQ) return farooqFAQ;
   }
   if (messageLower.includes("spendsmart") || (messageLower.includes("spend") && messageLower.includes("smart")) || messageLower.includes("finance") || messageLower.includes("expense")) {
     const spendFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("spendsmart"));
     if (spendFAQ) return spendFAQ;
   }
-  if (messageLower.includes("school") || messageLower.includes("sms") || (messageLower.includes("java") && messageLower.includes("desktop"))) {
+  if (messageLower.includes("school") || messageLower.includes("sms")) {
     const smsFAQ = portfolioKnowledge.faqs.find(f => f.question.toLowerCase().includes("school"));
     if (smsFAQ) return smsFAQ;
   }

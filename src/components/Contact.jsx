@@ -41,9 +41,9 @@ export default function Contact() {
             href={`https://wa.me/${phoneDigits}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk%20about%20a%20project.`}
             target="_blank"
             rel="noreferrer"
-            className="btn-primary px-8 py-4 rounded-xl font-display font-medium text-base flex items-center gap-2.5"
+            className="btn-primary px-8 py-4 rounded-xl font-display font-medium text-base flex items-center gap-2.5 glow-on-hover"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.7 20.3c-.4.4-1 .7-1.6.8-1.4.3-2.8.5-4.3.5C8.1 21.6 3 16.5 3 10.8 3 7 5.1 3.8 8.2 2.6c.6-.2 1.2-.1 1.7.4l1.6 1.6c.4.4.5 1 .3 1.6l-.8 2c-.2.6 0 1.2.5 1.6l2.7 2c.6.4 1.3.5 2 .2l2-.8c.6-.2 1.2-.1 1.6.3l1.6 1.6c.5.6.6 1.3.4 1.9z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.988 4.482-9.988 9.988 0 1.758.455 3.414 1.258 4.868L2 22l5.312-1.392c1.401.763 3.001 1.196 4.7 1.196 5.506 0 9.988-4.482 9.988-9.988C22 6.482 17.518 2 12.012 2zm4.786 14.193c-.272.763-1.392 1.4-2.155 1.508-.654.098-1.503.185-4.408-.98-3.723-1.492-6.13-5.267-6.315-5.512-.185-.245-1.503-2-1.503-3.816 0-1.815.959-2.709 1.303-3.069.344-.36.758-.45.998-.45.24 0 .48.01.688.02.218.01.512-.08.8-.08.288 0 .584.09.83.676.24.58.83 2.02.9 2.16.07.14.12.3.02.5-.1.2-.15.33-.3.51-.15.18-.32.4-.46.54-.15.15-.31.31-.13.62.18.3.8 1.31 1.71 2.12.91.81 1.67 1.06 1.91 1.19.24.13.38.11.52-.05.14-.17.62-.72.79-.97.17-.25.34-.21.58-.12.24.09 1.52.72 1.79.85.27.14.45.2.51.31.06.11.06.66-.21 1.42z"/></svg>
             Message on WhatsApp
           </a>
         </div>
@@ -77,8 +77,8 @@ export default function Contact() {
               <div className="font-display font-semibold">Prefer a message?</div>
               <div className="font-body text-sm text-text-secondary">Contact me directly on WhatsApp for the fastest reply.</div>
             </div>
-            <a href={`https://wa.me/${phoneDigits}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`} target="_blank" rel="noreferrer" className="btn-primary px-4 py-2 rounded-md inline-flex items-center gap-2 justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.7 20.3c-.4.4-1 .7-1.6.8-1.4.3-2.8.5-4.3.5C8.1 21.6 3 16.5 3 10.8 3 7 5.1 3.8 8.2 2.6c.6-.2 1.2-.1 1.7.4l1.6 1.6c.4.4.5 1 .3 1.6l-.8 2c-.2.6 0 1.2.5 1.6l2.7 2c.6.4 1.3.5 2 .2l2-.8c.6-.2 1.2-.1 1.6.3l1.6 1.6c.5.6.6 1.3.4 1.9z"/></svg>
+            <a href={`https://wa.me/${phoneDigits}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`} target="_blank" rel="noreferrer" className="btn-primary px-4 py-2 rounded-md inline-flex items-center gap-2 justify-center glow-on-hover">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.988 4.482-9.988 9.988 0 1.758.455 3.414 1.258 4.868L2 22l5.312-1.392c1.401.763 3.001 1.196 4.7 1.196 5.506 0 9.988-4.482 9.988-9.988C22 6.482 17.518 2 12.012 2zm4.786 14.193c-.272.763-1.392 1.4-2.155 1.508-.654.098-1.503.185-4.408-.98-3.723-1.492-6.13-5.267-6.315-5.512-.185-.245-1.503-2-1.503-3.816 0-1.815.959-2.709 1.303-3.069.344-.36.758-.45.998-.45.24 0 .48.01.688.02.218.01.512-.08.8-.08.288 0 .584.09.83.676.24.58.83 2.02.9 2.16.07.14.12.3.02.5-.1.2-.15.33-.3.51-.15.18-.32.4-.46.54-.15.15-.31.31-.13.62.18.3.8 1.31 1.71 2.12.91.81 1.67 1.06 1.91 1.19.24.13.38.11.52-.05.14-.17.62-.72.79-.97.17-.25.34-.21.58-.12.24.09 1.52.72 1.79.85.27.14.45.2.51.31.06.11.06.66-.21 1.42z"/></svg>
               WhatsApp
             </a>
           </div>

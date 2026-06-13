@@ -209,6 +209,56 @@ Feel free to send a message on WhatsApp or email for job opportunities, internsh
       question: "Where did he study?",
       answer: `Shoaib is pursuing a **BS in Software Engineering** at **Riphah International University** (Islamabad, Pakistan). He maintains a perfect **4.0 CGPA** and is in the class of 2021 – Present.`,
     },
+    {
+      question: "Why should I hire Shoaib?",
+      answer: `Here are 4 key reasons to hire Shoaib:
+1. **Academic Excellence (4.0 CGPA)**: Possesses an exceptionally deep, theoretical foundation in Software Engineering (OOP, database normalization, data structures).
+2. **Real-world Experience**: Built and deployed production sites like **Farooq Agencies** (which serves a real business) and active desktop systems.
+3. **Certified Competence**: Cisco certified in both C++ and Advanced Programming.
+4. **Reliability & Intern experience**: Has 3 years of remote developer intern experience at Developer Hub Corp and handles modern react/node/sql stacks natively.`,
+    },
+    {
+      question: "What databases does he know?",
+      answer: `Shoaib is highly proficient in relational and non-relational database design, querying, and management:
+- **Relational Databases**: Microsoft SQL Server (MSSQL), Oracle Database, PostgreSQL, MySQL, SQL.
+- **NoSQL / Cloud Services**: Firebase Firestore, Supabase.
+- He specializes in database schema normalization, transaction optimization, database modeling (ERD), and secure JDBC/REST endpoints.`,
+    },
+    {
+      question: "Who built this website/chatbot?",
+      answer: `This portfolio website and the interactive AI Chatbot were custom-designed and built by **Shoaib Arshad** himself using React.js, Tailwind CSS, and custom matching algorithms!`,
+    },
+    {
+      question: "Is he looking for internships?",
+      answer: `Yes, Shoaib is actively looking for **Software Engineering internships**, junior frontend developer positions, junior full-stack developer roles, or freelance projects. He can start immediately.`,
+    },
+    {
+      question: "Tell me about his Java Swing experience.",
+      answer: `Shoaib has strong Java desktop development skills. His major project, the **School Management System**, is a role-based Java Swing application integrated with Microsoft SQL Server. It includes a custom modern UI (using FlatDarkLaf) and is currently deployed and running in a real school to handle student portals, timetables, and fee tracking.`,
+    },
+    {
+      question: "How does the voice feature in SpendSmart work?",
+      answer: `The voice feature in SpendSmart leverages the browser's native **Web Speech API** (Speech Recognition). When the user clicks the voice logging button and speaks, the application parses natural language inputs (like 'add 1000 rupees for dinner') using smart regex matching, extracts the value and category, and logs it directly to MS SQL Server.`,
+    },
+    {
+      question: "How did he get a 4.0 CGPA?",
+      answer: `Shoaib's perfect **4.0 CGPA** is a result of consistent study, mastery of software engineering concepts, scoring top grades in difficult courses like Database Systems, Data Structures, and OOP, and building comprehensive, deployed semester projects.`,
+    },
+    {
+      question: "What is Riphah International University?",
+      answer: `Riphah International University is a premier academic institution in Pakistan. Shoaib is studying at its Islamabad campus, pursuing a BS in Software Engineering, where he is at the top of his class.`,
+    },
+    {
+      question: "Can he build custom websites?",
+      answer: `Yes! Shoaib builds fully custom, production-ready, and responsive websites. For instance, he designed, built, and launched **Farooq Agencies** (farooqagensies.com) for a local business, moving their operations from manual books to automated online ordering.`,
+    },
+    {
+      question: "Tell me about Farooq Agencies' results.",
+      answer: `Farooq Agencies successfully automated the inventory and ordering pipeline for a local medical supplier:
+- Replaced manual spreadsheets with a secure database.
+- Enabled direct WhatsApp routing for order placements.
+- Streamlined order processing time by over 50%.`,
+    },
   ],
 
   // Default responses

@@ -75,7 +75,7 @@ export default function Navbar() {
               href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`}
               target="_blank"
               rel="noreferrer"
-              className="btn-primary px-5 py-2 rounded-full text-xs lg:text-sm font-medium font-display transition-transform hover:scale-105 ml-2 shadow-sm"
+              className="btn-primary px-5 py-2 rounded-full text-xs lg:text-sm font-medium font-display transition-all hover:scale-105 ml-2 shadow-sm glow-on-hover"
             >
               Hire Me
             </a>
@@ -123,7 +123,7 @@ export default function Navbar() {
             href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`}
             target="_blank"
             rel="noreferrer"
-            className="btn-primary mt-2 py-2.5 rounded-xl text-sm font-medium text-center block shadow-md"
+            className="btn-primary mt-2 py-2.5 rounded-xl text-sm font-medium text-center block shadow-md glow-on-hover"
           >
             Hire Me
           </a>
