@@ -334,7 +334,7 @@ export default function Hero() {
           {[
             { val: "4.0", label: "CGPA", grad: "text-gradient-indigo" },
             { val: "4+", label: "Production Apps", grad: "text-gradient-cyan" },
-            { val: "3yr", label: "Coding Experience", grad: "text-gradient-indigo" },
+            { val: "1yr", label: "Coding Experience", grad: "text-gradient-indigo" },
             { val: "1", label: "Live Client Site", grad: "text-gradient-cyan" },
           ].map((s) => (
             <div key={s.label} className="text-center md:text-left">
