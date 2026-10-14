@@ -3,39 +3,95 @@ import { PortfolioProvider } from "../context/PortfolioContext";
 import { usePortfolio } from "../hooks/usePortfolio";
 import "../index.css";
 
-// ── Claude AI Assistant ────────────────────────────────────────────────────────
-function AIAssistant({ context, onApply }) {
+// ── Local Copy Polisher (no API key needed) ────────────────────────────────
+// Previously this component called Anthropic's API directly from the browser,
+// which would have leaked your API key to anyone viewing the page source.
+//
+// This replacement is a small, dependency-free text polisher that runs
+// entirely client-side. It handles the most common copy-editing fixes
+// (capitalisation, trailing spaces, weak filler words, em-dashes) and is
+// enough to give you a tighter first draft without exposing secrets.
+const FILLER_WORDS = [
+  "very", "really", "just", "actually", "basically", "literally",
+  "simply", "in order to", "a lot of", "kind of", "sort of",
+  "essentially", "virtually", "practically", "i think that",
+  "i believe that", "you can see that", "it is important to note that",
+];
+
+function polishCopy(text) {
+  if (!text || !text.trim()) return "(nothing to polish yet — type or paste some text above)";
+
+  let out = text.trim();
+
+  // Collapse repeated whitespace
+  out = out.replace(/[ \t]{2,}/g, " ");
+  out = out.replace(/\n{3,}/g, "\n\n");
+
+  // Strip filler phrases (case-insensitive, word-boundary safe)
+  FILLER_WORDS.forEach((w) => {
+    const re = new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b\\s*`, "gi");
+    out = out.replace(re, "");
+  });
+
+  // Smarten quotes and dashes
+  out = out
+    .replace(/\b-\b/g, "\u2014")           // hyphen between words -> em-dash
+    .replace(/--/g, "\u2014")               // double hyphen -> em-dash
+    .replace(/\s\u2014\s/g, " \u2014 ")    // spaced em-dash
+    .replace(/"([^"]+)"/g, "\u201C$1\u201D")
+    .replace(/'([^']+)'/g, "\u2018$1\u2019");
+
+  // Capitalise the first letter of every sentence
+  out = out.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
+
+  // Tidy spaces around punctuation
+  out = out.replace(/\s+([,.;:!?])/g, "$1");
+  out = out.replace(/([,;:])(?=[^\s])/g, "$1 ");
+
+  // Trim trailing spaces per line
+  out = out
+    .split("\n")
+    .map((l) => l.trim())
+    .join("\n");
+
+  // Final tidy
+  out = out.replace(/\s+$/g, "").trim();
+
+  if (out === text.trim()) {
+    return out + "\n\n\u2014 Looks clean already. Try a longer draft if you want more suggestions.";
+  }
+  return out;
+}
+
+function AIAssistant({ context }) {
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const ask = async () => {
+  const ask = () => {
     if (!prompt.trim()) return;
-    setLoading(true);
-    setResponse("");
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          system: `You are a portfolio writing assistant for ${context.name}, a Software Engineering student with CGPA 4.0. 
-You help improve project descriptions, bio text, and portfolio copy. 
-Keep tone professional yet personable. Be concise and impactful.
-Current portfolio data: ${JSON.stringify(context)}
-If the user asks you to rewrite something, provide ONLY the improved text — no explanations, no markdown formatting, no quotes. Plain text only.`,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-      const data = await res.json();
-      const text = data.content?.map((b) => b.text || "").join("") || "No response.";
-      setResponse(text);
-    } catch {
-      setResponse("Error connecting to AI. Check your API key setup.");
-    }
-    setLoading(false);
+    setResponse(polishCopy(prompt));
+    setCopied(false);
   };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(response);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const sampleTexts = [
+    { label: "Polish my bio", value: context?.bio || "" },
+    {
+      label: "Sample project description",
+      value:
+        "a really good project i built basically just to learn react, it has a lot of features like authentication and stuff and i think that it is important to note that it works really well",
+    },
+  ];
 
   return (
     <div className="rounded-2xl border border-accent-indigo/20 bg-bg-card p-6 space-y-4">
@@ -44,25 +100,29 @@ If the user asks you to rewrite something, provide ONLY the improved text — no
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
         </div>
         <div>
-          <h3 className="font-display font-semibold text-text-primary text-sm">AI Writing Assistant</h3>
-          <p className="font-mono text-[10px] text-text-muted">Powered by Claude claude-sonnet-4-6</p>
+          <h3 className="font-display font-semibold text-text-primary text-sm">Copy Polisher</h3>
+          <p className="font-mono text-[10px] text-text-muted">Local · no API key needed · runs in your browser</p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <p className="font-mono text-[10px] text-text-muted uppercase tracking-widest">Try asking:</p>
+        <p className="font-mono text-[10px] text-text-muted uppercase tracking-widest">Quick fills:</p>
         <div className="flex flex-wrap gap-2">
-          {[
-            "Improve my bio",
-            "Make SpendSmart description more impactful",
-            "Write a stronger tagline for Farooq Agency",
-            "Suggest better skill categories",
-          ].map((s) => (
-            <button key={s} onClick={() => setPrompt(s)}
-              className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-border-mid hover:border-accent-indigo/40 hover:text-accent-indigo text-text-muted transition-all">
-              {s}
+          {sampleTexts.map((s) => (
+            <button
+              key={s.label}
+              onClick={() => { setPrompt(s.value); setResponse(""); }}
+              className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-border-mid hover:border-accent-indigo/40 hover:text-accent-indigo text-text-muted transition-all"
+            >
+              {s.label}
             </button>
           ))}
+          <button
+            onClick={() => { setPrompt(""); setResponse(""); }}
+            className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-border-mid hover:border-accent-indigo/40 hover:text-accent-indigo text-text-muted transition-all"
+          >
+            Clear
+          </button>
         </div>
       </div>
 
@@ -70,21 +130,19 @@ If the user asks you to rewrite something, provide ONLY the improved text — no
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(); } }}
-          placeholder="Ask AI to improve your portfolio copy..."
-          rows={2}
+          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); ask(); } }}
+          placeholder="Paste your bio, project description, or any copy you want tightened..."
+          rows={4}
           className="flex-1 bg-bg-primary border border-border-mid rounded-xl px-4 py-3 font-body text-sm text-text-primary placeholder:text-text-muted resize-none focus:outline-none focus:border-accent-indigo/50"
         />
         <button
           onClick={ask}
-          disabled={loading || !prompt.trim()}
-          className="btn-primary px-4 rounded-xl font-mono text-xs disabled:opacity-40 flex items-center gap-1"
+          disabled={!prompt.trim()}
+          className="btn-primary px-4 rounded-xl font-mono text-xs disabled:opacity-40 flex items-center gap-1 self-end"
+          title="Polish (Cmd/Ctrl + Enter)"
         >
-          {loading ? (
-            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-          ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          )}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Polish
         </button>
       </div>
 
@@ -92,13 +150,19 @@ If the user asks you to rewrite something, provide ONLY the improved text — no
         <div className="rounded-xl bg-bg-primary border border-border-subtle p-4">
           <p className="font-body text-sm text-text-secondary whitespace-pre-wrap leading-relaxed">{response}</p>
           <button
-            onClick={() => onApply(response)}
+            onClick={copy}
             className="mt-3 font-mono text-[10px] text-accent-cyan hover:text-accent-indigo transition-colors"
           >
-            Copy to clipboard ↗
+            {copied ? "✓ Copied to clipboard" : "Copy to clipboard ↗"}
           </button>
         </div>
       )}
+
+      <p className="font-mono text-[10px] text-text-muted leading-relaxed">
+        Strips filler words, smartens quotes &amp; dashes, fixes sentence capitalisation and
+        punctuation spacing. Want a real LLM? Hook up a serverless function — never ship an API
+        key in client code.
+      </p>
     </div>
   );
 }
@@ -321,7 +385,7 @@ function AdminInner() {
     { id: "personal", label: "Personal Info" },
     { id: "projects", label: "Projects" },
     { id: "skills", label: "Skills" },
-    { id: "ai", label: "✦ AI Assistant" },
+    { id: "ai", label: "✦ Copy Polisher" },
   ];
 
   return (
@@ -361,7 +425,7 @@ function AdminInner() {
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="font-display font-bold text-2xl text-text-primary mb-1">Customize Portfolio</h1>
-          <p className="font-body text-text-secondary text-sm">Changes are saved to your browser and persist across reloads.</p>
+          <p className="font-body text-text-secondary text-sm">Changes are saved to your browser session (in-memory) and reset on full reload. For permanent edits, edit <code className="text-accent-cyan font-mono">src/data/portfolio.js</code>.</p>
         </div>
 
         {/* Tabs */}
@@ -385,7 +449,6 @@ function AdminInner() {
           {tab === "ai" && (
             <AIAssistant
               context={{ name: personal.name, bio: personal.bio }}
-              onApply={(text) => navigator.clipboard.writeText(text)}
             />
           )}
         </div>
