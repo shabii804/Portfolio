@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { defaultSkills } from "../data/portfolio";
+import HeroParticles from "./HeroParticles";
+
+// Occasional diagonal light streaks — position/length staggered so roughly
+// one star crosses every few seconds, each idle for most of its cycle
+const SHOOTING_STARS = [
+  { top: "16%", left: "72%", delay: "2.5s", dur: "12s" },
+  { top: "6%", left: "48%", delay: "7.5s", dur: "14s" },
+  { top: "34%", left: "88%", delay: "12s", dur: "13s" },
+];
 
 // Flat list of every skill across categories, for the hero marquee strip
 const FLAT_SKILLS = Object.values(defaultSkills).flat();
@@ -53,9 +62,21 @@ export default function Hero() {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16">
-      {/* Atmosphere: grid + aurora + glow blobs */}
-      <div className="absolute inset-0 grid-bg z-0" />
+      {/* Atmosphere: drifting grid + aurora + constellation + streaks + glow blobs */}
+      <div className="absolute inset-0 grid-pan-wrap z-0" aria-hidden="true">
+        <div className="grid-pan" />
+      </div>
       <div className="aurora" aria-hidden="true" />
+      <HeroParticles />
+      <div className="shooting-stars" aria-hidden="true">
+        {SHOOTING_STARS.map((s, i) => (
+          <span
+            key={i}
+            className="shooting-star"
+            style={{ top: s.top, left: s.left, "--delay": s.delay, "--dur": s.dur }}
+          />
+        ))}
+      </div>
       <div className="absolute top-1/4 left-[12%] w-[560px] h-[560px] rounded-full opacity-[0.05] blur-[130px] bg-accent-indigo pointer-events-none z-0 bg-blob-indigo" />
       <div className="absolute bottom-[10%] right-[8%] w-[440px] h-[440px] rounded-full opacity-[0.04] blur-[110px] bg-accent-cyan pointer-events-none z-0 bg-blob-cyan" />
 

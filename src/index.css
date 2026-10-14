@@ -558,6 +558,79 @@ body {
   outline-offset: 2px;
 }
 
+/* ─── Hero animated background: particles / shooting stars / drifting grid ── */
+.hero-particles {
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 45%, black 40%, transparent 92%);
+  mask-image: radial-gradient(ellipse 95% 85% at 50% 45%, black 40%, transparent 92%);
+}
+
+/* Slow one-cell pan — GPU transform, masked by the wrapper so the vignette stays put */
+.grid-pan-wrap {
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 75%);
+}
+.grid-pan {
+  position: absolute;
+  inset: -64px;
+  background-image:
+    linear-gradient(rgba(129, 140, 248, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 140, 248, 0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  animation: grid-pan 52s linear infinite;
+  will-change: transform;
+}
+@keyframes grid-pan {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(64px, 64px, 0); }
+}
+
+/* Occasional shooting star — bright head with a fading tail, mostly idle */
+.shooting-stars {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.shooting-star {
+  position: absolute;
+  width: 170px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(165, 180, 252, 0) 0%, rgba(165, 180, 252, 0.75) 78%, rgba(232, 233, 255, 0.95) 100%);
+  transform: rotate(145deg);
+  opacity: 0;
+  animation: shooting-star var(--dur, 11s) ease-in var(--delay, 0s) infinite;
+}
+.shooting-star::after {
+  content: '';
+  position: absolute;
+  right: -1.5px;
+  top: -1.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #e8e9ff;
+  box-shadow: 0 0 8px 2px rgba(129, 140, 248, 0.55);
+}
+@keyframes shooting-star {
+  0% { transform: translate3d(0, 0, 0) rotate(145deg); opacity: 0; }
+  2% { opacity: 1; }
+  9% { transform: translate3d(-460px, 320px, 0) rotate(145deg); opacity: 0; }
+  100% { transform: translate3d(-460px, 320px, 0) rotate(145deg); opacity: 0; }
+}
+/* Softer, sparser on small screens */
+@media (max-width: 640px) {
+  .shooting-star { width: 110px; }
+  @keyframes shooting-star {
+    0% { transform: translate3d(0, 0, 0) rotate(145deg); opacity: 0; }
+    2% { opacity: 0.8; }
+    9% { transform: translate3d(-300px, 210px, 0) rotate(145deg); opacity: 0; }
+    100% { transform: translate3d(-300px, 210px, 0) rotate(145deg); opacity: 0; }
+  }
+}
+
 :focus-visible {
   outline: 2px solid #818cf8;
   outline-offset: 2px;
