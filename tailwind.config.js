@@ -1,13 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
         display: ["'Space Grotesk'", "sans-serif"],
         body: ["'Inter'", "sans-serif"],
         mono: ["'JetBrains Mono'", "monospace"],
+      },
+      boxShadow: {
+        "glow-indigo": "0 0 24px -6px rgba(99, 102, 241, 0.5)",
+        "glow-cyan": "0 0 24px -6px rgba(34, 211, 238, 0.4)",
+        "card": "0 16px 40px -16px rgba(0, 0, 0, 0.6)",
       },
       colors: {
         bg: {
@@ -18,8 +22,10 @@ export default {
         },
         accent: {
           indigo: "#818cf8",
+          indigoSoft: "#a5b4fc",
+          indigoDeep: "#6366f1",
           cyan: "#22d3ee",
-          purple: "#a78bfa",
+          cyanSoft: "#67e8f9",
         },
         border: {
           subtle: "rgb(var(--border-subtle) / <alpha-value>)",
