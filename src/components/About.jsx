@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { usePortfolio } from "../context/PortfolioContext";
+import { usePortfolio } from "../hooks/usePortfolio";
 
 export default function About() {
   const { personal } = usePortfolio();

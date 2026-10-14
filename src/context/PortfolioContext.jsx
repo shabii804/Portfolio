@@ -1,8 +1,9 @@
-import { createContext, useContext, useState } from "react";
+import { useState } from "react";
 import { defaultProjects, defaultSkills, defaultPersonal, defaultExperience } from "../data/portfolio";
+import { PortfolioContext } from "./portfolioContextObject";
 
-const PortfolioContext = createContext(null);
-
+// Provider component only — context object lives in portfolioContextObject.js
+// so Fast Refresh keeps working in dev.
 export function PortfolioProvider({ children }) {
   const [projects, setProjects] = useState(defaultProjects);
   const [skills, setSkills] = useState(defaultSkills);
@@ -27,5 +28,3 @@ export function PortfolioProvider({ children }) {
     </PortfolioContext.Provider>
   );
 }
-
-export const usePortfolio = () => useContext(PortfolioContext);

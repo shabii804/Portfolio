@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { usePortfolio } from "../context/PortfolioContext";
+import { usePortfolio } from "../hooks/usePortfolio";
 
 const categoryMeta = {
   Frontend: { icon: "⚡", color: "#818cf8" },

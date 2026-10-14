@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { usePortfolio } from "../context/PortfolioContext";
+import { usePortfolio } from "../hooks/usePortfolio";
 
 const navLinks = ["About", "Experience", "Projects", "Skills", "Contact"];
 

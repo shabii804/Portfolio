@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ChatBot from "./ChatBot";
-import { usePortfolio } from "../context/PortfolioContext";
+import { usePortfolio } from "../hooks/usePortfolio";
 import "../styles/ChatButton.css";
 
 export default function ChatButton() {

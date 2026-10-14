@@ -1,4 +1,4 @@
-import { usePortfolio } from "../context/PortfolioContext";
+import { usePortfolio } from "../hooks/usePortfolio";
 
 export default function Footer() {
   const { personal } = usePortfolio();

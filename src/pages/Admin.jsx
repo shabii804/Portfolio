@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { PortfolioProvider, usePortfolio } from "../context/PortfolioContext";
+import { PortfolioProvider } from "../context/PortfolioContext";
+import { usePortfolio } from "../hooks/usePortfolio";
 import "../index.css";
 
 // ── Claude AI Assistant ────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ If the user asks you to rewrite something, provide ONLY the improved text — no
       const data = await res.json();
       const text = data.content?.map((b) => b.text || "").join("") || "No response.";
       setResponse(text);
-    } catch (e) {
+    } catch {
       setResponse("Error connecting to AI. Check your API key setup.");
     }
     setLoading(false);

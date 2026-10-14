@@ -111,7 +111,7 @@ function findBestMatch(userMessage) {
     // Keyword matching
     words.forEach((word) => {
       // Remove punctuation
-      const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+      const cleanWord = word.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
       if (cleanWord.length <= 2) return;
 
       if (questionLower.includes(cleanWord)) {

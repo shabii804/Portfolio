@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { usePortfolio } from "../context/PortfolioContext";
+import { usePortfolio } from "../hooks/usePortfolio";
 
 function ProjectModal({ project, onClose }) {
   const [imgIdx, setImgIdx] = useState(0);

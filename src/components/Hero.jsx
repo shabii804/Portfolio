@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { usePortfolio } from "../context/PortfolioContext";
+import { useState, useEffect, useRef } from "react";
+import { usePortfolio } from "../hooks/usePortfolio";
 
 export default function Hero() {
   const { personal } = usePortfolio();
