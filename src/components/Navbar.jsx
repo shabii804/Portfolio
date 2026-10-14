@@ -1,29 +1,21 @@
 import { useState, useEffect } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 
-const navLinks = ["About", "Experience", "Projects", "Skills", "Contact"];
+const navLinks = ["About", "Skills", "Projects", "Journey", "Activity", "Contact"];
 
 export default function Navbar() {
   const { personal } = usePortfolio();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState("");
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "dark";
-  });
-
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  const [isApple] = useState(() =>
+    /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
+  );
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -31,6 +23,11 @@ export default function Navbar() {
     document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
     setMobileOpen(false);
     setActive(id);
+  };
+
+  const openPalette = () => {
+    setMobileOpen(false);
+    window.dispatchEvent(new CustomEvent("open-command-palette"));
   };
 
   return (
@@ -41,19 +38,21 @@ export default function Navbar() {
     }`}>
       <div className={`mx-auto max-w-5xl transition-all duration-500 ${
         scrolled
-          ? "bg-bg-card/80 backdrop-blur-xl border border-border-subtle rounded-2xl shadow-lg shadow-black/[0.04] dark:shadow-indigo-950/[0.08]"
+          ? "bg-bg-card/85 backdrop-blur-xl border border-border-subtle rounded-2xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.7)]"
           : "bg-transparent border-b border-transparent"
       }`}>
-        <div className="px-6 py-3.5 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="group flex items-center gap-3"
+            aria-label="Back to top"
           >
-            <div className="relative w-9 h-9 rounded-full overflow-hidden border border-accent-indigo/35 shadow-md shadow-accent-indigo/10 transition-all duration-300 group-hover:border-accent-indigo group-hover:scale-105 group-hover:shadow-indigo-500/25 flex-shrink-0">
+            <div className="relative w-9 h-9 rounded-full overflow-hidden border border-accent-indigo/35 shadow-md shadow-accent-indigo/10 transition-all duration-300 group-hover:border-accent-indigo group-hover:scale-105 flex-shrink-0">
               <img
                 src={personal.profilePic}
                 alt={personal.name}
                 className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-500"
+                loading="eager"
               />
             </div>
             <span className="font-display font-bold text-sm tracking-tight text-text-primary group-hover:text-accent-indigo transition-colors duration-300 hidden sm:inline-block">
@@ -61,12 +60,12 @@ export default function Navbar() {
             </span>
           </button>
 
-          <div className="hidden md:flex items-center gap-2 lg:gap-4">
+          <div className="hidden md:flex items-center gap-1 lg:gap-2">
             {navLinks.map((link) => (
               <button
                 key={link}
                 onClick={() => scrollTo(link)}
-                className={`nav-link font-body text-xs lg:text-sm font-medium ${active === link ? "active" : ""}`}
+                className={`nav-link font-body text-[13px] lg:text-sm font-medium ${active === link ? "active" : ""}`}
               >
                 {link}
               </button>
@@ -75,29 +74,40 @@ export default function Navbar() {
               href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`}
               target="_blank"
               rel="noreferrer"
-              className="btn-primary px-5 py-2 rounded-full text-xs lg:text-sm font-medium font-display transition-all hover:scale-105 ml-2 shadow-sm glow-on-hover"
+              className="btn-primary px-4 lg:px-5 py-2 rounded-full text-xs lg:text-sm font-medium font-display transition-all hover:scale-[1.03] ml-1.5 glow-on-hover"
             >
               Hire Me
             </a>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Command palette trigger */}
             <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/30 transition-all shadow-sm group"
-              aria-label="Toggle Theme"
+              onClick={openPalette}
+              aria-label="Open command palette"
+              className="hidden sm:flex items-center gap-2 h-9 pl-3 pr-2 rounded-full bg-bg-secondary border border-border-subtle text-text-muted hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
             >
-              {theme === "dark" ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform group-hover:rotate-12"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform group-hover:rotate-45"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
-              )}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <span className="font-mono text-[10px] tracking-wide">{isApple ? "⌘" : "Ctrl+"}K</span>
+            </button>
+
+            <button
+              onClick={openPalette}
+              aria-label="Open command palette"
+              className="sm:hidden w-9 h-9 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo transition-all"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
             </button>
 
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="md:hidden flex flex-col gap-1.5 p-2"
               aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
             >
               <span className={`block w-5 h-px bg-text-secondary transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
               <span className={`block w-5 h-px bg-text-secondary transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
@@ -107,9 +117,9 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Floating Card Mobile Menu */}
+      {/* Floating card mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden max-w-5xl mx-auto mt-2 bg-bg-card/90 backdrop-blur-xl border border-border-subtle rounded-2xl p-5 flex flex-col gap-2.5 shadow-xl animate-fade-in">
+        <div className="md:hidden max-w-5xl mx-auto mt-2 mx-4 bg-bg-card/95 backdrop-blur-xl border border-border-subtle rounded-2xl p-5 flex flex-col gap-2.5 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.7)] animate-fade-in">
           {navLinks.map((link) => (
             <button
               key={link}
@@ -123,7 +133,7 @@ export default function Navbar() {
             href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`}
             target="_blank"
             rel="noreferrer"
-            className="btn-primary mt-2 py-2.5 rounded-xl text-sm font-medium text-center block shadow-md glow-on-hover"
+            className="btn-primary mt-2 py-2.5 rounded-xl text-sm font-medium text-center block glow-on-hover"
           >
             Hire Me
           </a>
