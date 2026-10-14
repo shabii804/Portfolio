@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getChatbotResponse, getSuggestedQuestions, getPortfolioName, isSmallTalk } from "../utils/chatbotLogic";
 import { askAI } from "../utils/aiChat";
 import "../styles/ChatBot.css";
@@ -30,30 +30,46 @@ export default function ChatBot({ isOpen, onClose }) {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingText, setPendingText] = useState(null); // message queued while the assistant is replying
+  const [isSlowReply, setIsSlowReply] = useState(false); // true after 6s of waiting on the AI
   const messagesEndRef = useRef(null);
   const idRef = useRef(2);
+  const slowTimerRef = useRef(null);
+  // Live mirror of messages so queued sends always build history from fresh state
+  const messagesRef = useRef(messages);
+  const pendingRef = useRef(null);
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
   const suggestedQuestions = getSuggestedQuestions();
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, pendingText, scrollToBottom]);
 
-  const handleSendMessage = async (message) => {
-    const text = message.trim();
-    if (!text || isLoading) return;
+  const clearSlowTimer = () => {
+    if (slowTimerRef.current) {
+      clearTimeout(slowTimerRef.current);
+      slowTimerRef.current = null;
+    }
+    setIsSlowReply(false);
+  };
 
+  const runTurn = async (text) => {
     const userMessage = { id: idRef.current++, text, sender: "user", timestamp: new Date() };
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
+    setIsSlowReply(false);
+    if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+    slowTimerRef.current = setTimeout(() => setIsSlowReply(true), 6000);
 
-    // Build conversation history for the GLM endpoint
+    // Build conversation history for the GLM endpoint (from the live mirror,
+    // so queued follow-ups include the messages that landed while waiting)
     const history = [
-      ...messages.slice(-8).map((m) => ({
+      ...messagesRef.current.slice(-8).map((m) => ({
         role: m.sender === "user" ? "user" : "assistant",
         content: m.text,
       })),
@@ -89,9 +105,35 @@ export default function ChatBot({ isOpen, onClose }) {
       source = "instant";
     }
 
+    clearSlowTimer();
     setMessages((prev) => [...prev, { id: idRef.current++, text: reply, sender: "bot", source, timestamp: new Date() }]);
     setIsLoading(false);
   };
+
+  const handleSendMessage = async (message) => {
+    const text = (message ?? "").trim();
+    if (!text) return;
+
+    // Assistant is mid-reply → queue the message instead of silently dropping it.
+    if (isLoading) {
+      pendingRef.current = text;
+      setPendingText(text);
+      setInputValue("");
+      return;
+    }
+
+    // Drain the queue: send this message, then any follow-up queued meanwhile.
+    let current = text;
+    while (current) {
+      await runTurn(current);
+      current = pendingRef.current;
+      pendingRef.current = null;
+      setPendingText(null);
+    }
+  };
+
+  // Ensure the slow-reply timer never leaks across renders/unmount
+  useEffect(() => () => clearSlowTimer(), []);
 
   const handleSuggestedQuestion = (question) => {
     handleSendMessage(question);
@@ -136,7 +178,7 @@ export default function ChatBot({ isOpen, onClose }) {
         </div>
 
         {/* Messages */}
-        <div className="chatbot-messages">
+        <div className="chatbot-messages" aria-live="polite">
           {messages.map((message) => (
             <div key={message.id} className={`chatbot-message chatbot-message-${message.sender}`}>
               <div className="chatbot-message-bubble">
@@ -152,6 +194,15 @@ export default function ChatBot({ isOpen, onClose }) {
             </div>
           ))}
 
+          {pendingText && (
+            <div className="chatbot-message chatbot-message-user chatbot-message-queued">
+              <div className="chatbot-message-bubble">
+                <div className="chatbot-message-text">{renderRichText(pendingText)}</div>
+                <span className="chatbot-queued-badge">queued</span>
+              </div>
+            </div>
+          )}
+
           {isLoading && (
             <div className="chatbot-message chatbot-message-bot">
               <div className="chatbot-message-bubble">
@@ -160,6 +211,9 @@ export default function ChatBot({ isOpen, onClose }) {
                   <span></span>
                   <span></span>
                 </div>
+                {isSlowReply && (
+                  <p className="chatbot-slow-note">Still thinking — complex questions can take up to 20s…</p>
+                )}
               </div>
             </div>
           )}
@@ -200,8 +254,8 @@ export default function ChatBot({ isOpen, onClose }) {
             <button
               className="chatbot-send-btn"
               onClick={() => handleSendMessage(inputValue)}
-              disabled={!inputValue.trim() || isLoading}
-              title="Send message"
+              disabled={!inputValue.trim()}
+              title={isLoading ? "Queued — the assistant will reply in order" : "Send message"}
               aria-label="Send message"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>

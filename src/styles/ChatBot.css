@@ -26,7 +26,8 @@
   margin: 0 1rem 1rem;
   display: flex;
   flex-direction: column;
-  background: rgba(13, 13, 21, 0.97);
+  /* Opaque — translucent backgrounds let bright page content ghost through */
+  background: #0d0d15;
   border: 1px solid rgb(35 35 49);
   border-radius: 20px;
   box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(129, 140, 248, 0.06);
@@ -140,6 +141,9 @@
   gap: 12px;
   scrollbar-width: thin;
   scrollbar-color: rgb(51 51 69) transparent;
+  /* Fade bubbles out under the header instead of hard-clipping them */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 16px);
 }
 
 .chatbot-messages::-webkit-scrollbar { width: 4px; }
@@ -188,6 +192,42 @@
 }
 
 .chatbot-message-text strong { color: #a5b4fc; font-weight: 600; }
+
+/* Queued message (sent while the assistant was mid-reply) */
+.chatbot-message-queued {
+  opacity: 0.55;
+}
+
+.chatbot-message-queued .chatbot-message-bubble {
+  background: rgba(99, 102, 241, 0.22);
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.chatbot-queued-badge {
+  position: absolute;
+  bottom: -9px;
+  right: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(13, 13, 21, 0.95);
+  color: #a5b4fc;
+  border: 1px dashed rgba(129, 140, 248, 0.5);
+}
+
+/* Slow-reply note inside the typing bubble */
+.chatbot-slow-note {
+  margin: 8px 0 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #686977;
+  animation: chatbotFade 0.4s ease both;
+}
 
 /* Source badge (AI vs instant) */
 .chatbot-source-badge {

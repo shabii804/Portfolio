@@ -244,14 +244,11 @@ export default function Contact() {
             {status === "fallback" && (
               <div role="status" className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-accent-cyan/10 border border-accent-cyan/30">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-                <p className="font-body text-sm text-accent-cyan">Opening your email app... Or email me at <a href={`mailto:${personal.email}`} className="underline">{personal.email}</a></p>
+                <p className="font-body text-sm text-accent-cyan">
+                  Your email app should open in a moment. If nothing happens, email me directly at{" "}
+                  <a href={`mailto:${personal.email}?subject=${encodeURIComponent("[Portfolio Contact] Hello")}`} className="underline">{personal.email}</a>
+                </p>
               </div>
-            )}
-
-            {!EMAILJS_ENABLED && (
-              <p className="font-mono text-[10px] text-text-muted">
-                Tip: configure EmailJS (VITE_EMAILJS_*) to enable direct in-page messaging.
-              </p>
             )}
           </form>
 

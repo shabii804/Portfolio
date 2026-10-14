@@ -125,6 +125,16 @@ export default function GitHubActivity() {
       setState({ status: "ok", ...data });
       try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch { /* quota */ }
     } catch {
+      // 3) Live fetch failed (offline / rate-limited) → serve last-known data of
+      //    ANY age rather than blank tiles; only show the error state if we have
+      //    never successfully loaded.
+      try {
+        const stale = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+        if (stale?.data) {
+          setState({ status: "ok", stale: true, ...stale.data });
+          return;
+        }
+      } catch { /* ignore corrupt cache */ }
       setState({ status: "error", stats: null, languages: null, events: null });
     }
   }, []);
@@ -264,7 +274,9 @@ export default function GitHubActivity() {
         </div>
 
         <p className="animate-on-scroll mt-6 font-mono text-[9px] text-text-muted text-center" style={{ transitionDelay: "0.3s" }}>
-          sourced live from the public GitHub API · cached for 30 minutes
+          {state.status === "ok" && state.stale
+            ? "showing last synced data — the GitHub API is rate-limiting this network right now"
+            : "sourced live from the public GitHub API · cached for 30 minutes"}
         </p>
       </div>
     </section>
