@@ -14,7 +14,7 @@ function ProjectModal({ project, onClose }) {
   const screenshots = project.screenshots || [];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label={`${project.title} details`}>
       <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
       <div
         className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-bg-card border border-border-mid shadow-2xl shadow-black/60"
@@ -29,7 +29,7 @@ function ProjectModal({ project, onClose }) {
               <p className="font-mono text-xs text-text-muted mt-0.5">{project.subtitle}</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
+          <button onClick={onClose} aria-label="Close modal" className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
@@ -51,6 +51,8 @@ function ProjectModal({ project, onClose }) {
                     <button
                       key={i}
                       onClick={() => setImgIdx(i)}
+                      aria-label={`View screenshot ${i + 1}`}
+                      aria-pressed={i === imgIdx}
                       className={`w-14 h-9 rounded-lg overflow-hidden border transition-all ${i === imgIdx ? "border-accent-indigo" : "border-border-subtle opacity-60 hover:opacity-100"}`}
                     >
                       <img src={`/screenshots/${ss}`} alt="" className="w-full h-full object-cover" />
@@ -199,7 +201,29 @@ function ProjectCard({ project, onClick, index }) {
 export default function Projects() {
   const { projects } = usePortfolio();
   const [selected, setSelected] = useState(null);
+  const [query, setQuery] = useState("");
+  const [activeStack, setActiveStack] = useState("All");
   const ref = useRef(null);
+
+  // Build a sorted list of all unique tech stacks across projects
+  const allStacks = ["All", ...Array.from(
+    new Set(projects.flatMap((p) => p.stack || []))
+  ).sort((a, b) => a.localeCompare(b))];
+
+  // Filtered projects (memo would also work — keeping it simple)
+  const filtered = projects.filter((p) => {
+    const matchesStack = activeStack === "All" || (p.stack || []).includes(activeStack);
+    if (!matchesStack) return false;
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (
+      p.title?.toLowerCase().includes(q) ||
+      p.subtitle?.toLowerCase().includes(q) ||
+      p.tagline?.toLowerCase().includes(q) ||
+      p.description?.toLowerCase().includes(q) ||
+      (p.stack || []).some((s) => s.toLowerCase().includes(q))
+    );
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -208,7 +232,7 @@ export default function Projects() {
     );
     ref.current?.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [filtered]);
 
   return (
     <>
@@ -222,15 +246,89 @@ export default function Projects() {
           <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-3" style={{ transitionDelay: "0.05s" }}>
             Things I've built.
           </h2>
-          <p className="animate-on-scroll font-body text-text-secondary text-lg mb-14 max-w-xl" style={{ transitionDelay: "0.1s" }}>
+          <p className="animate-on-scroll font-body text-text-secondary text-lg mb-10 max-w-xl" style={{ transitionDelay: "0.1s" }}>
             Click any card to see the full breakdown — features, stack, and screenshots.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {projects.map((p, i) => (
-              <ProjectCard key={p.id} project={p} index={i} onClick={() => setSelected(p)} />
-            ))}
+          {/* Search + Filter Bar */}
+          <div className="animate-on-scroll mb-10 space-y-4" style={{ transitionDelay: "0.12s" }}>
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search projects by name, tech, or keyword..."
+                aria-label="Search projects"
+                className="w-full bg-bg-card border border-border-subtle rounded-xl pl-11 pr-10 py-3 font-body text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-indigo/50 transition-colors"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {allStacks.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setActiveStack(s)}
+                  aria-pressed={activeStack === s}
+                  className={`font-mono text-[10px] px-3 py-1.5 rounded-lg border transition-all ${
+                    activeStack === s
+                      ? "bg-accent-indigo/15 text-accent-indigo border-accent-indigo/30"
+                      : "text-text-muted border-border-mid hover:border-accent-indigo/40 hover:text-accent-indigo"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            {/* Result count */}
+            <div className="font-mono text-[10px] text-text-muted">
+              {filtered.length === projects.length
+                ? `Showing all ${projects.length} projects`
+                : `Showing ${filtered.length} of ${projects.length} projects`}
+              {(query || activeStack !== "All") && (
+                <button
+                  onClick={() => { setQuery(""); setActiveStack("All"); }}
+                  className="ml-3 text-accent-cyan hover:text-accent-indigo transition-colors underline"
+                >
+                  Reset filters
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Grid */}
+          {filtered.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-5xl mb-4 opacity-50">🔍</div>
+              <h3 className="font-display font-semibold text-text-primary mb-2">No projects match your search</h3>
+              <p className="font-body text-sm text-text-muted mb-6">Try a different keyword or clear your filters.</p>
+              <button
+                onClick={() => { setQuery(""); setActiveStack("All"); }}
+                className="btn-ghost px-5 py-2.5 rounded-xl font-mono text-xs"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {filtered.map((p, i) => (
+                <ProjectCard key={p.id} project={p} index={i} onClick={() => setSelected(p)} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

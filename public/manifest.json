@@ -1,0 +1,40 @@
+{
+  "name": "Shoaib Arshad — Portfolio",
+  "short_name": "Shoaib Portfolio",
+  "description": "Full Stack Web Developer & Java Desktop Application Developer. React, Node.js, Firebase, SQL.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#05060f",
+  "theme_color": "#818cf8",
+  "lang": "en",
+  "categories": ["portfolio", "developer", "personal"],
+  "icons": [
+    {
+      "src": "/profile.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Projects",
+      "short_name": "Projects",
+      "url": "/#projects",
+      "description": "Browse Shoaib's portfolio of built projects"
+    },
+    {
+      "name": "Contact Me",
+      "short_name": "Contact",
+      "url": "/#contact",
+      "description": "Get in touch about a project or opportunity"
+    }
+  ]
+}
