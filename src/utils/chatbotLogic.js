@@ -140,6 +140,78 @@ function findBestMatch(userMessage) {
   return bestScore > 12 ? bestMatch : null;
 }
 
+// Small-talk detector — greetings, thanks, bye, health checks.
+// Used by the chat UI as a FAST PATH so these never burn an AI API call
+// (and never feel broken when the model is rate-limited). Handles typos
+// and stretched forms like "ehy", "hii", "helo", "heyyy" via Damerau
+// distance (adjacent transposition = 1 edit).
+
+// Real English words that are edit-distance-1 from a greeting — never
+// treat them as greetings ("no" ≈ "yo", "ok" ≈ "yo", "you" ≈ "yo", …).
+const NON_GREETING_WORDS = new Set([
+  "no", "go", "do", "me", "we", "he", "she", "so", "ok", "okay", "oh", "ah",
+  "hmm", "hm", "uh", "um", "on", "in", "is", "it", "am", "an", "as", "at",
+  "be", "by", "if", "my", "of", "or", "to", "up", "us", "and", "but", "not",
+  "now", "wow", "why", "who", "how", "what", "when", "job", "you", "yes",
+  "know", "show", "how", "home", "hope", "help",
+]);
+
+// Damerau-Levenshtein distance ≤ 1 (substitution, insert, delete, transpose)
+function withinOneEdit(a, b) {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1) return false;
+  if (a.length === b.length) {
+    const diff = [];
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diff.push(i);
+    if (diff.length === 1) return true; // one substitution
+    // one adjacent transposition
+    return diff.length === 2 && diff[1] === diff[0] + 1 &&
+      a[diff[0]] === b[diff[1]] && a[diff[1]] === b[diff[0]];
+  }
+  // length differs by exactly 1 → allow a single insertion/deletion
+  const [s, l] = a.length < b.length ? [a, b] : [b, a];
+  let i = 0, j = 0, skipped = false;
+  while (i < s.length && j < l.length) {
+    if (s[i] === l[j]) { i++; j++; continue; }
+    if (skipped) return false;
+    skipped = true; j++;
+  }
+  return true;
+}
+
+const GREETING_CORES = ["hi", "hello", "hey", "yo", "hola", "howdy", "salam", "aoa", "assalam", "greetings"];
+const GREETING_PHRASES = ["good morning", "good afternoon", "good evening", "hi there", "hello there", "assalamualaikum", "as-salam"];
+const THANKS_HINTS = ["thank", "thx", "appreciate", "great help", "awesome", "ty "];
+const BYE_HINTS = ["bye", "goodbye", "see you", "see ya", "talk later", "catch you later", "good night"];
+const HEALTH_HINTS = ["how are you", "hows it going", "how's it going", "whats up", "what's up", "how do you do"];
+const IDENTITY_HINTS = ["who are you", "your name", "what are you", "what is your name"];
+const SMALL_TALK_HINTS = [...THANKS_HINTS, ...BYE_HINTS, ...HEALTH_HINTS, ...IDENTITY_HINTS];
+
+function normalizeMsg(m) {
+  return m.toLowerCase().trim().replace(/[?.,!]+/g, "").replace(/\s+/g, " ");
+}
+
+// True only for greeting-like messages (exact, stretched, or typo'd)
+export function isGreetingLike(userMessage) {
+  const q = normalizeMsg(userMessage);
+  if (!q) return false;
+  if (GREETING_PHRASES.some((g) => q === g || q.startsWith(g))) return true;
+  const word = q.split(" ")[0];
+  if (NON_GREETING_WORDS.has(word)) return false;
+  if (GREETING_CORES.includes(word)) return true;
+  return q.split(" ").length <= 2 && word.length <= 9 &&
+    GREETING_CORES.some((g) => withinOneEdit(word, g));
+}
+
+// True for any casual small talk best answered locally (greeting, thanks,
+// bye, health check, bot identity).
+export function isSmallTalk(userMessage) {
+  const q = normalizeMsg(userMessage);
+  if (!q) return false;
+  if (SMALL_TALK_HINTS.some((h) => q.includes(h))) return true;
+  return isGreetingLike(userMessage);
+}
+
 // Main chatbot response function
 export function getChatbotResponse(userMessage) {
   if (!userMessage.trim()) {
@@ -149,14 +221,14 @@ export function getChatbotResponse(userMessage) {
   const messageLower = userMessage.toLowerCase().trim();
   const queryClean = messageLower.replace(/[?.,!]/g, "");
 
-  // 1. Conversational Greetings
+  // 1. Conversational Greetings (fuzzy — catches typos like "ehy", "helo", "hii")
   const greetingPhrases = ["hi", "hello", "hey", "greetings", "good morning", "good afternoon", "good evening", "howdy", "hola", "hi there", "hello there", "salam", "assalam", "aoa"];
-  if (greetingPhrases.includes(queryClean) || queryClean === "hi" || queryClean === "hello" || queryClean === "hey") {
+  const healthCheckPhrases = ["how are you", "how are you doing", "how is it going", "hows it going", "how are you today", "whats up", "what's up", "how do you do"];
+  if (greetingPhrases.includes(queryClean) || isGreetingLike(userMessage)) {
     return `Hello! 👋 I am **${portfolioKnowledge.personal.name}**'s AI Portfolio Assistant. How can I help you today?\n\nFeel free to ask me about:\n• 🚀 **Projects** (SpendSmart, Farooq Agencies, SMS, E-Shop)\n• 🏢 **Work Experience** (Frontend Intern at Developer Hub Corp)\n• 🎓 **Education** (Riphah SE, 4.0 CGPA)\n• 📜 **Certifications** (Cisco C++ & Cisco Advanced C++)\n• 📞 **Contact Information**`;
   }
 
   // 2. Health checks
-  const healthCheckPhrases = ["how are you", "how are you doing", "how is it going", "hows it going", "how are you today", "whats up", "what's up", "how do you do"];
   if (healthCheckPhrases.some(phrase => queryClean.includes(phrase))) {
     return `I am doing great and ready to assist you! 😊 I can share detailed portfolio insights, resume details, or help you contact Shoaib. What would you like to know?`;
   }

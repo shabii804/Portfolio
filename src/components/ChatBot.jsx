@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { getChatbotResponse, getSuggestedQuestions, getPortfolioName } from "../utils/chatbotLogic";
+import { getChatbotResponse, getSuggestedQuestions, getPortfolioName, isSmallTalk } from "../utils/chatbotLogic";
 import { askAI } from "../utils/aiChat";
 import "../styles/ChatBot.css";
 
@@ -63,14 +63,23 @@ export default function ChatBot({ isOpen, onClose }) {
     let reply = null;
     let source = "instant";
 
-    // 1) Try the fact-grounded GLM endpoint (free, no key)
-    try {
-      const ai = await askAI(history);
-      if (ai?.reply) {
-        reply = ai.reply;
-        source = ai.source || "glm";
-      }
-    } catch { /* fall through */ }
+    // 0) FAST PATH — greetings / thanks / small talk are answered locally.
+    //    Instant, free, and never burns the AI rate limit on "hi".
+    if (isSmallTalk(text)) {
+      reply = getChatbotResponse(text);
+      source = "instant";
+    }
+
+    // 1) Try the fact-grounded AI endpoint (free, no key)
+    if (!reply) {
+      try {
+        const ai = await askAI(history);
+        if (ai?.reply) {
+          reply = ai.reply;
+          source = ai.source || "glm";
+        }
+      } catch { /* fall through */ }
+    }
 
     // 2) Fallback: local rule-based engine (always works, zero cost)
     if (!reply) {
