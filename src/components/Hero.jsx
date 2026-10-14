@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { defaultSkills } from "../data/portfolio";
 import HeroParticles from "./HeroParticles";
+import { useCountUp, useMagnetic, useScrollParallax } from "../hooks/heroMotion";
 
 // Occasional diagonal light streaks — position/length staggered so roughly
 // one star crosses every few seconds, each idle for most of its cycle
@@ -14,6 +15,17 @@ const SHOOTING_STARS = [
 // Flat list of every skill across categories, for the hero marquee strip
 const FLAT_SKILLS = Object.values(defaultSkills).flat();
 
+// Animated stat number — counts up once on mount (reduced motion: instant)
+function StatValue({ num, decimals = 0, suffix = "", delay = 0 }) {
+  const value = useCountUp(num, { decimals, delay });
+  return (
+    <>
+      {value}
+      {suffix}
+    </>
+  );
+}
+
 export default function Hero() {
   const { personal } = usePortfolio();
   const [roleIdx, setRoleIdx] = useState(0);
@@ -21,11 +33,18 @@ export default function Hero() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [visible, setVisible] = useState(false);
   const tiltRef = useRef(null);
+  const glareRef = useRef(null);
+  const badgeRefs = useRef([]);
+  const magneticPrimary = useMagnetic();
+  const magneticCv = useMagnetic();
+  const magneticTalk = useMagnetic();
+  const parallaxRef = useScrollParallax();
   const reducedMotion = useRef(
     typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
   );
 
-  // Mouse-tilt parallax on the photo frame (skipped for touch + reduced motion)
+  // Mouse-tilt parallax on the photo frame + glare tracking + badge depth
+  // (skipped for touch + reduced motion)
   const handleTilt = (e) => {
     if (reducedMotion.current || !tiltRef.current) return;
     if (e.pointerType === "touch") return;
@@ -33,9 +52,21 @@ export default function Hero() {
     const px = (e.clientX - rect.left) / rect.width - 0.5;
     const py = (e.clientY - rect.top) / rect.height - 0.5;
     tiltRef.current.style.transform = `perspective(900px) rotateY(${px * 7}deg) rotateX(${-py * 7}deg)`;
+    if (glareRef.current) {
+      glareRef.current.style.setProperty("--mx", `${((px + 0.5) * 100).toFixed(1)}%`);
+      glareRef.current.style.setProperty("--my", `${((py + 0.5) * 100).toFixed(1)}%`);
+    }
+    for (const b of badgeRefs.current) {
+      if (!b) continue;
+      const f = parseFloat(b.dataset.depth || "0") * 26;
+      b.style.transform = `translate(${(px * 2 * f).toFixed(1)}px, ${(py * 2 * f).toFixed(1)}px)`;
+    }
   };
   const resetTilt = () => {
     if (tiltRef.current) tiltRef.current.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
+    for (const b of badgeRefs.current) {
+      if (b) b.style.transform = "";
+    }
   };
 
   // Entrance animation
@@ -80,7 +111,8 @@ export default function Hero() {
       <div className="absolute top-1/4 left-[12%] w-[560px] h-[560px] rounded-full opacity-[0.05] blur-[130px] bg-accent-indigo pointer-events-none z-0 bg-blob-indigo" />
       <div className="absolute bottom-[10%] right-[8%] w-[440px] h-[440px] rounded-full opacity-[0.04] blur-[110px] bg-accent-cyan pointer-events-none z-0 bg-blob-cyan" />
 
-      {/* Main content */}
+      {/* Main content (outer layer takes the scroll-parallax exit) */}
+      <div ref={parallaxRef} className="hero-parallax relative">
       <div className={`relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full transition-all duration-1000 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
         <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-6 items-center">
           {/* Left — copy */}
@@ -108,19 +140,20 @@ export default function Hero() {
               <span className="font-mono text-accent-indigo text-xs uppercase tracking-[0.2em] font-semibold">Hi there, I'm</span>
             </div>
 
-            {/* Name */}
-            <h1
-              className="font-display font-bold leading-[0.95] tracking-tight mb-6"
-              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.2s" }}
-            >
-              <span className="block text-[clamp(44px,7vw,84px)] text-text-primary">{personal.name.split(" ")[0]}</span>
-              <span className="block text-[clamp(44px,7vw,84px)] text-shimmer">{personal.name.split(" ").slice(1).join(" ")}.</span>
+            {/* Name — mask reveal, line by line */}
+            <h1 className="font-display font-bold leading-[0.95] tracking-tight mb-6">
+              <span className="name-mask name-mask-a">
+                <span className="name-line text-[clamp(44px,7vw,84px)] text-text-primary">{personal.name.split(" ")[0]}</span>
+              </span>
+              <span className="name-mask name-mask-b">
+                <span className="name-line text-[clamp(44px,7vw,84px)] text-shimmer">{personal.name.split(" ").slice(1).join(" ")}.</span>
+              </span>
             </h1>
 
             {/* Typewriter */}
             <div
               className="flex items-center justify-center lg:justify-start gap-2.5 mb-6"
-              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.35s" }}
+              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.4s" }}
             >
               <span className="font-mono text-accent-cyan/50 text-base select-none">▶</span>
               <div className="font-display text-lg sm:text-2xl font-medium text-text-secondary min-h-[30px] sm:min-h-[34px]">
@@ -132,7 +165,7 @@ export default function Hero() {
             {/* Bio */}
             <p
               className="font-body text-text-secondary text-base sm:text-lg leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0"
-              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.45s" }}
+              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.48s" }}
             >
               {personal.bio}
             </p>
@@ -140,21 +173,22 @@ export default function Hero() {
             {/* CTAs */}
             <div
               className="flex flex-wrap justify-center lg:justify-start gap-3 mb-10"
-              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.55s" }}
+              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.56s" }}
             >
-              <button onClick={() => scrollTo("projects")} className="btn-primary px-6 py-3.5 rounded-xl font-display font-semibold text-sm flex items-center gap-2.5 group glow-on-hover">
+              <button ref={magneticPrimary} onClick={() => scrollTo("projects")} className="magnetic btn-primary px-6 py-3.5 rounded-xl font-display font-semibold text-sm flex items-center gap-2.5 group glow-on-hover">
                 View My Work
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform group-hover:translate-x-1"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
               <a
+                ref={magneticCv}
                 href={personal.resumePdf}
                 download
-                className="btn-ghost px-5 py-3.5 rounded-xl font-display font-semibold text-sm flex items-center gap-2 group glow-on-hover"
+                className="magnetic btn-ghost px-5 py-3.5 rounded-xl font-display font-semibold text-sm flex items-center gap-2 group glow-on-hover"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform group-hover:-translate-y-0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Download CV
               </a>
-              <button onClick={() => scrollTo("contact")} className="btn-ghost px-5 py-3.5 rounded-xl font-display font-semibold text-sm group flex items-center gap-2 glow-on-hover">
+              <button ref={magneticTalk} onClick={() => scrollTo("contact")} className="magnetic btn-ghost px-5 py-3.5 rounded-xl font-display font-semibold text-sm group flex items-center gap-2 glow-on-hover">
                 Let's Talk
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
@@ -163,7 +197,7 @@ export default function Hero() {
             {/* Socials */}
             <div
               className="flex flex-wrap justify-center lg:justify-start items-center gap-5"
-              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.65s" }}
+              style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.64s" }}
             >
               {[
                 { label: "GitHub", href: personal.github, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> },
@@ -181,7 +215,7 @@ export default function Hero() {
           {/* Right — photo composition with orbit rings (always renders, no WebGL) */}
           <div
             className="relative mx-auto w-full max-w-[280px] sm:max-w-[340px] lg:max-w-[460px] order-1 lg:order-2"
-            style={{ animation: "fadeSlideUp 0.9s ease both", animationDelay: "0.3s" }}
+            style={{ animation: "fadeSlideUp 0.9s ease both", animationDelay: "0.24s" }}
             onPointerMove={handleTilt}
             onPointerLeave={resetTilt}
           >
@@ -205,6 +239,7 @@ export default function Hero() {
                     loading="eager"
                     decoding="async"
                   />
+                  <div ref={glareRef} className="photo-glare" aria-hidden="true" />
                 </div>
                 {/* Bottom caption chip inside the frame */}
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full bg-bg-primary/80 border border-border-mid backdrop-blur flex items-center gap-2 whitespace-nowrap">
@@ -213,16 +248,22 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Floating badges */}
-              <div className="absolute top-[6%] -right-1 sm:-right-4 w-16 h-16 rounded-2xl bg-bg-card/90 border border-accent-cyan/30 shadow-lg flex-col items-center justify-center float-slow backdrop-blur flex">
-                <span className="font-display font-bold text-accent-cyan text-lg leading-none">4.0</span>
-                <span className="font-mono text-[8px] text-text-muted mt-1">CGPA</span>
+              {/* Floating badges — inner layer counter-parallaxes with tilt for depth */}
+              <div className="absolute top-[6%] -right-1 sm:-right-4 w-16 h-16 rounded-2xl bg-bg-card/90 border border-accent-cyan/30 shadow-lg float-slow backdrop-blur">
+                <div ref={(el) => (badgeRefs.current[0] = el)} data-depth="0.5" className="w-full h-full flex flex-col items-center justify-center">
+                  <span className="font-display font-bold text-accent-cyan text-lg leading-none">4.0</span>
+                  <span className="font-mono text-[8px] text-text-muted mt-1">CGPA</span>
+                </div>
               </div>
               <div className="absolute top-[38%] -left-2 sm:-left-8 px-3 py-1.5 rounded-xl bg-bg-card/90 border border-accent-indigo/30 shadow-lg float-slow backdrop-blur" style={{ animationDelay: "3s" }}>
-                <span className="font-mono text-[10px] text-accent-indigo">React · Node.js</span>
+                <div ref={(el) => (badgeRefs.current[1] = el)} data-depth="0.85" className="depth-layer">
+                  <span className="font-mono text-[10px] text-accent-indigo">React · Node.js</span>
+                </div>
               </div>
-              <div className="absolute bottom-[10%] -right-2 sm:-right-6 px-3.5 py-1.5 rounded-full bg-bg-card/90 border border-border-mid shadow-lg items-center gap-2 backdrop-blur hidden sm:flex">
-                <span className="font-mono text-[10px] text-text-secondary">4 production apps</span>
+              <div className="absolute bottom-[10%] -right-2 sm:-right-6 px-3.5 py-1.5 rounded-full bg-bg-card/90 border border-border-mid shadow-lg backdrop-blur hidden sm:block">
+                <div ref={(el) => (badgeRefs.current[2] = el)} data-depth="0.35" className="depth-layer">
+                  <span className="font-mono text-[10px] text-text-secondary">4 production apps</span>
+                </div>
               </div>
             </div>
           </div>
@@ -234,13 +275,15 @@ export default function Hero() {
           style={{ animation: "fadeSlideUp 0.8s ease both", animationDelay: "0.7s" }}
         >
           {[
-            { val: "4.0", label: "CGPA", grad: "text-gradient-indigo" },
-            { val: "4", label: "Production Apps", grad: "text-gradient-cyan" },
-            { val: "4yrs", label: "Building Software", grad: "text-gradient-indigo" },
-            { val: "1", label: "Live Client Site", grad: "text-gradient-cyan" },
-          ].map((s) => (
+            { num: 4, decimals: 1, label: "CGPA", grad: "text-gradient-indigo" },
+            { num: 4, label: "Production Apps", grad: "text-gradient-cyan" },
+            { num: 4, suffix: "yrs", label: "Building Software", grad: "text-gradient-indigo" },
+            { num: 1, label: "Live Client Site", grad: "text-gradient-cyan" },
+          ].map((s, i) => (
             <div key={s.label} className="text-center lg:text-left">
-              <div className={`font-display font-bold text-3xl sm:text-4xl ${s.grad}`}>{s.val}</div>
+              <div className={`font-display font-bold text-3xl sm:text-4xl ${s.grad}`}>
+                <StatValue num={s.num} decimals={s.decimals || 0} suffix={s.suffix || ""} delay={700 + i * 90} />
+              </div>
               <div className="font-mono text-[10px] text-text-muted uppercase tracking-[0.12em] mt-1.5">{s.label}</div>
             </div>
           ))}
@@ -254,6 +297,7 @@ export default function Hero() {
             ))}
           </div>
         </div>
+      </div>
       </div>
 
       {/* Scroll hint */}

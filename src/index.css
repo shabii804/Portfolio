@@ -631,6 +631,66 @@ body {
   }
 }
 
+/* ─── Hero motion system (tokens + entrance + pointer effects) ───────────── */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Name — mask reveal, line by line (predetermined motion: CSS animation) */
+.name-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.name-line {
+  display: block;
+  transform: translateY(115%);
+  animation: name-rise 0.9s var(--ease-out) forwards;
+  will-change: transform;
+}
+.name-mask-a .name-line { animation-delay: 0.18s; }
+.name-mask-b .name-line { animation-delay: 0.3s; }
+@keyframes name-rise {
+  to { transform: translateY(0); }
+}
+
+/* Magnetic CTAs — named properties only (never `all`); trailing + release */
+.magnetic {
+  transition:
+    transform 240ms var(--ease-out),
+    background-color 300ms var(--ease-out),
+    border-color 300ms var(--ease-out),
+    color 300ms var(--ease-out),
+    box-shadow 300ms var(--ease-out);
+  will-change: transform;
+}
+
+/* Pointer-tracked glare over the portrait (fine pointers only) */
+.photo-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 30%),
+    rgba(255, 255, 255, 0.11),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .photo-frame:hover .photo-glare { opacity: 1; }
+}
+
+/* Badge depth layer — inner wrapper that counter-parallaxes with tilt */
+.depth-layer { will-change: transform; }
+
+/* Scroll-parallax exit layer (transform/opacity driven by rAF) */
+.hero-parallax { will-change: transform, opacity; }
+
 :focus-visible {
   outline: 2px solid #818cf8;
   outline-offset: 2px;
