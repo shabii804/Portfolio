@@ -1,16 +1,20 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /api/chat — Z.AI GLM chat endpoint for the portfolio assistant.
-// Deploys as a Vercel Serverless Function (works with the existing Vite SPA —
-// no Next.js involved). Grounded STRICTLY in src/data/factSheet.js.
-// If the SDK or upstream call fails, respond ok:false — the client silently
-// falls back to its local rule-based engine, so the chat never breaks.
+// POST /api/chat — AI chat endpoint for the portfolio assistant.
+// Pure-fetch implementation (NO SDK, NO config files, NO module-scope side
+// effects) so it can never crash-boot on Vercel serverless.
+//
+// Provider chain:
+//   1. GLM_API_KEY env var set  → Z.ai open platform (glm-4.5-flash, free)
+//   2. No key                   → Pollinations (keyless, free, OpenAI-compatible)
+//   3. Both fail                → 502 { ok:false } → client rule-based engine
+//
+// Answers are grounded STRICTLY in src/data/factSheet.js to prevent
+// hallucinated credentials (e.g. wrong CGPA / university).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import ZAI from "z-ai-web-dev-sdk";
 import { FACT_SHEET } from "../src/data/factSheet.js";
 
-// ── Naive in-memory rate limiter (per cold-start instance; good enough to
-//    stop casual abuse. For hard limits, wire Upstash Redis later.) ─────────
+// ── Naive in-memory rate limiter (per cold-start instance) ──────────────────
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 10;
 const hits = new Map(); // ip → { count, resetAt }
@@ -40,10 +44,76 @@ const CORS = {
 
 const SYSTEM_PROMPT = `You are the portfolio assistant for Shoaib Arshad. You answer questions from recruiters, clients and fellow developers about Shoaib — his skills, projects, education, experience and how to reach him.
 
-You must stay GROUNDED in the fact sheet below. Treat it as the only truth.
+STRICT RULES:
+- Stay GROUNDED in the fact sheet below. Treat it as the only truth.
+- If a fact is not in the sheet, say you don't know and suggest the contact section.
+- Never invent GPA, universities, employers, dates or metrics.
+- Keep answers short and friendly (2-5 sentences unless a list is asked for).
+- Use **bold** for key facts like project names, GPA, or skills.
 
 ${FACT_SHEET}`;
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function safeParse(s) {
+  try { return JSON.parse(s); } catch { return null; }
+}
+
+function withTimeout(ms) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return { signal: controller.signal, done: () => clearTimeout(timer) };
+}
+
+async function callOpenAiCompatible({ baseUrl, apiKey, model, messages, extraHeaders = {} }) {
+  const { signal, done } = withTimeout(28_000);
+  try {
+    const res = await fetch(baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+        ...extraHeaders,
+      },
+      body: JSON.stringify({ model, messages, stream: false }),
+      signal,
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(`Upstream ${res.status}: ${detail.slice(0, 160)}`);
+    }
+    const data = await res.json();
+    const reply = data?.choices?.[0]?.message?.content;
+    if (typeof reply !== "string" || !reply.trim()) throw new Error("Empty completion");
+    return reply.trim();
+  } finally {
+    done();
+  }
+}
+
+// ── Providers ────────────────────────────────────────────────────────────────
+async function askGLM(messages) {
+  const key = process.env.GLM_API_KEY || process.env.ZAI_API_KEY || process.env.ZHIPU_API_KEY;
+  if (!key) return null; // no key configured → skip to next provider
+  const reply = await callOpenAiCompatible({
+    baseUrl: "https://api.z.ai/api/paas/v4/chat/completions",
+    apiKey: key,
+    model: "glm-4.5-flash",
+    messages,
+  });
+  return { reply, source: "glm" };
+}
+
+async function askPollinations(messages) {
+  const reply = await callOpenAiCompatible({
+    baseUrl: "https://text.pollinations.ai/openai",
+    apiKey: null,
+    model: "openai",
+    messages,
+  });
+  return { reply, source: "glm" }; // client badges any model answer as "AI"
+}
+
+// ── Handler ──────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
@@ -78,27 +148,20 @@ export default async function handler(req, res) {
     return res.status(400).json({ ok: false, error: "No valid messages" });
   }
 
+  const convo = [{ role: "system", content: SYSTEM_PROMPT }, ...messages];
+
+  // Provider chain — every failure is caught, the function NEVER throws.
   try {
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        { role: "assistant", content: SYSTEM_PROMPT },
-        ...messages,
-      ],
-      thinking: { type: "disabled" },
-    });
+    const viaKey = await askGLM(convo).catch(() => null);
+    if (viaKey) return res.status(200).json({ ok: true, ...viaKey });
+  } catch { /* fall through */ }
 
-    const reply = completion?.choices?.[0]?.message?.content?.trim();
-    if (!reply) throw new Error("Empty completion");
-
-    return res.status(200).json({ ok: true, reply, source: "glm" });
+  try {
+    const viaPollinations = await askPollinations(convo);
+    return res.status(200).json({ ok: true, ...viaPollinations });
   } catch (err) {
-    console.error("[/api/chat] GLM call failed:", err?.message || err);
+    console.error("[/api/chat] all providers failed:", err?.message || err);
     // ok:false → the client falls back to its local rule-based engine
     return res.status(502).json({ ok: false, error: "AI unavailable" });
   }
-}
-
-function safeParse(s) {
-  try { return JSON.parse(s); } catch { return null; }
 }

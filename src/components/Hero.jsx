@@ -1,23 +1,9 @@
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import { defaultSkills } from "../data/portfolio";
 
-// The 3D orbit scene is the heaviest asset on the page — load it lazily so
-// first paint stays fast (PRD: Lighthouse 90+).
-const HeroOrbit = lazy(() => import("./HeroOrbit"));
-
-function OrbitFallback() {
-  return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="relative w-48 h-48 sm:w-60 sm:h-60">
-        <div className="absolute inset-0 rounded-full border border-accent-indigo/20" />
-        <div className="absolute inset-6 rounded-full border border-accent-cyan/15" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="font-display font-bold text-5xl text-gradient-indigo">SA</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+// Flat list of every skill across categories, for the hero marquee strip
+const FLAT_SKILLS = Object.values(defaultSkills).flat();
 
 export default function Hero() {
   const { personal } = usePortfolio();
@@ -25,9 +11,23 @@ export default function Hero() {
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [visible, setVisible] = useState(false);
+  const tiltRef = useRef(null);
   const reducedMotion = useRef(
     typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
   );
+
+  // Mouse-tilt parallax on the photo frame (skipped for touch + reduced motion)
+  const handleTilt = (e) => {
+    if (reducedMotion.current || !tiltRef.current) return;
+    if (e.pointerType === "touch") return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    tiltRef.current.style.transform = `perspective(900px) rotateY(${px * 7}deg) rotateX(${-py * 7}deg)`;
+  };
+  const resetTilt = () => {
+    if (tiltRef.current) tiltRef.current.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
+  };
 
   // Entrance animation
   useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
@@ -53,8 +53,9 @@ export default function Hero() {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16">
-      {/* Grid bg + glow blobs */}
+      {/* Atmosphere: grid + aurora + glow blobs */}
       <div className="absolute inset-0 grid-bg z-0" />
+      <div className="aurora" aria-hidden="true" />
       <div className="absolute top-1/4 left-[12%] w-[560px] h-[560px] rounded-full opacity-[0.05] blur-[130px] bg-accent-indigo pointer-events-none z-0 bg-blob-indigo" />
       <div className="absolute bottom-[10%] right-[8%] w-[440px] h-[440px] rounded-full opacity-[0.04] blur-[110px] bg-accent-cyan pointer-events-none z-0 bg-blob-cyan" />
 
@@ -92,7 +93,7 @@ export default function Hero() {
               style={{ animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.2s" }}
             >
               <span className="block text-[clamp(44px,7vw,84px)] text-text-primary">{personal.name.split(" ")[0]}</span>
-              <span className="block text-[clamp(44px,7vw,84px)] text-gradient-indigo">{personal.name.split(" ").slice(1).join(" ")}.</span>
+              <span className="block text-[clamp(44px,7vw,84px)] text-shimmer">{personal.name.split(" ").slice(1).join(" ")}.</span>
             </h1>
 
             {/* Typewriter */}
@@ -156,34 +157,52 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right — 3D orbit scene (first on mobile so the 3D lands above the fold) */}
+          {/* Right — photo composition with orbit rings (always renders, no WebGL) */}
           <div
-            className="relative mx-auto w-full max-w-[240px] sm:max-w-[320px] lg:max-w-[560px] aspect-square order-1 lg:order-2"
+            className="relative mx-auto w-full max-w-[280px] sm:max-w-[340px] lg:max-w-[460px] order-1 lg:order-2"
             style={{ animation: "fadeSlideUp 0.9s ease both", animationDelay: "0.3s" }}
+            onPointerMove={handleTilt}
+            onPointerLeave={resetTilt}
           >
-            {/* Halo behind the canvas */}
-            <div className="absolute inset-[12%] rounded-full bg-gradient-to-br from-accent-indigo/[0.13] via-transparent to-accent-cyan/[0.09] blur-3xl pointer-events-none" />
+            {/* Rotating conic glow behind everything */}
+            <div className="photo-glow-ring" aria-hidden="true" />
 
-            <Suspense fallback={<OrbitFallback />}>
-              <HeroOrbit />
-            </Suspense>
+            {/* Tilt wrapper — photo frame + rings move together */}
+            <div ref={tiltRef} className="relative transition-transform duration-300 ease-out will-change-transform">
+              {/* CSS orbit rings */}
+              <div className="orbit-ring orbit-tilt-a" aria-hidden="true"><span className="orbit-dot" /></div>
+              <div className="orbit-ring orbit-tilt-b" aria-hidden="true"><span className="orbit-dot" /></div>
 
-            {/* SA monogram — crisp DOM overlay at the core */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-              <span className="font-display font-bold text-4xl sm:text-5xl text-gradient-indigo drop-shadow-[0_0_24px_rgba(99,102,241,0.45)]">SA</span>
-            </div>
+              {/* Photo frame — gradient hairline border over the portrait */}
+              <div className="photo-frame relative aspect-[4/5] max-w-[78%] mx-auto">
+                <div className="photo-frame-inner w-full h-full">
+                  <img
+                    src="/profile.jpeg"
+                    alt={`Portrait of ${personal.name}`}
+                    width={880}
+                    height={1100}
+                    loading="eager"
+                    decoding="async"
+                  />
+                </div>
+                {/* Bottom caption chip inside the frame */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full bg-bg-primary/80 border border-border-mid backdrop-blur flex items-center gap-2 whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-mono text-[10px] text-text-secondary">Open to work</span>
+                </div>
+              </div>
 
-            {/* Floating badges */}
-            <div className="hidden md:flex absolute top-[12%] right-[2%] w-14 h-14 rounded-2xl bg-bg-card/90 border border-accent-cyan/25 shadow-lg flex-col items-center justify-center float-slow backdrop-blur">
-              <span className="font-display font-bold text-accent-cyan text-base leading-none">4.0</span>
-              <span className="font-mono text-[8px] text-text-muted mt-0.5">CGPA</span>
-            </div>
-            <div className="hidden md:flex absolute bottom-[14%] left-[0%] px-3 py-1.5 rounded-xl bg-bg-card/90 border border-accent-indigo/25 shadow-lg float-slow backdrop-blur" style={{ animationDelay: "3s" }}>
-              <span className="font-mono text-[10px] text-accent-indigo">React · Node.js</span>
-            </div>
-            <div className="hidden sm:flex absolute bottom-[6%] right-[8%] px-3.5 py-1.5 rounded-full bg-bg-card/90 border border-border-mid shadow-lg items-center gap-2 backdrop-blur">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-mono text-[10px] text-text-secondary">Open to work</span>
+              {/* Floating badges */}
+              <div className="absolute top-[6%] -right-1 sm:-right-4 w-16 h-16 rounded-2xl bg-bg-card/90 border border-accent-cyan/30 shadow-lg flex-col items-center justify-center float-slow backdrop-blur flex">
+                <span className="font-display font-bold text-accent-cyan text-lg leading-none">4.0</span>
+                <span className="font-mono text-[8px] text-text-muted mt-1">CGPA</span>
+              </div>
+              <div className="absolute top-[38%] -left-2 sm:-left-8 px-3 py-1.5 rounded-xl bg-bg-card/90 border border-accent-indigo/30 shadow-lg float-slow backdrop-blur" style={{ animationDelay: "3s" }}>
+                <span className="font-mono text-[10px] text-accent-indigo">React · Node.js</span>
+              </div>
+              <div className="absolute bottom-[10%] -right-2 sm:-right-6 px-3.5 py-1.5 rounded-full bg-bg-card/90 border border-border-mid shadow-lg items-center gap-2 backdrop-blur hidden sm:flex">
+                <span className="font-mono text-[10px] text-text-secondary">4 production apps</span>
+              </div>
             </div>
           </div>
         </div>
@@ -204,6 +223,15 @@ export default function Hero() {
               <div className="font-mono text-[10px] text-text-muted uppercase tracking-[0.12em] mt-1.5">{s.label}</div>
             </div>
           ))}
+        </div>
+
+        {/* Tech marquee */}
+        <div className="mt-10 marquee-mask" style={{ animation: "fadeSlideUp 0.8s ease both", animationDelay: "0.8s" }} aria-hidden="true">
+          <div className="marquee-track">
+            {[...FLAT_SKILLS, ...FLAT_SKILLS].map((skill, i) => (
+              <span key={i} className="marquee-item">{skill}</span>
+            ))}
+          </div>
         </div>
       </div>
 

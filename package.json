@@ -11,13 +11,9 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.0.0",
-    "@react-three/drei": "^10.7.9",
-    "@react-three/fiber": "^9.8.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.17.0",
-    "three": "^0.186.1",
-    "z-ai-web-dev-sdk": "^0.0.18"
+    "react-router-dom": "^7.17.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

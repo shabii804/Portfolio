@@ -60,7 +60,7 @@ export default function Skills() {
         </div>
 
         {/* Core proficiencies */}
-        <div className="animate-on-scroll mt-16 card-border-glow rounded-2xl p-6 md:p-8 bg-bg-card" style={{ transitionDelay: "0.35s" }}>
+        <div className="animate-on-scroll card-border-glow card-glow-border mt-16 rounded-2xl p-6 md:p-8 bg-bg-card" style={{ transitionDelay: "0.35s" }}>
           <div className="flex items-center justify-between mb-7 flex-wrap gap-2">
             <h3 className="font-display font-semibold text-text-primary">Core proficiencies</h3>
             <span className="font-mono text-[10px] text-text-muted">self-assessed · honest numbers</span>

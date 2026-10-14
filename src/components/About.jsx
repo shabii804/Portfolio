@@ -116,7 +116,7 @@ export default function About() {
             {/* Highlight tiles */}
             <div className="grid grid-cols-2 gap-4">
               {highlights.map((h, i) => (
-                <div key={h.label} className="animate-on-scroll card-border-glow rounded-2xl p-5 bg-bg-card" style={{ transitionDelay: `${0.16 + 0.06 * i}s` }}>
+                <div key={h.label} className="animate-on-scroll card-border-glow card-glow-border rounded-2xl p-5 bg-bg-card" style={{ transitionDelay: `${0.16 + 0.06 * i}s` }}>
                   <div className="text-xl mb-2.5">{h.icon}</div>
                   <div className="font-display font-semibold text-text-primary text-sm mb-1">{h.label}</div>
                   <div className="font-mono text-[10px] text-text-muted leading-relaxed">{h.sub}</div>

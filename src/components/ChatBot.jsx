@@ -116,7 +116,7 @@ export default function ChatBot({ isOpen, onClose }) {
                 <h3 className="chatbot-title">Portfolio Assistant</h3>
                 <p className="chatbot-subtitle">
                   <span className="chatbot-ai-dot" aria-hidden="true" />
-                  Z.AI GLM · fact-grounded
+                  AI assistant · fact-grounded
                 </p>
               </div>
             </div>

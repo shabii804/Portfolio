@@ -201,7 +201,7 @@ function ProjectCard({ project, onClick, index }) {
 
   return (
     <article
-      className="animate-on-scroll card-border-glow rounded-2xl p-6 sm:p-7 bg-bg-card flex flex-col gap-4 cursor-pointer group"
+      className="animate-on-scroll card-border-glow card-glow-border rounded-2xl p-6 sm:p-7 bg-bg-card flex flex-col gap-4 cursor-pointer group"
       style={{
         transitionDelay: `${0.06 * index}s`,
         borderColor: hovered ? `${project.accentHex}40` : "rgb(var(--border-subtle))",

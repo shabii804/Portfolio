@@ -307,6 +307,204 @@ body {
   transform-origin: bottom left;
 }
 
+/* ─── Hero photo composition ─────────────────────────────────────────────── */
+.photo-glow-ring {
+  position: absolute;
+  inset: -14%;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(99, 102, 241, 0.5) 0%,
+    rgba(34, 211, 238, 0.35) 18%,
+    transparent 38%,
+    transparent 62%,
+    rgba(129, 140, 248, 0.4) 80%,
+    rgba(99, 102, 241, 0.5) 100%
+  );
+  filter: blur(28px);
+  opacity: 0.5;
+  animation: spin-slow 14s linear infinite;
+  pointer-events: none;
+}
+
+.photo-frame {
+  position: relative;
+  border-radius: 2rem;
+  padding: 1px;
+  background: linear-gradient(
+    145deg,
+    rgba(129, 140, 248, 0.55) 0%,
+    rgba(51, 51, 69, 0.25) 30%,
+    rgba(34, 211, 238, 0.45) 65%,
+    rgba(51, 51, 69, 0.25) 100%
+  );
+  box-shadow:
+    0 24px 70px -24px rgba(0, 0, 0, 0.75),
+    0 0 60px -18px rgba(99, 102, 241, 0.4);
+}
+
+.photo-frame-inner {
+  border-radius: calc(2rem - 1px);
+  overflow: hidden;
+  background: rgb(var(--bg-card));
+  display: block;
+}
+
+.photo-frame-inner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* CSS orbit rings — the "orbit" identity without WebGL */
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(129, 140, 248, 0.22);
+  pointer-events: none;
+}
+.orbit-ring .orbit-dot {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #818cf8, #22d3ee);
+  box-shadow: 0 0 12px 2px rgba(129, 140, 248, 0.65);
+}
+.orbit-tilt-a {
+  inset: -7%;
+  transform: rotate(-16deg);
+  animation: spin-slow 30s linear infinite;
+}
+.orbit-tilt-b {
+  inset: 4%;
+  border-color: rgba(34, 211, 238, 0.16);
+  transform: rotate(24deg);
+  animation: spin-slow 44s linear infinite reverse;
+}
+.orbit-tilt-b .orbit-dot {
+  background: #22d3ee;
+  box-shadow: 0 0 12px 2px rgba(34, 211, 238, 0.6);
+}
+
+/* ─── Aurora atmosphere (hero) ───────────────────────────────────────────── */
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.aurora::before,
+.aurora::after {
+  content: '';
+  position: absolute;
+  width: 720px;
+  height: 720px;
+  border-radius: 9999px;
+  filter: blur(120px);
+}
+.aurora::before {
+  top: -28%;
+  left: -12%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.16) 0%, transparent 62%);
+  animation: aurora-drift 22s ease-in-out infinite;
+}
+.aurora::after {
+  bottom: -30%;
+  right: -14%;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.11) 0%, transparent 62%);
+  animation: aurora-drift 27s ease-in-out infinite reverse;
+}
+@keyframes aurora-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(70px, 46px) scale(1.12); }
+  66% { transform: translate(-46px, -30px) scale(0.94); }
+}
+
+/* ─── Shimmer name ───────────────────────────────────────────────────────── */
+.text-shimmer {
+  background: linear-gradient(
+    110deg,
+    #a5b4fc 12%,
+    #818cf8 30%,
+    #e8e9ff 46%,
+    #22d3ee 60%,
+    #818cf8 80%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-slide 6s ease-in-out infinite;
+}
+@keyframes shimmer-slide {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ─── Tech marquee ───────────────────────────────────────────────────────── */
+.marquee-mask {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+}
+.marquee-track {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+.marquee-track:hover { animation-play-state: paused; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--text-muted));
+  white-space: nowrap;
+}
+.marquee-item::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #818cf8, #22d3ee);
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.55);
+}
+
+/* ─── Gradient-border card hover (projects / skills) ─────────────────────── */
+.card-glow-border {
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-glow-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.65), rgba(34, 211, 238, 0.45));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.card-glow-border:hover::before { opacity: 1; }
+.card-glow-border:hover { transform: translateY(-5px); }
+
 /* ─── Keyboard hint (command palette) ────────────────────────────────────── */
 .kbd {
   font-family: 'JetBrains Mono', monospace;
