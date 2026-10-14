@@ -45,7 +45,7 @@ export default function Footer() {
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-widest text-text-muted mb-5">Navigation</h4>
             <div className="space-y-2.5">
-              {["about", "experience", "projects", "skills", "contact"].map((id) => (
+              {["about", "skills", "projects", "journey", "activity", "contact"].map((id) => (
                 <button
                   key={id}
                   onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })}
@@ -111,7 +111,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-6 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-mono text-[10px] text-text-muted text-center sm:text-left">
-            © 2025 {personal.name} · Built with React, Vite & Tailwind CSS
+            © 2026 {personal.name} · Built with React, Vite & Tailwind CSS · AI answers grounded in the fact sheet
           </span>
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-3">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { defaultProjects, defaultSkills, defaultPersonal, defaultExperience } from "../data/portfolio";
+import { defaultProjects, defaultSkills, defaultPersonal, defaultExperience, defaultJourney } from "../data/portfolio";
 import { PortfolioContext } from "./portfolioContextObject";
 
 // Provider component only — context object lives in portfolioContextObject.js
@@ -9,6 +9,7 @@ export function PortfolioProvider({ children }) {
   const [skills, setSkills] = useState(defaultSkills);
   const [personal, setPersonal] = useState(defaultPersonal);
   const [experience, setExperience] = useState(defaultExperience);
+  const [journey] = useState(defaultJourney);
 
   const updateProjects = setProjects;
   const updateSkills = setSkills;
@@ -23,7 +24,7 @@ export function PortfolioProvider({ children }) {
   };
 
   return (
-    <PortfolioContext.Provider value={{ projects, skills, personal, experience, updateProjects, updateSkills, updatePersonal, updateExperience, resetAll }}>
+    <PortfolioContext.Provider value={{ projects, skills, personal, experience, journey, updateProjects, updateSkills, updatePersonal, updateExperience, resetAll }}>
       {children}
     </PortfolioContext.Provider>
   );

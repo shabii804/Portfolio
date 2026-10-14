@@ -18,6 +18,27 @@ export const defaultProjects = [
       "PROJECT IMPACT: Digitized a traditional medical supply business. Expanded business reach through online sales channels. Improved operational efficiency through automation. Enhanced customer experience with streamlined ordering and support. Created a scalable foundation for future business growth.",
       "MY ROLE: System Architecture & Design, Frontend Development (React.js), Backend Development (Firebase), Database Design & Implementation, Authentication & Security, WhatsApp Integration, Deployment & Production Management, Testing & Maintenance."
     ],
+  caseStudy: {
+    problem:
+      "Farooq Agencies ran entirely on paper and phone calls: inventory lived in handwritten registers, customers had no way to browse or order online, and the owner spent hours each day answering repetitive inquiries and reconciling stock by hand.",
+    approach: [
+      "Mapped the real workflow of the shop first — catalog, inquiry, order, restock — then translated it into a customer portal and an admin dashboard instead of forcing a generic e-commerce template onto the business.",
+      "Built the storefront in React with category browsing, search, filtering and live availability so customers always see accurate stock before ordering.",
+      "Built a secure admin dashboard with role-based authentication, full CRUD for products and variants (sizes, packaging, quantities), and order tracking backed by Firebase Firestore's real-time sync.",
+      "Routed customer inquiries through WhatsApp Business integration with instant order notifications, meeting the owner on the channel he already used instead of asking him to change habits.",
+    ],
+    outcome: [
+      "Deployed in production at farooqagensies.com on Firebase Hosting with zero downtime since launch.",
+      "Digitalized 50+ medical products with real-time inventory, replacing manual record-keeping entirely.",
+      "Cut customer response time through automated WhatsApp inquiry routing and instant admin notifications.",
+      "Gave the owner a centralized, phone-accessible view of stock and orders — the foundation for future growth.",
+    ],
+    metrics: [
+      { value: "50+", label: "products digitized" },
+      { value: "24/7", label: "online ordering" },
+      { value: "0", label: "downtime since launch" },
+    ],
+  },
 
   stack: [
     "React.js",
@@ -96,6 +117,28 @@ export const defaultProjects = [
       "Improved decision-making with clear analytics and reporting.",
       "Increased financial discipline with budget alerts and notifications."
     ],
+    caseStudy: {
+      problem:
+        "Most people abandon expense trackers because logging a transaction takes ten taps and three menus. Shoaib wanted a finance app where recording an expense is as fast as saying it — and where budgets actually defend themselves.",
+      approach: [
+        "Designed a full-stack architecture: React (Vite) frontend, Node.js + Express REST API, and Microsoft SQL Server for relational integrity across users, transactions and budgets.",
+        "Integrated the Web Speech API so users can log expenses by voice — 'Add 500 rupees for food' becomes a categorized entry in under a second.",
+        "Built an analytics dashboard in Recharts: spending distribution, monthly trends, weekday-vs-weekend comparison, category breakdowns and budget utilization.",
+        "Engineered per-month budget scoping with carry-over logic, overspending detection, and database-persisted notifications that follow the user across devices and sessions.",
+        "Added automated PDF report generation — income summaries, expense breakdowns and transaction history ready for record-keeping.",
+      ],
+      outcome: [
+        "Real-time synchronization across multiple open browser sessions with no stale data.",
+        "Voice-first logging reduced the friction of manual entry to a single spoken sentence.",
+        "Optimized SQL queries keep analytics fast even as transaction history grows.",
+        "Deployed on Vercel with a dark-mode-first HCI-grounded interface that presents complex financial data calmly.",
+      ],
+      metrics: [
+        { value: "8+", label: "analytics visualizations" },
+        { value: "<1s", label: "voice → expense entry" },
+        { value: "3-tier", label: "full-stack architecture" },
+      ],
+    },
     stack: ["React (Vite)", "Node.js", "Express.js", "MSSQL", "Recharts"],
     live: "https://spend-smart-expense-manager.vercel.app/",
     github: "https://github.com/shabii804/SpendSmart",
@@ -120,10 +163,30 @@ export const defaultProjects = [
       "Global state via React Context API — no external state library",
       "Reusable component architecture for scalable maintenance",
     ],
+    caseStudy: {
+      problem:
+        "E-commerce UIs tend to collapse under their own state: cart logic, filters and pricing rules get duplicated across components until every change breaks something else. The goal was a storefront that stays maintainable as it grows.",
+      approach: [
+        "Centralized cart, catalog and UI state in the React Context API — no Redux, no external state library — so data flows through one predictable pipeline.",
+        "Decomposed the interface into a library of reusable components: product cards, quantity steppers, price displays and section shells that compose instead of copy-paste.",
+        "Implemented category filtering and search with smooth state transitions, plus a deals section driven by promotional pricing logic rather than hardcoded discounts.",
+        "Built mobile-first with Tailwind CSS, keeping the DOM lean for fast interaction on low-end devices.",
+      ],
+      outcome: [
+        "A fully responsive storefront — mobile, tablet and desktop — from one codebase.",
+        "Dynamic cart with real-time quantity and total updates, no page reloads.",
+        "A component architecture where adding a new section is composition, not surgery.",
+      ],
+      metrics: [
+        { value: "0", label: "external state libraries" },
+        { value: "100%", label: "responsive layout" },
+        { value: "1", label: "global state pipeline" },
+      ],
+    },
     stack: ["React", "Tailwind CSS", "JavaScript", "Context API"],
     live: null,
     github: "https://github.com/shabii804/E-Shop",
-    accentHex: "#a78bfa",
+    accentHex: "#a5b4fc",
     badge: "Frontend",
     date: "Jan 2023",
     screenshots: [],
@@ -149,10 +212,32 @@ export const defaultProjects = [
       "TECHNOLOGY STACK: Programming Language: Java. GUI Framework: Java Swing. Look & Feel: FlatLaf (Flat Dark Theme). Database: Microsoft SQL Server (MSSQL). Connectivity: JDBC (Java Database Connectivity). Architecture: Desktop Client-Server Model. Reporting: HTML/CSS-based dynamic report generation.",
       "KEY LEARNING OUTCOMES: Designed and implemented normalized relational database with 15+ interconnected tables. Developed advanced Java Swing UI beyond standard components using custom layouts and styling. Implemented automated database initialization and schema migration using SQL scripts. Applied security practices including SHA-256 password hashing and secure database handling. Improved understanding of full-stack desktop application architecture."
     ],
+    caseStudy: {
+      problem:
+        "The school ran attendance, fees, exams and communication on paper and spreadsheets. Records were slow to reconcile, easy to lose, and impossible to audit — and there was no affordable software that fit a small school's exact workflow.",
+      approach: [
+        "Interviewed the real workflows first, then designed a role-based system: separate Admin, Teacher and Student portals with tailored dashboards and permissions.",
+        "Built in Java Swing with the FlatDarkLaf theme for a modern desktop experience, backed by Microsoft SQL Server over JDBC.",
+        "Modeled a normalized relational database of 15+ interconnected tables — students, classes, subjects, timetables, attendance, marks, fees, salaries and expenses.",
+        "Engineered timestamp-based attendance to prevent duplication, automated fee receipts, exam marks entry with auto-compiled results, and an HTML-based report generator for result cards and financial records.",
+        "Automated database initialization and schema migration with SQL scripts, and secured accounts with SHA-256 password hashing.",
+      ],
+      outcome: [
+        "Deployed and actively used in a real school — not a demo, a production system staff depend on daily.",
+        "Attendance, fees and results moved from registers to a single auditable system.",
+        "School-wide and class-specific announcements replaced notice-board communication.",
+        "Admin analytics dashboard gives management a live view of the institution's data.",
+      ],
+      metrics: [
+        { value: "15+", label: "relational DB tables" },
+        { value: "3", label: "role-based portals" },
+        { value: "Live", label: "in a real school" },
+      ],
+    },
     stack: ["Java", "C#", "Swing", "OOP", "MSSQL"],
     live: null,
     github: "https://github.com/shabii804/School-Mangment-System-Mini-FYP-",
-    accentHex: "#34d399",
+    accentHex: "#67e8f9",
     badge: "Active Deployment",
     date: "Jan 2022",
     screenshots: ["sms-1.png", "sms-2.png", "sms-3.png", "sms-4.png", "sms-5.png", "sms-6.png"],
@@ -185,6 +270,64 @@ export const defaultPersonal = {
   profilePic: "/profile.jpeg",       // place profile.jpg in /public/
   resumePdf: "/resume.pdf",          // place resume.pdf in /public/
 };
+
+// ─── JOURNEY TIMELINE ────────────────────────────────────────────────────────
+export const defaultJourney = [
+  {
+    year: "2021",
+    period: "Sep 2021 — Present",
+    title: "Started BS Software Engineering",
+    place: "Riphah International University, Islamabad",
+    tag: "Education",
+    description:
+      "Began a Software Engineering degree — and have held a perfect 4.0 CGPA across every semester since, with deep focus on OOP, databases, algorithms and systems analysis.",
+  },
+  {
+    year: "2022",
+    period: "Jan 2022",
+    title: "School Management System goes live",
+    place: "Mini FYP · Java Swing + MSSQL",
+    tag: "Desktop",
+    description:
+      "Designed and shipped a role-based school administration desktop app that a real school still runs today — 15+ relational tables, three portals, attendance, fees and automated result cards.",
+  },
+  {
+    year: "2023",
+    period: "Jan 2023",
+    title: "Shipped E-Shop & SpendSmart",
+    place: "React · Node.js · MSSQL",
+    tag: "Full-Stack",
+    description:
+      "Built a maintainable e-commerce frontend on the Context API, then leveled up to a full-stack finance tracker with voice expense logging, Recharts analytics and per-month budget logic.",
+  },
+  {
+    year: "2023",
+    period: "Mar 2023 — Apr 2026",
+    title: "Frontend Developer Intern",
+    place: "Developer Hub Corporation · Remote",
+    tag: "Internship",
+    description:
+      "Built production UI modules for e-commerce and video platforms — including a real-time video calling interface and an interactive scheduling calendar. Certified on completion.",
+  },
+  {
+    year: "2026",
+    period: "May 2026",
+    title: "Launched Farooq Agencies",
+    place: "farooqagensies.com · Live client",
+    tag: "Client Work",
+    description:
+      "Took a traditional medical supply business online end-to-end: React storefront, Firebase admin dashboard, WhatsApp ordering automation — zero downtime since launch.",
+  },
+  {
+    year: "Now",
+    period: "Oct 2026",
+    title: "Open to the next challenge",
+    place: "Internships · Freelance · Full-time",
+    tag: "Next",
+    description:
+      "Actively looking for internships, freelance projects or a junior full-time role — anywhere I can ship meaningful products, learn fast under mentorship, and keep raising the bar.",
+  },
+];
 
 // ─── EXPERIENCE ───────────────────────────────────────────────────────────────
 export const defaultExperience = [
