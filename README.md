@@ -4,23 +4,36 @@
 
 Built with **React 19**, **Vite 8**, and **Tailwind CSS 3**. No Next.js, no other frameworks — pure React.
 
+Design language: **restrained dark luxury** — near-black canvas (`#07070B`), 1px hairline borders, a single indigo→cyan gradient accent, Space Grotesk + Inter + JetBrains Mono, 8px spacing rhythm.
+
 ## ✨ Features
 
-- 🎨 **Cosmic dark-mode design** with animated particle canvas, gradient blobs, and grid backdrop
-- 🌗 **Light/dark theme toggle** with system persistence (saved to `localStorage`)
-- ⌨️ **Typewriter effect** for rotating role titles in the hero
-- 🖼️ **3D tilt profile card** with hover interactivity
-- 🤖 **Built-in chatbot** answering questions about projects, skills, education & contact info
-- 📨 **Working contact form** powered by EmailJS (graceful `mailto:` fallback when not configured)
-- 🔍 **Project search & filter** by tech stack and keyword
-- 📊 **Scroll progress bar** at the top of the page
-- ⬆️ **Back-to-top floating button** appears after scrolling
-- 🚀 **Lazy-loaded routes** (`/admin`, `/*`) for faster initial paint
-- 🛡️ **Branded 404 page** for unknown URLs
-- 🔐 **SEO-ready**: Open Graph, Twitter Cards, JSON-LD structured data, `robots.txt`, `sitemap.xml`
-- 📱 **PWA support**: installable on mobile/desktop via `manifest.json`
-- 🎯 **Accessibility**: `prefers-reduced-motion` support, skip-to-content link, ARIA labels, focus-visible
-- 🛠️ **Admin panel** at `/admin` for editing portfolio content in-session
+### Experience
+- 🪐 **3D orbit hero** — react-three-fiber + drei scene: faceted "SA" monogram core, three tilted orbital rings, and the real stack (React, Node.js, TypeScript, Java, SQL, Firebase, Tailwind) orbiting as glowing chips. Lazy-loaded so first paint stays fast; static monogram fallback when WebGL is unavailable; honors `prefers-reduced-motion`.
+- 🟢 **Availability badge** — pulsing "Available for opportunities" status in the hero and footer
+- ⌨️ **Typewriter roles** in the hero
+- ⌘K **Command palette** — navigate sections, download the CV, copy the email, open socials, launch the AI assistant. Full keyboard control (↑ ↓ ↵ Esc).
+- 🧭 **Fixed 9-section order** — Nav → Hero → About → Skills → Projects → Journey → GitHub Activity → Contact → Footer
+- 📊 **Scroll progress bar** + ⬆️ back-to-top button
+- 🛡️ **Branded 404** and lazy-loaded `/admin` route
+
+### Content
+- 📚 **Full case studies for all 4 projects** — Problem → Approach → Outcome with metric tiles, feature lists, stack chips, screenshot gallery (modal), and live/source links: Farooq Agencies, SpendSmart, E-Shop, School Management System
+- 🔍 **Project search & filter** by keyword and tech stack
+- 🧭 **Journey timeline** — 2021 → now: degree, desktop app in a real school, full-stack builds, certified internship, live client launch, and what's next
+- 🐙 **GitHub Activity section** — live public-API data (repos, stars, followers, language distribution, recent events feed), cached 30 min in `localStorage`, graceful fallback when GitHub rate-limits
+
+### Intelligence
+- 🤖 **AI chatbot grounded in a fact sheet** — `POST /api/chat` (Vercel Serverless Function) calls **Z.AI GLM** (free, no API key) with `src/data/factSheet.js` injected as the system prompt, so answers about CGPA, projects, or contact info can't drift into hallucination. If the endpoint is unreachable (local dev, other hosts), the client silently falls back to the built-in rule-based engine — the chat never breaks. Replies are badged **AI** (GLM) or **instant** (local).
+
+### Craft
+- 📨 **Working contact form** — EmailJS with graceful `mailto:` fallback (see `.env.example`)
+- 📄 **CV download** — `public/resume.pdf` wired through hero, footer and command palette
+- 🖼️ **AI-generated OG image** (`public/og-image.jpg`, 1200×630) for Open Graph / Twitter Cards
+- 🔍 **SEO** — canonical URL, Open Graph, Twitter Cards, JSON-LD Person schema, `robots.txt`, `sitemap.xml`
+- 📱 **PWA** — installable via `manifest.json`
+- 🎯 **Accessibility** — skip-link, ARIA labels/roles, focus-visible rings, `prefers-reduced-motion` (3D rotation pauses), keyboard-operable cards & palette
+- 📐 **Responsive 360px → 1440px+** — 3D hero moves above the fold on mobile
 
 ## 🚀 Quick Start
 
@@ -28,121 +41,45 @@ Built with **React 19**, **Vite 8**, and **Tailwind CSS 3**. No Next.js, no othe
 # Install dependencies
 npm install
 
-# Start dev server (http://localhost:5173)
+# Start the dev server
 npm run dev
-
-# Production build
-npm run build
-
-# Preview the production build
-npm run preview
 
 # Lint
 npm run lint
+
+# Production build + preview
+npm run build && npm run preview
 ```
 
-## 🔧 Configuration
+## 🤖 Chatbot & the `/api` function
 
-### Contact Form (EmailJS)
+- `api/chat.js` deploys automatically as a **Vercel Serverless Function** (works with the Vite SPA — no Next.js involved). `z-ai-web-dev-sdk` is a regular dependency; Vercel bundles it for Node.
+- Grounding data lives in **one file**: edit `src/data/factSheet.js` (it derives from `src/data/portfolio.js`) and the AI's knowledge updates with it.
+- Abuse protection: in-memory IP rate limit (10 req/min per instance) + 20 s client timeout + strict message sanitization.
+- Local dev has no `/api` route — the chatbot uses its rule-based fallback automatically (that's by design).
 
-The contact form works without any backend via [EmailJS](https://www.emailjs.com/).
-Until configured, it gracefully falls back to opening the visitor's email client.
-
-1. Create a free account at https://dashboard.emailjs.com/
-2. Set up a **Service** (e.g. Gmail) and a **Template**
-3. Copy your credentials into a `.env` file (see `.env.example`):
-
-```bash
-cp .env.example .env
-```
-
-```env
-VITE_EMAILJS_SERVICE_ID=service_xxxxxxx
-VITE_EMAILJS_TEMPLATE_ID=template_xxxxxxx
-VITE_EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxxx
-```
-
-The template should accept these variables: `name`, `email`, `subject`, `message`, `to_email`, `portfolio_owner`.
-
-### Static Assets
-
-Place these files in `public/`:
-
-| File | Purpose |
-|------|---------|
-| `profile.png` / `profile.jpeg` | Profile photo shown in hero & navbar |
-| `resume.pdf` | Downloadable resume (hero + footer) |
-| `favicon.svg` | Browser tab icon |
-| `screenshots/*.png` | Project screenshots (referenced in `portfolio.js`) |
-
-### Editing Content
-
-All portfolio content lives in [`src/data/portfolio.js`](src/data/portfolio.js):
-
-- `defaultPersonal` — name, bio, contact info, social links
-- `defaultProjects` — project list (title, description, stack, screenshots, links)
-- `defaultSkills` — categorized skill chips
-- `defaultExperience` — work experience timeline entries
-
-The chatbot's knowledge base lives in [`src/data/portfolioKnowledge.js`](src/data/portfolioKnowledge.js).
-
-## 📂 Project Structure
+## 📁 Structure
 
 ```
-src/
-├── components/
-│   ├── About.jsx           # About section
-│   ├── BackToTop.jsx       # Floating scroll-to-top button
-│   ├── ChatBot.jsx         # Inline chatbot window
-│   ├── ChatButton.jsx      # Floating chat + WhatsApp buttons
-│   ├── Contact.jsx         # Contact form (EmailJS) + direct links
-│   ├── Experience.jsx      # Work experience + education timeline
-│   ├── Footer.jsx          # Footer with links & resume actions
-│   ├── Hero.jsx            # Hero section with particle canvas + typewriter
-│   ├── LoadingFallback.jsx # Suspense fallback spinner
-│   ├── Navbar.jsx          # Sticky nav with theme toggle + mobile menu
-│   ├── NotFound.jsx        # 404 page (lazy-loaded)
-│   ├── Projects.jsx        # Projects grid with search & filter
-│   ├── ScrollProgress.jsx  # Top scroll-progress bar
-│   └── Skills.jsx          # Skills grid + proficiency bars
-├── context/
-│   ├── PortfolioContext.jsx     # Provider component
-│   └── portfolioContextObject.js # createContext (separated for Fast Refresh)
-├── hooks/
-│   └── usePortfolio.js     # Context hook (separated for Fast Refresh)
-├── data/
-│   ├── portfolio.js        # All portfolio content
-│   └── portfolioKnowledge.js # Chatbot FAQ knowledge base
-├── pages/
-│   └── Admin.jsx           # /admin route (in-session editor + copy polisher)
-├── utils/
-│   └── chatbotLogic.js     # Chatbot matching logic
-├── App.jsx                 # Main page composition
-├── main.jsx                # Entry point + router
-├── index.css              # Tailwind + custom styles
-└── styles/                 # Component-specific CSS (chatbot, etc.)
+api/chat.js                  → Z.AI GLM serverless endpoint (fact-sheet grounded)
+src/components/HeroOrbit.jsx → R3F 3D orbit scene (lazy-loaded)
+src/components/Hero.jsx      → hero with availability badge + 3D
+src/components/CommandPalette.jsx → ⌘K launcher
+src/components/Journey.jsx   → career timeline
+src/components/GitHubActivity.jsx → live GitHub public-API section
+src/components/Projects.jsx  → case studies (search/filter + modal)
+src/components/ChatBot.jsx   → hybrid AI chat (GLM → rule-based fallback)
+src/data/portfolio.js        → all content (projects, journey, skills, personal)
+src/data/factSheet.js        → chatbot ground truth (edit here!)
+public/og-image.jpg          → AI-generated social card
 ```
 
-## 🛠️ Tech Stack
+## 🚢 Deploy (Vercel)
 
-| Layer | Tool |
-|-------|------|
-| Framework | React 19 |
-| Build tool | Vite 8 |
-| Styling | Tailwind CSS 3 |
-| Routing | react-router-dom 7 |
-| Email | @emailjs/browser 4 |
-| Fonts | Space Grotesk (display), Inter (body), JetBrains Mono (mono) |
+1. Push to GitHub — Vercel auto-detects Vite.
+2. No environment variables are required (chatbot + activity work keyless). Add `VITE_EMAILJS_*` vars when the contact form should send in-page.
+3. Canonical/OG URLs point at `https://shoaibarshad-seven.vercel.app/` — update `index.html` if the domain changes.
 
-## 📦 Deployment
+## 🛠 Admin panel
 
-This is a static site — deploy the `dist/` folder anywhere:
-
-- **Vercel**: `npm i -g vercel && vercel --prod`
-- **Netlify**: drag-and-drop the `dist/` folder, or connect the repo with build command `npm run build` and publish directory `dist`
-- **GitHub Pages**: `npm run build` then publish `dist/` via `gh-pages` package
-- **Firebase Hosting**: `firebase init` then `firebase deploy`
-
-## 📄 License
-
-MIT © Shoaib Arshad
+`/admin` — in-session content editor for personal info, projects and skills (changes reset on reload; edit `src/data/portfolio.js` to persist).
