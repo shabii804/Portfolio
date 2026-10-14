@@ -11,7 +11,7 @@ import {
   defaultProjects,
   defaultExperience,
   defaultJourney,
-} from "./portfolio";
+} from "./portfolio.js";
 
 const p = defaultPersonal;
 
