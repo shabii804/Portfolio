@@ -1276,3 +1276,125 @@ html.custom-cursor textarea { cursor: text; }
 @media (max-width: 640px) {
   .hero-float-chip-inner { width: 40px; height: 40px; border-radius: 12px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   v10 — CINEMATIC VIDEO HERO · "floating code" clip as the hero backdrop
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Full-bleed looping clip — object-cover so any viewport crops it cleanly */
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(1.06) contrast(1.03);
+}
+
+/* Legibility scrims: heavy on the copy side (left), a breath on the right,
+   plus a floor shadow under the stats/marquee zone */
+.hero-video-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 6, 15, 0.92) 0%, rgba(5, 6, 15, 0.66) 30%, rgba(5, 6, 15, 0.16) 62%, rgba(5, 6, 15, 0.4) 100%),
+    radial-gradient(ellipse 120% 85% at 50% 118%, rgba(5, 6, 15, 0.6) 0%, transparent 58%);
+}
+.hero-video-fade-top {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 6, 15, 0.78) 0%, rgba(5, 6, 15, 0) 24%);
+}
+.hero-video-fade-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  /* Fixed dark — the hero is a cinema slab in BOTH themes; the light theme
+     bridges out at the very bottom edge (see ::after below) */
+  background: linear-gradient(180deg, rgba(5, 6, 15, 0) 0%, rgba(5, 6, 15, 0.45) 55%, #05060f 94%);
+}
+
+/* The clip is a dark, cinematic scene — keep the hero copy light in BOTH
+   themes ("cinema mode") by re-scoping the text tokens onto the section,
+   which always wins over the html-level theme definitions. */
+.hero-video-active {
+  --text-primary: 240 240 246;
+  --text-secondary: 197 200 218;
+  --text-muted: 151 153 174;
+  --border-subtle: 44 45 64;
+}
+.hero-video-active .text-shimmer {
+  background: linear-gradient(110deg, #a5b4fc 12%, #818cf8 30%, #e8e9ff 46%, #22d3ee 60%, #818cf8 80%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+[data-theme="light"] .hero-video-active .text-shimmer {
+  background: linear-gradient(110deg, #a5b4fc 12%, #818cf8 30%, #e8e9ff 46%, #22d3ee 60%, #818cf8 80%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Icon tiles gain presence over moving footage (dark glass in both themes
+   — the hero stays cinema-dark even when the page flips to light) */
+.hero-video-active .hero-float-chip-inner {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: rgba(10, 11, 22, 0.62);
+  border-color: rgba(129, 140, 248, 0.28);
+  box-shadow:
+    0 14px 34px -14px rgba(0, 0, 0, 0.65),
+    0 0 26px -6px rgba(99, 102, 241, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+[data-theme="light"] .hero-video-active .hero-float-chip-inner {
+  background: rgba(10, 11, 22, 0.62);
+  border-color: rgba(129, 140, 248, 0.28);
+  box-shadow:
+    0 14px 34px -14px rgba(0, 0, 0, 0.65),
+    0 0 26px -6px rgba(99, 102, 241, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+/* Reduced motion: no playback — a static poster frame carries the scene.
+   The scrim divs stay up, so copy legibility is unchanged. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { display: none; }
+  .hero-video-active {
+    background: url("/hero-poster.jpg") center / cover no-repeat rgb(5, 6, 15);
+  }
+}
+
+/* Light theme over the cinema-dark hero:
+   1) the at-top transparent nav gets a frosted light pill so its dark text
+      stays readable against the dark footage (morphs into the scrolled pill) */
+[data-theme="light"] .nav-shell.nav-top > div {
+  background: rgba(243, 243, 248, 0.8);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgb(var(--border-subtle));
+  border-radius: 1rem;
+  box-shadow: 0 16px 40px -18px rgba(10, 10, 30, 0.45);
+}
+/* 2) a soft dark→light bridge in the hero's bottom padding zone melts the
+      cinema slab into the light page below */
+[data-theme="light"] .hero-video-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 64px;
+  background: linear-gradient(180deg, rgba(243, 243, 248, 0) 0%, rgba(243, 243, 248, 0.9) 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+/* 3) the SCROLL hint lives inside that bridge — flip it dark in light mode */
+[data-theme="light"] .hero-video-active .hero-scroll-hint .text-text-muted { color: #56597a; }
+
+

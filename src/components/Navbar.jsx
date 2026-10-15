@@ -65,7 +65,7 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
   return (
     <nav
       className={`nav-shell fixed left-0 right-0 z-50 ${hidden ? "nav-hidden" : ""} transition-all duration-500 ${
-        scrolled ? "top-3 md:top-4 px-4 sm:px-6" : "top-0 px-0"
+        scrolled ? "top-3 md:top-4 px-4 sm:px-6" : "nav-top top-0 px-0"
       }`}
     >
       <div className={`mx-auto max-w-5xl transition-all duration-500 ${
