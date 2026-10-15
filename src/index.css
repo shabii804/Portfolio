@@ -1435,49 +1435,52 @@ html.custom-cursor textarea { cursor: text; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   v13 — GLOBAL CINEMA BACKGROUND
-   The "floating code" clip moves to a FIXED layer behind the ENTIRE site.
-   At rest (hero) it keeps the v12 framed cinema panel — inset, rounded,
-   hairline border, brand glow. As the visitor scrolls, the frame EXPANDS
-   (scroll-driven clip-path, spring-damped) until the footage becomes the
-   full-viewport website background. Content sections float above it as
-   frosted glass panels; a scroll-linked dim keeps every panel readable.
+   v10 — CINEMATIC VIDEO HERO · "floating code" clip as the hero backdrop
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* The fixed global layer. Its own cinema canvas (auroras + #05060f) is
-   what shows through the frame's padding zone at rest. */
-.vbg {
-  position: fixed;
-  inset: 0;
+/* v12 — FRAMED CINEMA HERO · the clip sits INSET inside the hero canvas
+   with padding/margin all around (framed-panel look) */
+
+/* The frame: a rounded "cinema screen" floating on the dark hero canvas.
+   Top margin clears the fixed nav; height is computed so the bottom edge
+   ALWAYS lands 22px above the fold — even when the hero copy overflows
+   100svh and the section keeps scrolling. Hairline border + deep shadow +
+   soft brand glow make the inset read as intentional design. */
+.hero-video-frame {
+  position: absolute;
   z-index: 0;
+  top: clamp(76px, 11vh, 96px);
+  left: clamp(12px, 2.2vw, 24px);
+  right: clamp(12px, 2.2vw, 24px);
+  height: calc(100svh - clamp(76px, 11vh, 96px) - clamp(12px, 2.4vh, 22px));
+  border-radius: clamp(18px, 2.4vw, 28px);
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 42px 120px -42px rgba(0, 0, 0, 0.85),
+    0 0 90px -32px rgba(99, 102, 241, 0.3);
+  transform: translateZ(0); /* GPU-clip the rounded corners while drifting */
+}
+.hero-video-media {
+  position: absolute;
+  inset: 0;
+}
+/* Static filmic vignette pressed into the panel edges */
+.hero-video-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 110px rgba(5, 6, 15, 0.42),
+    inset 0 0 34px rgba(5, 6, 15, 0.18);
   pointer-events: none;
-  background:
-    radial-gradient(55% 45% at 78% 14%, rgba(99, 102, 241, 0.08), transparent 62%),
-    radial-gradient(42% 38% at 10% 88%, rgba(34, 211, 238, 0.06), transparent 60%),
-    #05060f;
 }
 
-/* Clip wrapper — framer-motion drives clip-path: inset(rest → 0) with a
-   spring, so the framed panel opens into the full-bleed background. */
-.vbg-clip {
-  position: absolute;
-  inset: 0;
-  will-change: clip-path;
-  transform: translateZ(0);
-}
-
-/* Zoom wrapper — slow scroll-linked push-in (scale 1 → 1.08) */
-.vbg-zoom {
-  position: absolute;
-  inset: 0;
-  will-change: transform;
-}
-
-/* Looping clip — object-cover so any viewport crops it cleanly. Slow Ken
-   Burns drift adds cinematic life; loop fades (baked into the encode)
-   melt the restart through dark. */
-.vbg-video {
+/* Looping clip — object-cover so any viewport crops it cleanly.
+   Slow Ken Burns drift adds cinematic life; loop fades (baked into the
+   encode) melt the restart through dark. */
+.hero-video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1493,40 +1496,17 @@ html.custom-cursor textarea { cursor: text; }
   to { transform: scale(1.1) translate3d(-1.4%, 1%, 0); }
 }
 
-/* Hairline frame edge + deep shadow + brand glow. Lives OUTSIDE the clip
-   (clip-path would cut the outer shadow) and fades away as the frame
-   expands — the panel dissolves into the full-bleed background. */
-.vbg-edge {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow:
-    0 42px 120px -42px rgba(0, 0, 0, 0.85),
-    0 0 90px -32px rgba(99, 102, 241, 0.3);
-  pointer-events: none;
-}
-
-/* Scroll-linked readability dim — sits above the footage, below content.
-   0.06 at the hero (its own scrims handle copy) rising to ~0.55 deep in
-   the page so the glass panels keep contrast over bright footage. */
-.vbg-dim {
-  position: absolute;
-  inset: 0;
-  background: #05060f;
-  pointer-events: none;
-}
-
-/* Hero legibility scrims — now INSIDE the global clip, so they only shade
-   the footage (heavy on the copy side + top/bottom melts) and fade out as
-   the frame opens up, handing over to the panels + dim. */
-.vbg .hero-video-scrim {
+/* Legibility scrims: heavy on the copy side (left), a breath on the right,
+   plus a floor shadow under the stats/marquee zone — tuned lighter now that
+   no icon chips compete with the footage */
+.hero-video-scrim {
   position: absolute;
   inset: 0;
   background:
     linear-gradient(90deg, rgba(5, 6, 15, 0.86) 0%, rgba(5, 6, 15, 0.62) 32%, rgba(5, 6, 15, 0.12) 64%, rgba(5, 6, 15, 0.32) 100%),
     radial-gradient(ellipse 120% 85% at 50% 118%, rgba(5, 6, 15, 0.55) 0%, transparent 58%);
 }
-.vbg .hero-video-fade-top {
+.hero-video-fade-top {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(5, 6, 15, 0.62) 0%, rgba(5, 6, 15, 0) 24%);
@@ -1536,13 +1516,13 @@ html.custom-cursor textarea { cursor: text; }
    the footage's bright center (light code windows) while keeping the
    panel alive. */
 @media (max-width: 768px) {
-  .vbg .hero-video-scrim {
+  .hero-video-scrim {
     background:
       linear-gradient(180deg, rgba(5, 6, 15, 0.6) 0%, rgba(5, 6, 15, 0.34) 38%, rgba(5, 6, 15, 0.52) 68%, rgba(5, 6, 15, 0.85) 100%),
       linear-gradient(90deg, rgba(5, 6, 15, 0.5) 0%, rgba(5, 6, 15, 0.3) 50%, rgba(5, 6, 15, 0.5) 100%);
   }
 }
-.vbg .hero-video-fade-bottom {
+.hero-video-fade-bottom {
   position: absolute;
   left: 0;
   right: 0;
@@ -1555,15 +1535,18 @@ html.custom-cursor textarea { cursor: text; }
 
 /* The clip is a dark, cinematic scene — keep the hero copy light in BOTH
    themes ("cinema mode") by re-scoping the text tokens onto the section,
-   which always wins over the html-level theme definitions. The hero itself
-   is TRANSPARENT: it sits directly on the fixed .vbg layer behind it. */
+   which always wins over the html-level theme definitions. The section is
+   an always-dark canvas: faint brand auroras live in the padding zone
+   around the framed panel. */
 .hero-video-active {
   --text-primary: 240 240 246;
   --text-secondary: 197 200 218;
   --text-muted: 151 153 174;
   --border-subtle: 44 45 64;
-  background: transparent;
-  z-index: 1;
+  background:
+    radial-gradient(55% 45% at 78% 14%, rgba(99, 102, 241, 0.08), transparent 62%),
+    radial-gradient(42% 38% at 10% 88%, rgba(34, 211, 238, 0.06), transparent 60%),
+    #05060f;
 }
 .hero-video-active .text-shimmer {
   background: linear-gradient(110deg, #a5b4fc 12%, #818cf8 30%, #e8e9ff 46%, #22d3ee 60%, #818cf8 80%);
@@ -1578,50 +1561,17 @@ html.custom-cursor textarea { cursor: text; }
   background-clip: text;
 }
 
-/* ── Frosted glass panels — the site's content floats over the footage ──
-   Every section (and the footer) becomes a rounded glass slab with side
-   margins: the video glows through the 82% tint, the gaps BETWEEN panels
-   reveal the full-bleed footage, and backdrop blur keeps text crisp. */
-.global-video-on main > section:not(.hero-video-active),
-.global-video-on footer {
-  position: relative;
-  z-index: 1;
-  margin-inline: clamp(10px, 1.6vw, 22px);
-  margin-top: clamp(12px, 1.8vh, 18px);
-  border-radius: clamp(20px, 2.4vw, 30px);
-  background: rgb(var(--bg-primary)); /* fallback: solid panel */
-  background: color-mix(in srgb, rgb(var(--bg-primary)) 82%, transparent);
-  -webkit-backdrop-filter: blur(22px) saturate(1.12);
-  backdrop-filter: blur(22px) saturate(1.12);
-  border: 1px solid rgb(var(--border-subtle));
-  box-shadow: 0 34px 90px -56px rgba(0, 0, 0, 0.85);
-}
-.global-video-on footer { margin-bottom: clamp(12px, 1.8vh, 18px); }
-
-/* Mobile: backdrop blur over a playing video is too expensive — drop it
-   and raise the tint instead. Margins shrink to keep content wide. */
-@media (max-width: 768px) {
-  .global-video-on main > section:not(.hero-video-active),
-  .global-video-on footer {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: color-mix(in srgb, rgb(var(--bg-primary)) 92%, transparent);
-    margin-inline: 10px;
-    border-radius: 22px;
-  }
-}
-
-/* Reduced motion: no playback — a static poster still, INSIDE the frozen
-   rest frame, so the framed-panel design holds. Scrim divs stay up for
-   copy legibility; the dim locks at 0.42 (set in VideoBackground). */
+/* Reduced motion: no playback — a static poster still, INSIDE the frame, so
+   the framed-panel design holds. Scrim divs stay up for copy legibility. */
 @media (prefers-reduced-motion: reduce) {
-  .vbg-video { display: none; }
-  .vbg-zoom {
+  .hero-video { display: none; }
+  .hero-video-media {
     background: url("/hero-poster.jpg") center / cover no-repeat rgb(5, 6, 15);
   }
 }
+/* (video-drift needs no extra guard here: the element is hidden above) */
 
-/* Light theme over the global cinema footage:
+/* Light theme over the cinema-dark hero:
    1) the at-top transparent nav gets a frosted light pill so its dark text
       stays readable against the dark footage (morphs into the scrolled pill) */
 [data-theme="light"] .nav-shell.nav-top > div {
@@ -1632,8 +1582,20 @@ html.custom-cursor textarea { cursor: text; }
   border-radius: 1rem;
   box-shadow: 0 16px 40px -18px rgba(10, 10, 30, 0.45);
 }
-/* 2) the SCROLL hint flips dark in light mode — the hero stays cinema-dark
-      while the glass panels below carry the light theme */
+/* 2) a soft dark→light bridge in the hero's bottom padding zone melts the
+      cinema slab into the light page below */
+[data-theme="light"] .hero-video-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 64px;
+  background: linear-gradient(180deg, rgba(243, 243, 248, 0) 0%, rgba(243, 243, 248, 0.9) 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+/* 3) the SCROLL hint lives inside that bridge — flip it dark in light mode */
 [data-theme="light"] .hero-video-active .hero-scroll-hint .text-text-muted { color: #56597a; }
 
 
