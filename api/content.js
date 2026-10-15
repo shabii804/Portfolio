@@ -2,7 +2,8 @@
 // /api/content — portfolio content (the data behind every section of the site).
 //
 //   GET  public  → { ok, content }
-//   PUT  admin   body { content: { personal?, skills?, projects?, experience?, journey? } }
+//   PUT  admin   body { content: { personal?, media?, settings?, skills?,
+//                                projects?, experience?, journey? } }
 //                → merges the provided sections, updates meta, persists.
 //
 // Persisting = committing src/data/content.json + regenerating
@@ -14,7 +15,7 @@ import { applyCors, deepSanitize, error, json, optionsEcho, parseBody } from "..
 import { isAuthorized } from "../server/admin/auth.js";
 import { readContent, sendStoreError, writeContent } from "../server/admin/store.js";
 
-const SECTIONS = ["personal", "skills", "projects", "experience", "journey"];
+const SECTIONS = ["personal", "media", "settings", "skills", "projects", "experience", "journey"];
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return optionsEcho(res);
@@ -46,6 +47,12 @@ export default async function handler(req, res) {
   if (patch.personal !== undefined && (typeof patch.personal !== "object" || Array.isArray(patch.personal))) {
     return error(res, 400, "personal must be an object");
   }
+  if (patch.media !== undefined && (typeof patch.media !== "object" || Array.isArray(patch.media))) {
+    return error(res, 400, "media must be an object");
+  }
+  if (patch.settings !== undefined && (typeof patch.settings !== "object" || Array.isArray(patch.settings))) {
+    return error(res, 400, "settings must be an object");
+  }
   if (patch.skills !== undefined && (typeof patch.skills !== "object" || Array.isArray(patch.skills))) {
     return error(res, 400, "skills must be an object of arrays");
   }
@@ -66,6 +73,22 @@ export default async function handler(req, res) {
         // personal merges per-field: a partial patch must not wipe the
         // untouched fields (phone, roles, links…). Arrays elsewhere replace.
         next.personal = { ...(current.personal || {}), ...patch.personal };
+      } else if (s === "settings") {
+        // Site switches merge per-field too (toggling the chatbot must not
+        // reset the SEO title).
+        next.settings = { ...(current.settings || {}), ...patch.settings };
+      } else if (s === "media") {
+        // Media merges per-field AND one level deeper into heroBackground so
+        // swapping only the poster never drops the video sources.
+        const cur = current.media || {};
+        const pm = patch.media;
+        next.media = { ...cur, ...pm };
+        if (pm.heroBackground || cur.heroBackground) {
+          next.media.heroBackground = {
+            ...(cur.heroBackground || {}),
+            ...(pm.heroBackground || {}),
+          };
+        }
       } else {
         next[s] = patch[s];
       }

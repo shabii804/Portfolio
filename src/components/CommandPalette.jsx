@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { scrollToSection } from "../hooks/useLenis";
+import { content } from "../data/portfolio";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CommandPalette — Cmd/Ctrl+K launcher (PRD requirement).
@@ -76,9 +77,14 @@ export default function CommandPalette() {
     { group: "Navigate", label: "Skills", hint: "Toolkit & proficiencies", icon: "⚡", scroll: "skills" },
     { group: "Navigate", label: "Projects", hint: "4 case studies", icon: "▤", scroll: "projects" },
     { group: "Navigate", label: "Journey", hint: "Timeline 2021 → now", icon: "⏱", scroll: "journey" },
-    { group: "Navigate", label: "GitHub Activity", hint: "Live commits & stats", icon: "◈", scroll: "activity" },
+    // Admin-gated entries: hidden sections lose their palette shortcuts too
+    ...(content?.settings?.showGitHubActivity !== false
+      ? [{ group: "Navigate", label: "GitHub Activity", hint: "Live commits & stats", icon: "◈", scroll: "activity" }]
+      : []),
     { group: "Navigate", label: "Contact", hint: "Start a conversation", icon: "✉", scroll: "contact" },
-    { group: "Actions", label: "Ask the AI assistant", hint: "GLM-powered, fact-grounded", icon: "✦", event: "toggle-chatbot" },
+    ...(content?.settings?.showChatbot !== false
+      ? [{ group: "Actions", label: "Ask the AI assistant", hint: "GLM-powered, fact-grounded", icon: "✦", event: "toggle-chatbot" }]
+      : []),
     { group: "Actions", label: "Toggle light / dark theme", hint: "Smooth cross-fade", icon: "◐", event: "sa:toggle-theme" },
     { group: "Actions", label: "Open the terminal", hint: "whoami · skills · projects", icon: "▸", scroll: "about" },
     { group: "Actions", label: "Download CV", hint: "resume.pdf", icon: "↓", href: personal.resumePdf },

@@ -431,10 +431,35 @@
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-15T15:58:39.506Z",
+    "updatedAt": "2026-10-15T16:34:16.900Z",
     "note": "Canonical portfolio content — managed via the Admin panel (/admin → PUT /api/content).",
     "updatedSections": [
-      "personal"
+      "settings"
     ]
+  },
+  "media": {
+    "heroBackground": {
+      "enabled": true,
+      "type": "video",
+      "desktop": "/hero-video.mp4",
+      "webm": "/hero.webm",
+      "mobile": "/hero-mobile.mp4",
+      "poster": "/hero-poster.jpg",
+      "image": "/og-image.jpg",
+      "objectPosition": "center 30%",
+      "scrim": 1,
+      "grain": true,
+      "vignette": true
+    }
+  },
+  "settings": {
+    "seoTitle": "Shoaib Arshad — Full Stack Developer | React, Node.js, Java, Flutter",
+    "seoDescription": "Full Stack Developer building production-grade web apps (React, Node.js, Firebase), Java desktop systems and Flutter apps. CGPA 4.0 Software Engineering student at Riphah International University, Islamabad.",
+    "showPreloader": true,
+    "showCursor": true,
+    "showScrollProgress": true,
+    "showBackToTop": true,
+    "showChatbot": true,
+    "showGitHubActivity": true
   }
 }

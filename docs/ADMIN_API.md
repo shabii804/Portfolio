@@ -10,14 +10,17 @@ Vite middleware so the exact same handlers run in `vite dev` / `vite preview`.
 |---|---|
 | **Overview** | Stats (projects, skills, journey, messages/unread), storage health, latest message, quick actions |
 | **Content** | Name, title, email, phone, location, LinkedIn/GitHub/Slack, bio, hero typewriter roles, availability, profile/CV paths |
+| **Hero & Media** | The hero background end-to-end: switch video / image / off, upload new clips (desktop MP4, WebM, mobile MP4), posters and images (≤3 MB each), or paste URLs — plus framing (object position, dark overlay strength, film grain, vignette) with a live preview |
 | **Projects** | Full CRUD: add / edit / duplicate / delete / reorder, all fields incl. stack, features, screenshots, impact and the deep case-study (JSON) |
 | **Skills & Journey** | Skill groups (categories), experience roles with highlight bullets, journey timeline milestones (reorderable) |
 | **Messages** | Contact-form inbox: read/unread, delete, reply via mailto, filter unread |
-| **Settings** | Environment checklist, production setup guide, full API reference |
+| **Settings** | Site switches (SEO title/description, preloader, custom cursor, scroll progress, back-to-top, chatbot, GitHub activity) + environment checklist, production setup guide, full API reference |
 | **Tools** | Copy Polisher (client-side text cleanup, kept from the original admin) |
 
 Saves are persisted to **`src/data/content.json`** (canonical) and regenerate **`src/data/portfolio.js`**
 (the module the site + AI chatbot import), so the whole site — including chatbot answers — stays in sync.
+Uploaded media lands in **`public/uploads/`** (committed through the same GitHub driver) and is served
+from the Vercel CDN after the automatic redeploy.
 
 ## Storage drivers
 
@@ -48,7 +51,8 @@ Auth header for `admin` endpoints: `Authorization: Bearer <token from /api/auth>
 |---|---|---|---|
 | `POST` | `/api/auth` | public | `{ password }` → `{ ok, token, expiresInMs }`. Rate limited 5/min/IP. |
 | `GET` | `/api/content` | public | Full portfolio content JSON. |
-| `PUT` | `/api/content` | admin | `{ content: { personal?, skills?, projects?, experience?, journey? } }` — merges provided sections, bumps `meta.updatedAt`. |
+| `PUT` | `/api/content` | admin | `{ content: { personal?, media?, settings?, skills?, projects?, experience?, journey? } }` — merges provided sections (`personal`, `media.heroBackground` and `settings` deep-merge per field), bumps `meta.updatedAt`. |
+| `POST` | `/api/upload` | admin | `{ name, data }` (base64, ≤3 MB; images / mp4 / webm / pdf…) → `{ path: "/uploads/<file>" }` — plugs straight into the hero background or any URL field. Rate limited 12/10min/IP. |
 | `GET` | `/api/projects` | public | Projects array. |
 | `POST` | `/api/projects` | admin | `{ project }` → adds (id auto-generated). |
 | `PUT` | `/api/projects?id=…` | admin | `{ project }` → replaces (unknown fields preserved). |

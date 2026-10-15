@@ -1500,6 +1500,16 @@ html.custom-cursor textarea { cursor: text; }
   will-change: transform, opacity;
 }
 .hero-video.is-playing { opacity: 1; }
+
+/* Static image background mode (admin: hero background type = image).
+   Shares .hero-video (cover crop + grade + Ken Burns drift); the img needs
+   no playback fade — it mounts already-visible. */
+img.hero-video-img {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: none;
+}
 @keyframes video-drift {
   from { transform: scale(1.03) translate3d(0, 0, 0); }
   to { transform: scale(1.1) translate3d(-1.4%, 1%, 0); }

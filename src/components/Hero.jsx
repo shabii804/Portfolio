@@ -3,6 +3,7 @@ import { usePortfolio } from "../hooks/usePortfolio";
 import { defaultSkills } from "../data/portfolio";
 import { scrollToSection } from "../hooks/useLenis";
 import HeroVideo from "./HeroVideo";
+import { heroBackgroundConfig } from "../data/heroMedia";
 import SplitText from "./SplitText";
 import { useCountUp, useMagnetic, useScrollParallax } from "../hooks/heroMotion";
 
@@ -45,6 +46,9 @@ export default function Hero() {
   // Exit choreography: copy drifts up with the scroll, fades, and soft-blurs
   // (desktop only) while the video behind it scales 1→1.15 in HeroVideo.
   const parallaxRef = useScrollParallax({ rate: 0.08, fade: 0.55, blur: 4 });
+  // Admin toggle (content.media.heroBackground.enabled) — when the background
+  // is off the section drops the cinema-dark scope and shows theme tokens.
+  const heroMediaOn = heroBackgroundConfig().enabled !== false;
 
   // Typewriter — starts only after the preloader lifts so the reveal is clean
   useEffect(() => {
@@ -70,7 +74,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="hero-video-active relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16"
+      className={`${heroMediaOn ? "hero-video-active " : ""}relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16`}
     >
       {/* Cinematic video background — "floating code" clip + scrims +
           animated motion icons. Replaces the previous 3D/particle layers:

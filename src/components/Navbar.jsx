@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { scrollToSection } from "../hooks/useLenis";
+import { content } from "../data/portfolio";
 
-const navLinks = ["About", "Skills", "Projects", "Journey", "Activity", "Contact"];
+// "Activity" disappears with the section when the admin turns GitHub
+// Activity off (content.settings.showGitHubActivity).
+const navLinks = ["About", "Skills", "Projects", "Journey", "Activity", "Contact"].filter(
+  (l) => l !== "Activity" || content?.settings?.showGitHubActivity !== false
+);
 
 function SunIcon() {
   return (

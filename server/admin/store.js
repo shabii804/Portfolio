@@ -18,7 +18,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { error } from "./http.js";
-import { ghRead, ghWrite, ghConfig } from "./github.js";
+import { ghRead, ghWrite, ghWriteRaw, ghConfig } from "./github.js";
 
 const ROOT = path.resolve(fileURLToPath(new URL("../..", import.meta.url))); // → Portfolio/
 const CONTENT_FILE = process.env.CONTENT_PATH || "src/data/content.json";
@@ -150,4 +150,4 @@ export async function writeMessages(messages) {
   return { mode: "file" };
 }
 
-export { ghConfig };
+export { ghConfig, ghWriteRaw };

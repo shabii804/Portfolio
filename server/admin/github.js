@@ -47,8 +47,9 @@ export async function ghRead(path) {
   return { text: Buffer.from(data.content, "base64").toString("utf8"), sha: data.sha };
 }
 
-// Creates or updates a file. Retries once on sha conflicts (409).
-export async function ghWrite(path, text, message) {
+// Shared put loop — content arrives already base64-encoded. Retries on sha
+// conflicts (409) with a fresh read, same as before.
+async function ghPut(path, base64Content, message) {
   const { branch } = ghConfig();
   let existing = null;
   try {
@@ -59,7 +60,7 @@ export async function ghWrite(path, text, message) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const body = {
       message,
-      content: Buffer.from(text, "utf8").toString("base64"),
+      content: base64Content,
       branch,
       ...(existing?.sha ? { sha: existing.sha } : {}),
     };
@@ -73,4 +74,15 @@ export async function ghWrite(path, text, message) {
     throw new Error(`GitHub write failed (${res.status}): ${detail.slice(0, 180)}`);
   }
   throw new Error("GitHub write failed after retries (conflict)");
+}
+
+// Creates or updates a text file.
+export async function ghWrite(path, text, message) {
+  return ghPut(path, Buffer.from(text, "utf8").toString("base64"), message);
+}
+
+// Creates or updates a binary file — media uploads (video/images) commit
+// through this. `base64Content` must already be base64.
+export async function ghWriteRaw(path, base64Content, message) {
+  return ghPut(path, base64Content, message);
 }

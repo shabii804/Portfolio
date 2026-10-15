@@ -35,7 +35,7 @@ export function Field({ label, hint, children }) {
   );
 }
 
-const inputCls =
+export const inputCls =
   "w-full bg-bg-primary border border-border-mid rounded-xl px-4 py-2.5 font-body text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-indigo/60 transition-colors";
 
 export function TextInput({ label, hint, ...props }) {

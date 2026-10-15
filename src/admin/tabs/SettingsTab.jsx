@@ -1,14 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Settings — deployment health, environment checklist, production setup guide
-// and the full REST API reference.
+// Settings — two halves:
+//   1. "Site settings" — REAL editable switches persisted into
+//      content.settings via PUT /api/content (SEO title/description, feature
+//      toggles: preloader, cursor, scroll progress, back-to-top, chatbot,
+//      GitHub activity).
+//   2. Deployment health, environment checklist, production setup guide and
+//      the full REST API reference (unchanged infrastructure tooling).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Badge, Panel } from "../ui.jsx";
+import { useState } from "react";
+import { Badge, Btn, Panel, Spinner, TextArea, TextInput, Toggle } from "../ui.jsx";
 
 const API_REFERENCE = [
   ["POST", "/api/auth", "public", "Login with the admin password → bearer token (7 days)."],
   ["GET", "/api/content", "public", "Full portfolio content (same data the site is built from)."],
-  ["PUT", "/api/content", "admin", "Merge sections: personal / skills / projects / experience / journey."],
+  ["PUT", "/api/content", "admin", "Merge sections: personal / media / settings / skills / projects / experience / journey."],
+  ["POST", "/api/upload", "admin", "Upload media (base64, ≤3 MB) → /uploads/<file> — plugs into the hero background or any URL field."],
   ["GET", "/api/messages", "admin", "List contact-form messages (newest first)."],
   ["POST", "/api/messages", "public", "Submit a message (honeypot + rate limited 5/10min)."],
   ["PATCH", "/api/messages?id=", "admin", "Mark a message read/unread."],
@@ -21,7 +28,87 @@ const API_REFERENCE = [
   ["POST", "/api/chat", "public", "AI chatbot (grounded in the fact sheet derived from content)."],
 ];
 
-export default function SettingsTab({ status }) {
+// ── 1. Real site settings editor ──────────────────────────────────────────────
+function SiteSettingsPanel({ content, saveContent }) {
+  const server = content?.settings ?? {};
+  const [draft, setDraft] = useState({ ...server });
+  const [busy, setBusy] = useState(false);
+
+  const set = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
+  const dirty = JSON.stringify(draft) !== JSON.stringify(server);
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      await saveContent({ settings: draft }, "Site settings");
+    } catch {
+      /* toast already shown by saveContent */
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const toggles = [
+    ["showPreloader", "Loading intro", "The cinematic name/photo intro on first visit."],
+    ["showCursor", "Custom cursor", "Glow cursor + comet trail (desktop pointers only)."],
+    ["showScrollProgress", "Scroll progress bar", "Thin gradient bar under the nav."],
+    ["showBackToTop", "Back-to-top button", "Floating button after scrolling down."],
+    ["showChatbot", "AI chatbot", "The floating GLM assistant + its command palette action."],
+    ["showGitHubActivity", "GitHub activity", "Live commits section + its nav & palette links."],
+  ];
+
+  return (
+    <Panel
+      title="Site settings"
+      desc="Saved with the rest of the content — every switch applies site-wide after the automatic redeploy."
+      actions={dirty ? <Badge tone="amber">unsaved changes</Badge> : <Badge tone="muted">in sync</Badge>}
+    >
+      <div className="grid md:grid-cols-2 gap-4 mb-5">
+        <TextInput
+          label="Browser tab title (SEO)"
+          value={draft.seoTitle || ""}
+          onChange={(e) => set("seoTitle", e.target.value)}
+          placeholder="Shoaib Arshad — Full Stack Developer"
+        />
+        <TextArea
+          label="Meta description (SEO)"
+          rows={3}
+          value={draft.seoDescription || ""}
+          onChange={(e) => set("seoDescription", e.target.value)}
+          placeholder="Short pitch shown in search results…"
+        />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3 py-4 border-t border-border-subtle">
+        {toggles.map(([key, label, desc]) => (
+          <div key={key} className="flex items-start justify-between gap-3 py-1.5">
+            <div className="min-w-0">
+              <div className="font-body text-xs text-text-primary">{label}</div>
+              <div className="font-body text-[11px] text-text-muted leading-snug">{desc}</div>
+            </div>
+            <Toggle
+              checked={draft[key] !== false}
+              onChange={(v) => set(key, v)}
+              label={draft[key] !== false ? "on" : "off"}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-3 pt-4 border-t border-border-subtle">
+        <Btn onClick={save} disabled={busy || !dirty}>
+          {busy ? <><Spinner className="!w-3.5 !h-3.5" /> Saving…</> : "Save settings"}
+        </Btn>
+        <span className="font-mono text-[10px] text-text-muted">
+          {dirty ? "You have unsaved changes." : "Everything saved."}
+        </span>
+      </div>
+    </Panel>
+  );
+}
+
+// ── 2. Infrastructure / env / API reference ───────────────────────────────────
+export default function SettingsTab({ status, content, saveContent }) {
   const env = status?.env || {};
   const envRows = [
     ["ADMIN_PASSWORD", env.ADMIN_PASSWORD, "Custom admin password set (default disabled)."],
@@ -33,6 +120,8 @@ export default function SettingsTab({ status }) {
 
   return (
     <div className="space-y-6">
+      {content !== undefined && <SiteSettingsPanel content={content} saveContent={saveContent} />}
+
       <Panel
         title="Environment & health"
         desc="What this deployment can do right now. Booleans only — the API never returns secret values."

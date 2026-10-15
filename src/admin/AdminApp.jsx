@@ -16,6 +16,7 @@ import { api, clearToken, getToken, login, timeAgo } from "./api.js";
 import { Badge, Btn, Spinner } from "./ui.jsx";
 import OverviewTab from "./tabs/OverviewTab.jsx";
 import ContentTab from "./tabs/ContentTab.jsx";
+import MediaTab from "./tabs/MediaTab.jsx";
 import ProjectsTab from "./tabs/ProjectsTab.jsx";
 import SkillsTab from "./tabs/SkillsTab.jsx";
 import MessagesTab from "./tabs/MessagesTab.jsx";
@@ -25,6 +26,7 @@ import ToolsTab from "./tabs/ToolsTab.jsx";
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "content", label: "Content" },
+  { id: "media", label: "Hero & Media" },
   { id: "projects", label: "Projects" },
   { id: "skills", label: "Skills & Journey" },
   { id: "messages", label: "Messages" },
@@ -219,6 +221,7 @@ export default function AdminApp() {
           <h1 className="font-display font-bold text-2xl text-text-primary mb-1">
             {tab === "overview" && "Dashboard"}
             {tab === "content" && "Site content"}
+            {tab === "media" && "Hero & media"}
             {tab === "projects" && "Projects"}
             {tab === "skills" && "Skills, experience & journey"}
             {tab === "messages" && "Inbox"}
@@ -228,10 +231,11 @@ export default function AdminApp() {
           <p className="font-body text-text-secondary text-sm mb-6">
             {tab === "overview" && "Everything at a glance — storage health, stats and the latest activity."}
             {tab === "content" && "Identity, hero roles, bio and links — powers the hero, contact section and chatbot."}
+            {tab === "media" && "The hero background — video/image uploads, framing, film look. What visitors see behind everything."}
             {tab === "projects" && "Case studies with full CRUD, reordering and deep case-study JSON."}
             {tab === "skills" && "Structured editors for skills, experience roles and the journey timeline."}
             {tab === "messages" && "Messages submitted through the site's contact form."}
-            {tab === "settings" && "Deployment health, environment setup and the full API reference."}
+            {tab === "settings" && "Site-wide switches, deployment health, environment setup and the full API reference."}
             {tab === "tools" && "Utilities that run fully client-side."}
           </p>
 
@@ -239,10 +243,11 @@ export default function AdminApp() {
             {tab === "overview" && <OverviewTab status={status} content={content} onNavigate={setTab} />}
             {/* key = last update → editors remount with fresh server state after each save */}
             {tab === "content" && <ContentTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
+            {tab === "media" && <MediaTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} notify={notify} />}
             {tab === "projects" && <ProjectsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "skills" && <SkillsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "messages" && <MessagesTab notify={notify} />}
-            {tab === "settings" && <SettingsTab status={status} />}
+            {tab === "settings" && <SettingsTab key={content?.meta?.updatedAt || "init"} status={status} content={content} saveContent={saveContent} />}
             {tab === "tools" && <ToolsTab content={content} />}
           </div>
         </main>
