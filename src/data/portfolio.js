@@ -434,7 +434,7 @@ export const content = {
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-15T16:34:16.900Z",
+    "updatedAt": "2026-10-15T17:49:21.393Z",
     "note": "Canonical portfolio content — managed via the Admin panel (/admin → PUT /api/content).",
     "updatedSections": [
       "settings"
