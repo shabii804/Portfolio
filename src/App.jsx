@@ -1,6 +1,7 @@
-import { useEffect } from "react"
+import { useEffect, useSyncExternalStore } from "react"
 import "./index.css"
 import { content } from "./data/portfolio"
+import { subscribeRuntime, runtimeVersion, runtimeSettings } from "./data/runtimeContent"
 import { PortfolioProvider } from './context/PortfolioContext'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -24,6 +25,13 @@ import useTheme from './hooks/useTheme'
 // `!== false` keeps everything ON when the settings section is missing.
 const SETTINGS = content?.settings ?? {}
 
+// Runtime-reactive settings: bundled defaults overlaid by the latest runtime
+// snapshot (Supabase saves / local test mode apply without a rebuild).
+function useSettings() {
+  useSyncExternalStore(subscribeRuntime, runtimeVersion)
+  return runtimeSettings(SETTINGS)
+}
+
 // When the preloader is disabled via settings, something still has to lift
 // the hero entrance choreography (html.is-ready + "sa:ready" event) — the
 // Preloader normally owns that handoff.
@@ -41,26 +49,27 @@ function ReadyBroadcast() {
 export default function App() {
   useLenis()
   const { theme, toggle } = useTheme()
+  const settings = useSettings()
 
   // SEO title/description from admin settings (client-side — the static
   // index.html defaults still apply for crawlers and before hydration).
   useEffect(() => {
-    if (SETTINGS.seoTitle) document.title = SETTINGS.seoTitle
-    if (SETTINGS.seoDescription) {
+    if (settings.seoTitle) document.title = settings.seoTitle
+    if (settings.seoDescription) {
       document
         .querySelector('meta[name="description"]')
-        ?.setAttribute("content", SETTINGS.seoDescription)
+        ?.setAttribute("content", settings.seoDescription)
     }
-  }, [])
+  }, [settings])
 
   return (
     <PortfolioProvider>
       <div className="relative">
         <a href="#home" className="skip-link">Skip to content</a>
         <div className="noise-overlay" />
-        {SETTINGS.showPreloader === false ? <ReadyBroadcast /> : <Preloader />}
-        {SETTINGS.showCursor !== false && <Cursor />}
-        {SETTINGS.showScrollProgress !== false && <ScrollProgress />}
+        {settings.showPreloader === false ? <ReadyBroadcast /> : <Preloader />}
+        {settings.showCursor !== false && <Cursor />}
+        {settings.showScrollProgress !== false && <ScrollProgress />}
         <Navbar theme={theme} onToggleTheme={toggle} />
         <main>
           <Hero />
@@ -68,13 +77,13 @@ export default function App() {
           <Skills />
           <Projects />
           <Journey />
-          {SETTINGS.showGitHubActivity !== false && <GitHubActivity />}
+          {settings.showGitHubActivity !== false && <GitHubActivity />}
           <Contact />
         </main>
         <Footer />
-        {SETTINGS.showChatbot !== false && <ChatButton />}
+        {settings.showChatbot !== false && <ChatButton />}
         <CommandPalette />
-        {SETTINGS.showBackToTop !== false && <BackToTop />}
+        {settings.showBackToTop !== false && <BackToTop />}
       </div>
     </PortfolioProvider>
   )

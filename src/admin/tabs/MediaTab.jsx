@@ -12,11 +12,10 @@
 // Saves via the central PUT /api/content ("media" section, deep-merged).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { maxUploadMb, uploadMedia } from "../media.js";
+import { useLocalMediaSrc } from "../../data/localMedia";
 import { Badge, Btn, Field, Panel, Spinner, Toggle, inputCls } from "../ui.jsx";
-
-const HARD_MAX_MB = 25; // browser-bridge ceiling (serverless route caps at 3 MB)
 
 const DEFAULTS = {
   enabled: true,
@@ -37,6 +36,11 @@ const PRESET_POSITIONS = ["center 30%", "center center", "center 50%", "center 7
 export default function MediaTab({ content, saveContent, notify }) {
   const [draft, setDraft] = useState({ ...DEFAULTS, ...(content?.media?.heroBackground ?? {}) });
   const [busy, setBusy] = useState(false);
+  // Latest draft for the upload auto-save (kept in sync outside render).
+  const draftRef = useRef(draft);
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
 
   const set = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   const onNotify = (msg, kind) => notify?.(msg, kind);
@@ -49,6 +53,21 @@ export default function MediaTab({ content, saveContent, notify }) {
       /* toast already shown by saveContent */
     } finally {
       setBusy(false);
+    }
+  };
+
+  // Upload → wire the new path into the draft → SAVE IMMEDIATELY.
+  // (Uploading used to only fill the field; if the separate Save click was
+  // missed the hero kept playing the old clip — the #1 “it did not change”
+  // bug. One click now does the whole thing.)
+  const saveField = async (key, path) => {
+    const next = { ...draftRef.current, [key]: path };
+    draftRef.current = next;
+    setDraft(next);
+    try {
+      await saveContent({ media: { heroBackground: next } }, "Hero background");
+    } catch {
+      /* toast already shown by saveContent */
     }
   };
 
@@ -97,18 +116,20 @@ export default function MediaTab({ content, saveContent, notify }) {
           <div className="grid md:grid-cols-2 gap-4">
             <MediaField
               label="Desktop video (MP4)"
-              hint="Main clip shown on laptops/desktops."
+              hint="Main clip shown on laptops/desktops. Uploading saves it instantly."
               accept="video/mp4"
               value={draft.desktop}
               onChange={(v) => set("desktop", v)}
+              onUploaded={(path) => saveField("desktop", path)}
               onNotify={onNotify}
             />
             <MediaField
               label="Desktop video (WebM, optional)"
-              hint="VP9 cut — smaller at equal quality, served first on desktop."
+              hint="VP9 cut — smaller at equal quality, served first on desktop. Clear it if your MP4 upload is newer!"
               accept="video/webm"
               value={draft.webm}
               onChange={(v) => set("webm", v)}
+              onUploaded={(path) => saveField("webm", path)}
               onNotify={onNotify}
             />
             <MediaField
@@ -117,6 +138,7 @@ export default function MediaTab({ content, saveContent, notify }) {
               accept="video/mp4"
               value={draft.mobile}
               onChange={(v) => set("mobile", v)}
+              onUploaded={(path) => saveField("mobile", path)}
               onNotify={onNotify}
             />
             <MediaField
@@ -125,6 +147,7 @@ export default function MediaTab({ content, saveContent, notify }) {
               accept="image/jpeg,image/png,image/webp,image/avif"
               value={draft.poster}
               onChange={(v) => set("poster", v)}
+              onUploaded={(path) => saveField("poster", path)}
               onNotify={onNotify}
             />
           </div>
@@ -132,10 +155,11 @@ export default function MediaTab({ content, saveContent, notify }) {
           <div className="grid md:grid-cols-2 gap-4">
             <MediaField
               label="Background image"
-              hint="Static frame — gets the same crop, grade and drift as the video."
+              hint="Static frame — gets the same crop, grade and drift as the video. Uploading saves it instantly."
               accept="image/jpeg,image/png,image/webp,image/avif"
               value={draft.image}
               onChange={(v) => set("image", v)}
+              onUploaded={(path) => saveField("image", path)}
               onNotify={onNotify}
             />
             <MediaField
@@ -144,14 +168,15 @@ export default function MediaTab({ content, saveContent, notify }) {
               accept="image/jpeg,image/png,image/webp,image/avif"
               value={draft.poster}
               onChange={(v) => set("poster", v)}
+              onUploaded={(path) => saveField("poster", path)}
               onNotify={onNotify}
             />
           </div>
         )}
         <p className="font-mono text-[10px] text-text-muted mt-4 leading-relaxed">
-          Uploads go live after the automatic redeploy (~1 min). Up to 3 MB through the API; with GitHub connected
-          (Settings → Connect GitHub) up to {HARD_MAX_MB} MB straight from your browser — full-size hero clips welcome.
-          Larger clips: compress to H.264/VP9 first, or paste an external URL.
+          Uploading a file SAVES it immediately — the hero updates by itself. Up to {maxUploadMb()} MB per file
+          (Supabase / GitHub connected) — full-size hero clips welcome. Larger clips: compress to H.264/VP9 first,
+          or paste an external URL.
         </p>
       </Panel>
 
@@ -208,37 +233,37 @@ export default function MediaTab({ content, saveContent, notify }) {
           {busy ? <><Spinner className="!w-3.5 !h-3.5" /> Saving…</> : "Save hero background"}
         </Btn>
         <span className="font-mono text-[10px] text-text-muted">
-          Saves commit → Vercel redeploys → live in ~1 min.
+          Uploads already save themselves — this button is for framing tweaks (position, overlay, grain).
         </span>
       </div>
     </div>
   );
 }
 
-// ── URL field with upload button ───────────────────────────────────────────────
-function MediaField({ label, hint, value, onChange, accept, onNotify }) {
+// ── URL field with upload button (upload → auto-save upstream) ───────────────
+function MediaField({ label, hint, value, onChange, onUploaded, accept, onNotify }) {
   const inputRef = useRef(null);
   const [busy, setBusy] = useState(false);
+  const resolved = useLocalMediaSrc(value); // idb:// paths (test mode) → object URL
 
   const pick = async (e) => {
     const file = e.target.files?.[0];
     e.target.value = ""; // allow re-picking the same file later
     if (!file || busy) return;
-    const cap = maxUploadMb(); // 3 MB via API — 25 MB with the browser bridge
+    const cap = maxUploadMb();
     if (file.size > cap * 1024 * 1024) {
       onNotify(
-        `"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)} MB — the limit is ${cap} MB.` +
-          (cap < HARD_MAX_MB ? " Connect GitHub in Settings to unlock up to " + HARD_MAX_MB + " MB." : " Compress it first."),
+        `"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)} MB — the limit is ${cap} MB. Compress it first or paste an external URL.`,
         "err"
       );
       return;
     }
     setBusy(true);
     try {
-      // Smart transport: API (≤3 MB) → automatic browser-GitHub bridge fallback.
       const res = await uploadMedia(file);
       onChange(res.path);
       onNotify(res.message || `Uploaded ${file.name}`, "info");
+      onUploaded?.(res.path); // auto-save — no separate Save click needed
     } catch (err) {
       onNotify(err.message || "Upload failed", "err");
     } finally {
@@ -262,18 +287,38 @@ function MediaField({ label, hint, value, onChange, accept, onNotify }) {
           disabled={busy}
           className="shrink-0 px-3.5 rounded-xl border border-accent-indigo/30 bg-accent-indigo/10 text-accent-indigo font-mono text-xs hover:bg-accent-indigo/20 transition-all disabled:opacity-40 flex items-center gap-1.5"
         >
-          {busy ? <Spinner className="!w-3 !h-3" /> : "↑"} Upload
+          {busy ? <Spinner className="!w-3 !h-3" /> : "↑"} Upload &amp; save
         </button>
         <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={pick} aria-hidden="true" tabIndex={-1} />
       </div>
       {value && (
         <div className="mt-2 flex items-center gap-2">
-          <span className={`w-1.5 h-1.5 rounded-full ${value.startsWith("/uploads/") ? "bg-emerald-400" : "bg-accent-cyan"}`} aria-hidden="true" />
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              value.startsWith("/uploads/")
+                ? "bg-emerald-400"
+                : value.startsWith("idb://")
+                  ? "bg-accent-indigo"
+                  : value.startsWith("http")
+                    ? "bg-accent-cyan"
+                    : "bg-text-muted"
+            }`}
+            aria-hidden="true"
+          />
           <span className="font-mono text-[10px] text-text-muted">
-            {value.startsWith("/uploads/") ? "uploaded file" : value.startsWith("http") ? "external URL" : "bundled file"}
+            {value.startsWith("/uploads/")
+              ? "uploaded file"
+              : value.startsWith("idb://")
+                ? "test-mode file (this browser)"
+                : value.startsWith("http")
+                  ? value.includes("supabase")
+                    ? "Supabase CDN"
+                    : "external URL"
+                  : "bundled file"}
           </span>
         </div>
       )}
+      <span data-idb-resolved={resolved} className="hidden" aria-hidden="true" />
     </Field>
   );
 }
@@ -282,15 +327,18 @@ function MediaField({ label, hint, value, onChange, accept, onNotify }) {
 function HeroPreview({ draft }) {
   const scrim = Math.max(0, Math.min(1.5, Number(draft.scrim) || 0));
   const pos = draft.objectPosition || "center 30%";
+  const desktop = useLocalMediaSrc(draft.desktop);
+  const poster = useLocalMediaSrc(draft.poster);
+  const image = useLocalMediaSrc(draft.image);
   return (
     <div className="relative aspect-video rounded-xl overflow-hidden border border-border-subtle bg-[#05060f]">
       {draft.enabled ? (
         <>
           {draft.type === "video" ? (
             <video
-              key={draft.desktop || "none"}
-              src={draft.desktop || undefined}
-              poster={draft.poster || undefined}
+              key={desktop || "none"}
+              src={desktop || undefined}
+              poster={poster || undefined}
               muted
               loop
               autoPlay
@@ -300,8 +348,8 @@ function HeroPreview({ draft }) {
             />
           ) : (
             <img
-              key={draft.image || draft.poster || "none"}
-              src={draft.image || draft.poster}
+              key={image || poster || "none"}
+              src={image || poster}
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition: pos }}

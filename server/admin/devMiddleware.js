@@ -28,6 +28,7 @@ import messagesHandler from "../../api/messages.js";
 import projectsHandler from "../../api/projects.js";
 import statusHandler from "../../api/status.js";
 import uploadHandler, { mimeForUpload } from "../../api/upload.js";
+import uploadUrlHandler from "../../api/upload-url.js";
 import { optionsEcho, readRawBody, safeParse } from "./http.js";
 
 // chat.js is imported LAZILY with a COMPUTED specifier: its module graph
@@ -57,6 +58,7 @@ const ROUTES = [
   ["PUT", /^\/api\/projects\/?$/, projectsHandler],
   ["DELETE", /^\/api\/projects\/?$/, projectsHandler],
   ["POST", /^\/api\/upload\/?$/, uploadHandler],
+  ["POST", /^\/api\/upload-url\/?$/, uploadUrlHandler],
   ["GET", /^\/api\/status\/?$/, statusHandler],
   ["POST", /^\/api\/chat\/?$/, "chat"],
 ];

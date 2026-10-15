@@ -68,7 +68,7 @@ export function Btn({ variant = "primary", className = "", children, ...props })
   );
 }
 
-export function Toggle({ checked, onChange, label }) {
+export function Toggle({ checked, onChange, label, disabled }) {
   return (
     <div className="flex items-center gap-3">
       <button
@@ -76,8 +76,9 @@ export function Toggle({ checked, onChange, label }) {
         role="switch"
         aria-checked={checked}
         aria-label={label}
+        disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`w-10 h-5 rounded-full transition-colors relative shrink-0 ${checked ? "bg-emerald-500" : "bg-border-mid"}`}
+        className={`w-10 h-5 rounded-full transition-colors relative shrink-0 ${checked ? "bg-emerald-500" : "bg-border-mid"} ${disabled ? "opacity-50" : ""}`}
       >
         <span
           className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${checked ? "left-5" : "left-0.5"}`}

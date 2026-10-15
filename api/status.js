@@ -7,6 +7,7 @@
 import { error, json, optionsEcho } from "../server/admin/http.js";
 import { isAuthorized, usingDefaultPassword } from "../server/admin/auth.js";
 import { ghConfig, readContent, readMessages, storageMode } from "../server/admin/store.js";
+import { sbConfig } from "../server/admin/supabase.js";
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return optionsEcho(res);
@@ -20,15 +21,20 @@ export default async function handler(req, res) {
   const personal = content.personal || {};
   const skills = content.skills || {};
 
+  const sb = sbConfig();
+
   return json(res, 200, {
     ok: true,
     storage: storageMode(),
     usingDefaultPassword: usingDefaultPassword(),
     repo: ghConfig().repo,
     branch: ghConfig().branch,
+    supabaseBucket: sb.enabled ? sb.bucket : null,
     env: {
       ADMIN_PASSWORD: Boolean(process.env.ADMIN_PASSWORD),
       ADMIN_SECRET: Boolean(process.env.ADMIN_SECRET),
+      SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
+      SUPABASE_SERVICE_KEY: sb.enabled,
       GITHUB_TOKEN: Boolean(process.env.GITHUB_TOKEN),
       GITHUB_REPO: Boolean(process.env.GITHUB_REPO),
       GITHUB_BRANCH: Boolean(process.env.GITHUB_BRANCH),

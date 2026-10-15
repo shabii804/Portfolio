@@ -6,7 +6,8 @@ import {
   useReducedMotion,
   useMotionValueEvent,
 } from "framer-motion";
-import { heroBackgroundConfig } from "../data/heroMedia";
+import { useHeroBackgroundConfig } from "../data/heroMedia";
+import { useLocalMediaSrc } from "../data/localMedia";
 
 /**
  * Full-bleed cinematic hero background — ADMIN-DRIVEN via
@@ -44,9 +45,17 @@ const SCRUB_MODE = import.meta.env.VITE_VIDEO_SCRUB === "1";
 // Keeps the early-return OUT of the hookful component below so the Rules of
 // Hooks hold no matter how the admin flips the switches.
 export default function HeroVideo() {
-  const hb = heroBackgroundConfig();
+  // Reactive: re-renders when a runtime snapshot lands (Supabase save, or a
+  // local-test-mode save in this browser) — no rebuild needed.
+  const hb = useHeroBackgroundConfig();
+  const desktop = useLocalMediaSrc(hb.desktop);
+  const webm = useLocalMediaSrc(hb.webm);
+  const mobile = useLocalMediaSrc(hb.mobile);
+  const poster = useLocalMediaSrc(hb.poster);
+  const image = useLocalMediaSrc(hb.image);
+  const resolved = { ...hb, desktop, webm, mobile, poster, image };
   if (hb.enabled === false) return null;
-  return <HeroVideoMedia hb={hb} />;
+  return <HeroVideoMedia key={`${webm}|${desktop}|${mobile}|${poster}|${image}`} hb={resolved} />;
 }
 
 function HeroVideoMedia({ hb }) {

@@ -1,6 +1,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Content + message store with two interchangeable drivers:
+// Content + message store with three interchangeable drivers:
 //
+//   supabase (production) — JSON documents + media in Supabase Storage. Saves
+//                          go LIVE INSTANTLY (the site fetches /api/content at
+//                          runtime); no rebuild needed. When GITHUB_TOKEN is
+//                          also set, content.json is best-effort mirrored to
+//                          the repo so rebuilds bundle fresh data too.
 //   github (production) — reads/writes JSON through the GitHub Contents API.
 //                         Saving content commits src/data/content.json AND
 //                         regenerates src/data/portfolio.js → Vercel rebuilds.
@@ -19,12 +24,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { error } from "./http.js";
 import { ghRead, ghWrite, ghWriteRaw, ghConfig } from "./github.js";
+import { sbEnabled, sbReadText, sbWriteText } from "./supabase.js";
 
 const ROOT = path.resolve(fileURLToPath(new URL("../..", import.meta.url))); // → Portfolio/
 const CONTENT_FILE = process.env.CONTENT_PATH || "src/data/content.json";
 const MESSAGES_FILE = process.env.MESSAGES_PATH || "data/messages.json";
 
-export const storageMode = () => (process.env.GITHUB_TOKEN ? "github" : "file");
+export const storageMode = () =>
+  sbEnabled() ? "supabase" : process.env.GITHUB_TOKEN ? "github" : "file";
 
 export function persistenceNotConfigured(err) {
   return err?.message === "PERSISTENCE_NOT_CONFIGURED";
@@ -45,7 +52,7 @@ export function sendStoreError(res, err) {
     return error(
       res,
       503,
-      "Persistence is not configured on this deployment. Fix it in one of two ways: (1) /admin → Settings → “Connect GitHub” — paste a token, works instantly from your browser; or (2) set GITHUB_TOKEN in Vercel → Settings → Environment Variables and redeploy."
+      "Persistence is not configured on this deployment. Fix it in one of two ways: (1) /admin → Settings → “Connect GitHub” — paste a token, works instantly from your browser; or (2) set GITHUB_TOKEN (GitHub CMS) or SUPABASE_URL + SUPABASE_SERVICE_KEY (instant Supabase CMS) in Vercel → Settings → Environment Variables and redeploy."
     );
   }
   return error(res, 500, err?.message || "Storage error");
@@ -85,6 +92,10 @@ async function fileWrite(rel, text) {
 
 // ── content ──────────────────────────────────────────────────────────────────
 export async function readContent() {
+  if (storageMode() === "supabase") {
+    const remote = await sbReadText("data/content.json");
+    if (remote) return JSON.parse(remote);
+  }
   if (storageMode() === "github") {
     const remote = await ghRead(CONTENT_FILE);
     if (remote) return JSON.parse(remote.text);
@@ -107,6 +118,20 @@ export async function readContent() {
 export async function writeContent(content, sections) {
   const json = JSON.stringify(content, null, 2) + "\n";
   const message = `feat(admin): update ${sections.join(", ")} via admin panel`;
+  if (storageMode() === "supabase") {
+    await sbWriteText("data/content.json", json);
+    // Best-effort repo mirror (keeps the build-time bundle fresh on later
+    // rebuilds when both drivers are configured). Never blocks the save.
+    if (process.env.GITHUB_TOKEN) {
+      try {
+        await ghWrite(CONTENT_FILE, json, message);
+        await ghWrite("src/data/portfolio.js", renderPortfolioModule(content), message);
+      } catch {
+        /* mirror is optional — Supabase already has the canonical copy */
+      }
+    }
+    return { mode: "supabase", message };
+  }
   if (storageMode() === "github") {
     await ghWrite(CONTENT_FILE, json, message);
     await ghWrite("src/data/portfolio.js", renderPortfolioModule(content), message);
@@ -124,7 +149,9 @@ export async function writeContent(content, sections) {
 // ── contact inbox ────────────────────────────────────────────────────────────
 export async function readMessages() {
   let text;
-  if (storageMode() === "github") {
+  if (storageMode() === "supabase") {
+    text = await sbReadText("data/messages.json");
+  } else if (storageMode() === "github") {
     const remote = await ghRead(MESSAGES_FILE);
     text = remote?.text ?? null;
   } else {
@@ -141,6 +168,10 @@ export async function readMessages() {
 
 export async function writeMessages(messages) {
   const json = JSON.stringify(messages, null, 2) + "\n";
+  if (storageMode() === "supabase") {
+    await sbWriteText("data/messages.json", json);
+    return { mode: "supabase" };
+  }
   if (storageMode() === "github") {
     // "[skip ci]" → the inbox update does not burn a Vercel build
     await ghWrite(MESSAGES_FILE, json, "[skip ci] chore(admin): update contact inbox");

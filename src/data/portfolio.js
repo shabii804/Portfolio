@@ -3,7 +3,7 @@
 // every admin save so the site build and the AI chatbot fact sheet stay in sync.
 export const content = {
   "personal": {
-    "name": "Shoaib Arshadjhjkhk",
+    "name": "Shoaib Arshad",
     "title": "Full Stack Web Developer & Java Desktop Application Developer",
     "roles": [
       "Full Stack Web Developer",
@@ -434,19 +434,19 @@ export const content = {
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-15T18:57:59.571Z",
+    "updatedAt": "2026-10-16T00:00:00.000Z",
     "note": "Canonical portfolio content — managed via the Admin panel (/admin → PUT /api/content).",
     "updatedSections": [
-      "settings"
+      "media"
     ]
   },
   "media": {
     "heroBackground": {
       "enabled": true,
       "type": "video",
-      "desktop": "/hero-video.mp4",
-      "webm": "/hero.webm",
-      "mobile": "/hero-mobile.mp4",
+      "desktop": "/uploads/software-engineer-portfolio-vide-2026101-mefu16.mp4",
+      "webm": "",
+      "mobile": "/uploads/software-engineer-portfolio-vide-2026101-mefu16.mp4",
       "poster": "/hero-poster.jpg",
       "image": "",
       "objectPosition": "center 30%",

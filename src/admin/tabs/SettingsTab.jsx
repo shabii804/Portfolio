@@ -17,12 +17,14 @@ import {
   ghValidate,
   setGhConfig,
 } from "../ghBridge.js";
+import { clearAllLocalData, localModeOn, setLocalMode } from "../localStore.js";
 
 const API_REFERENCE = [
   ["POST", "/api/auth", "public", "Login with the admin password → bearer token (7 days)."],
   ["GET", "/api/content", "public", "Full portfolio content (same data the site is built from)."],
   ["PUT", "/api/content", "admin", "Merge sections: personal / media / settings / skills / projects / experience / journey."],
-  ["POST", "/api/upload", "admin", "Upload media (base64, ≤3 MB) → /uploads/<file> — plugs into the hero background or any URL field."],
+  ["POST", "/api/upload", "admin", "Upload media (base64, ≤3 MB) → /uploads/<file> or Supabase CDN (instant)."],
+  ["POST", "/api/upload-url", "admin", "Mint a signed upload URL — the browser PUTs big files (≤48 MB) straight to Supabase."],
   ["GET", "/api/messages", "admin", "List contact-form messages (newest first)."],
   ["POST", "/api/messages", "public", "Submit a message (honeypot + rate limited 5/10min)."],
   ["PATCH", "/api/messages?id=", "admin", "Mark a message read/unread."],
@@ -114,7 +116,110 @@ function SiteSettingsPanel({ content, saveContent }) {
   );
 }
 
-// ── 1b. Browser GitHub bridge — the zero-setup persistence fix ────────────────
+// ── 1a. Local test mode — the zero-backend playground ────────────────────
+// Saves/uploads live in THIS browser only (localStorage + IndexedDB) and the
+// site picks them up instantly — perfect for trying hero changes without any
+// deploy. Turn off → everything test-related is wiped.
+export function LocalTestModePanel({ onModeChanged }) {
+  const [on, setOn] = useState(localModeOn());
+  const [busy, setBusy] = useState(false);
+
+  const toggle = async (v) => {
+    setBusy(true);
+    try {
+      if (!v) await clearAllLocalData().catch(() => {});
+      setLocalMode(v);
+      setOn(v);
+      onModeChanged?.(v);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Panel
+      title="Local test mode — this browser only"
+      desc="Try changes with zero setup: saves and uploads live in this browser's memory and show up on the site INSTANTLY. Nothing is published."
+      actions={<Badge tone={on ? "indigo" : "muted"}>{on ? "◍ on" : "off"}</Badge>}
+    >
+      <div className="flex items-start justify-between gap-4 py-1">
+        <div className="min-w-0">
+          <div className="font-body text-xs text-text-primary">Enable test mode</div>
+          <div className="font-body text-[11px] text-text-muted leading-snug mt-0.5">
+            {on
+              ? "Active — every save & upload now stays in this browser. Open the site in another tab to see changes live."
+              : "Off — saves go through the real persistence chain (Supabase / GitHub)."}
+          </div>
+          {on && (
+            <div className="font-mono text-[10px] text-amber-400 mt-2 leading-relaxed">
+              Visitors do NOT see test data — it exists only here. Turning it off wipes it.
+            </div>
+          )}
+        </div>
+        <Toggle checked={on} onChange={toggle} disabled={busy} label="local test mode" />
+      </div>
+    </Panel>
+  );
+}
+
+// ── 1b. Supabase — the instant CMS backend (recommended) ──────────────────
+export function SupabasePanel({ status }) {
+  const env = status?.env || {};
+  const configured = env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY;
+  return (
+    <Panel
+      title="Supabase — instant CMS (recommended)"
+      desc="Stores content + media in your Supabase project. Saves and uploads go LIVE INSTANTLY — no rebuild, no redeploy."
+      actions={<Badge tone={configured ? "green" : "amber"}>{configured ? `● connected${status?.supabaseBucket ? ` · ${status.supabaseBucket}` : ""}` : "not configured"}</Badge>}
+    >
+      <ol className="space-y-3 list-none">
+        {["1", "2", "3", "4"].map((step, i) => (
+          <li key={step} className="flex gap-3">
+            <span className="shrink-0 w-6 h-6 rounded-lg bg-accent-indigo/15 border border-accent-indigo/30 text-accent-indigo font-mono text-[11px] flex items-center justify-center">
+              {i + 1}
+            </span>
+            <div className="font-body text-xs text-text-secondary leading-relaxed pt-0.5">
+              {i === 0 && (
+                <>
+                  Create a free project at <strong className="text-text-primary">supabase.com</strong> (no card needed).
+                </>
+              )}
+              {i === 1 && (
+                <>
+                  In Supabase → <strong className="text-text-primary">Project Settings → API</strong> copy the
+                  <em> Project URL</em> and the <em>service_role</em> secret key.
+                </>
+              )}
+              {i === 2 && (
+                <>
+                  Vercel → your project → Settings → Environment Variables → add:
+                  <div className="mt-2 font-mono text-[10px] text-text-secondary bg-bg-primary border border-border-subtle rounded-xl p-3 space-y-1">
+                    <div><span className="text-accent-cyan">SUPABASE_URL</span> = https://xxxx.supabase.co</div>
+                    <div><span className="text-accent-cyan">SUPABASE_SERVICE_KEY</span> = eyJ… <span className="text-text-muted">(service_role — server only)</span></div>
+                  </div>
+                </>
+              )}
+              {i === 3 && (
+                <>
+                  Redeploy (Deployments → ⋯ → Redeploy). Done — the bucket is created automatically and this panel
+                  turns <Badge tone="green">● connected</Badge>. Hero video uploads stream straight to Supabase
+                  (up to 48 MB) and appear the moment the upload finishes.
+                </>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="font-mono text-[10px] text-text-muted mt-4 leading-relaxed">
+        Priority: Supabase → GitHub → local disk. With both Supabase and GitHub tokens set, content is also
+        mirrored to the repo so rebuilds bundle fresh data. Keep the service key OUT of the browser — it is a
+        server-side secret.
+      </p>
+    </Panel>
+  );
+}
+
+// ── 1c. Browser GitHub bridge — the zero-setup persistence fix ─────────────────
 // Vercel's serverless filesystem is read-only (EROFS on /var/task/**), so
 // without persistence every save/upload fails on production. This panel
 // connects the bridge: a GitHub token stored ONLY in this browser commits
@@ -240,11 +345,13 @@ export function GitHubBridgePanel({ onGhChanged }) {
 }
 
 // ── 2. Infrastructure / env / API reference ───────────────────────────────────
-export default function SettingsTab({ status, content, saveContent, onGhChanged }) {
+export default function SettingsTab({ status, content, saveContent, onGhChanged, onModeChanged }) {
   const env = status?.env || {};
   const envRows = [
     ["ADMIN_PASSWORD", env.ADMIN_PASSWORD, "Custom admin password set (default disabled)."],
-    ["GITHUB_TOKEN", env.GITHUB_TOKEN, "GitHub CMS driver active — saves commit & deploy."],
+    ["SUPABASE_URL", env.SUPABASE_URL, "Supabase project URL — instant CMS backend."],
+    ["SUPABASE_SERVICE_KEY", env.SUPABASE_SERVICE_KEY, "Supabase service key — unlocks instant saves + 48 MB uploads."],
+    ["GITHUB_TOKEN", env.GITHUB_TOKEN, "GitHub CMS driver — saves commit & deploy."],
     ["GITHUB_REPO", env.GITHUB_REPO, "Custom target repo (defaults to shabii804/Portfolio)."],
     ["GITHUB_BRANCH", env.GITHUB_BRANCH, "Custom target branch (defaults to main)."],
     ["CHATBOT_KEY (GLM/Z.AI)", env.CHATBOT_KEY, "Chatbot uses GLM; without it Pollinations fallback is used."],
@@ -252,6 +359,8 @@ export default function SettingsTab({ status, content, saveContent, onGhChanged 
 
   return (
     <div className="space-y-6">
+      <LocalTestModePanel onModeChanged={onModeChanged} />
+      <SupabasePanel status={status} />
       <GitHubBridgePanel onGhChanged={onGhChanged} />
       {content !== undefined && <SiteSettingsPanel content={content} saveContent={saveContent} />}
 
@@ -294,6 +403,8 @@ export default function SettingsTab({ status, content, saveContent, onGhChanged 
               Open <strong className="text-text-primary">Vercel → your project → Settings → Environment Variables</strong> and add:
               <div className="mt-2 font-mono text-[10px] text-text-secondary bg-bg-primary border border-border-subtle rounded-xl p-3 space-y-1">
                 <div><span className="text-accent-cyan">ADMIN_PASSWORD</span> = your secret password</div>
+                <div><span className="text-accent-cyan">SUPABASE_URL</span> = https://xxxx.supabase.co <span className="text-text-muted">(instant CMS — recommended)</span></div>
+                <div><span className="text-accent-cyan">SUPABASE_SERVICE_KEY</span> = eyJ…</div>
                 <div><span className="text-accent-cyan">GITHUB_TOKEN</span> = github_pat_…</div>
                 <div><span className="text-accent-cyan">GITHUB_REPO</span> = shabii804/Portfolio <span className="text-text-muted">(optional)</span></div>
                 <div><span className="text-accent-cyan">GITHUB_BRANCH</span> = main <span className="text-text-muted">(optional)</span></div>

@@ -14,6 +14,7 @@
 import { useEffect, useState } from "react";
 import { api, clearToken, getToken, login, timeAgo } from "./api.js";
 import { bridgeSaveContent, ghConnected } from "./ghBridge.js";
+import { clearAllLocalData, loadLocalContent, localModeOn, localSaveContent, seedLocalContent, setLocalMode } from "./localStore.js";
 import { Badge, Btn, Spinner } from "./ui.jsx";
 import OverviewTab from "./tabs/OverviewTab.jsx";
 import ContentTab from "./tabs/ContentTab.jsx";
@@ -46,6 +47,9 @@ export default function AdminApp() {
   // (and anything reading ghConnected() at render time) refreshes.
   const [ghVersion, setGhVersion] = useState(0);
   const bumpGh = () => setGhVersion((v) => v + 1);
+  // Bumped when local test mode flips — header badge + save routing refresh.
+  const [modeVersion, setModeVersion] = useState(0);
+  const bumpMode = () => setModeVersion((v) => v + 1);
 
   const notify = (msg, kind = "ok") => setToast({ id: Date.now(), msg, kind });
 
@@ -97,12 +101,18 @@ export default function AdminApp() {
     setContent(null);
   };
 
-  // Central save — every tab persists through here. Transport: server API
-  // first; on 503 (read-only host, driver unconfigured) retry through the
-  // browser GitHub bridge when it's connected (Settings → Connect GitHub).
+  // Central save — every tab persists through here. Transport:
+  //   test mode      → localStorage in this browser (instant, no backend)
+  //   server API     → Supabase / GitHub / dev disk (503 → bridge fallback)
   const saveContent = async (patch, label) => {
     try {
       let res;
+      if (localModeOn()) {
+        const next = localSaveContent(content, patch);
+        setContent(next);
+        notify(`${label} saved — test mode, live in this browser instantly`, "ok");
+        return { content: next, storage: "local" };
+      }
       try {
         res = await api("/api/content", { method: "PUT", body: { content: patch } });
       } catch (err) {
@@ -111,11 +121,14 @@ export default function AdminApp() {
         res = { content: next, storage: "github-browser" };
       }
       setContent(res.content);
+      const instant = res.storage === "supabase";
       notify(
-        res.storage === "github" || res.storage === "github-browser"
-          ? `${label} saved — committing… live in ~1 min`
-          : `${label} saved`,
-        res.storage === "file" ? "ok" : "info"
+        instant
+          ? `${label} saved — live instantly`
+          : res.storage === "github" || res.storage === "github-browser"
+            ? `${label} saved — committing… live in ~1 min`
+            : `${label} saved`,
+        instant || res.storage === "file" ? "ok" : "info"
       );
       setStatus((s) => (s ? { ...s, counts: { ...s.counts } } : s));
       return res;
@@ -128,6 +141,21 @@ export default function AdminApp() {
       }
       throw err;
     }
+  };
+
+  // Local test mode switch (Settings tab). Toggling ON seeds the snapshot
+  // from the currently loaded content so the test starts from reality.
+  const toggleLocalMode = async (on) => {
+    if (on) {
+      setLocalMode(true);
+      if (!loadLocalContent() && content) seedLocalContent(content);
+      notify("Test mode ON — saves & uploads stay in this browser", "info");
+    } else {
+      await clearAllLocalData().catch(() => {});
+      setLocalMode(false);
+      notify("Test mode OFF — test data cleared", "info");
+    }
+    bumpMode();
   };
 
   if (booting) {
@@ -167,12 +195,19 @@ export default function AdminApp() {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-3" data-gh-version={ghVersion}>
+          <div className="flex items-center gap-2 md:gap-3" data-gh-version={ghVersion} data-mode-version={modeVersion}>
+            {localModeOn() && <Badge tone="indigo">◍ Test mode · this browser</Badge>}
             <Badge
               tone={status?.storage === "github" || ghConnected() ? "green" : "amber"}
               className="hidden md:inline-flex"
             >
-              {status?.storage === "github" ? "GitHub CMS" : ghConnected() ? "GitHub CMS · browser" : "Local driver"}
+              {status?.storage === "supabase"
+                ? "Supabase CMS"
+                : status?.storage === "github"
+                  ? "GitHub CMS"
+                  : ghConnected()
+                    ? "GitHub CMS · browser"
+                    : "Local driver"}
             </Badge>
             {unread > 0 && <Badge tone="cyan">{unread} new</Badge>}
             <a href="/" target="_blank" rel="noreferrer" className="btn-ghost px-3 py-1.5 rounded-lg font-mono text-xs">
@@ -264,7 +299,7 @@ export default function AdminApp() {
             {tab === "projects" && <ProjectsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "skills" && <SkillsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "messages" && <MessagesTab notify={notify} />}
-            {tab === "settings" && <SettingsTab key={content?.meta?.updatedAt || "init"} status={status} content={content} saveContent={saveContent} onGhChanged={bumpGh} />}
+            {tab === "settings" && <SettingsTab key={content?.meta?.updatedAt || "init"} status={status} content={content} saveContent={saveContent} onGhChanged={bumpGh} onModeChanged={toggleLocalMode} />}
             {tab === "tools" && <ToolsTab content={content} />}
           </div>
         </main>

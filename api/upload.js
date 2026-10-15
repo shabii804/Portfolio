@@ -27,6 +27,7 @@ import {
 } from "../server/admin/http.js";
 import { isAuthorized } from "../server/admin/auth.js";
 import { ghWriteRaw, mapStorageError, sendStoreError, storageMode } from "../server/admin/store.js";
+import { sbUploadFile } from "../server/admin/supabase.js";
 
 const ROOT = path.resolve(fileURLToPath(new URL("..", import.meta.url))); // → Portfolio/
 const UPLOAD_DIR = "public/uploads";
@@ -106,6 +107,18 @@ export default async function handler(req, res) {
   const message = `feat(admin): upload ${fileName} via admin panel`;
 
   try {
+    if (storageMode() === "supabase") {
+      // Supabase Storage → public URL served instantly, no rebuild involved.
+      const publicPath = await sbUploadFile(`uploads/${fileName}`, buf, mimeForUpload(fileName));
+      return json(res, 200, {
+        ok: true,
+        path: publicPath.path,
+        url: publicPath.path,
+        size: buf.length,
+        storage: "supabase",
+        message: "Uploaded to Supabase — live instantly",
+      });
+    }
     if (storageMode() === "github") {
       await ghWriteRaw(`${UPLOAD_DIR}/${fileName}`, buf.toString("base64"), message);
     } else {
