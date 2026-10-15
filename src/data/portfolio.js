@@ -3,7 +3,7 @@
 // every admin save so the site build and the AI chatbot fact sheet stay in sync.
 export const content = {
   "personal": {
-    "name": "Shoaib Arshad",
+    "name": "Shoaib Arshadjhjkhk",
     "title": "Full Stack Web Developer & Java Desktop Application Developer",
     "roles": [
       "Full Stack Web Developer",
@@ -434,10 +434,10 @@ export const content = {
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-15T18:26:27.656Z",
+    "updatedAt": "2026-10-15T18:28:26.393Z",
     "note": "Canonical portfolio content — managed via the Admin panel (/admin → PUT /api/content).",
     "updatedSections": [
-      "media"
+      "personal"
     ]
   },
   "media": {
