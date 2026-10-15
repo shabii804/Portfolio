@@ -26,11 +26,19 @@ from the Vercel CDN after the automatic redeploy.
 
 | Driver | When | Behavior |
 |---|---|---|
+| **Browser bridge** | Token pasted in `/admin → Settings → Connect GitHub` | Saves and uploads commit **straight from the browser** via the GitHub Contents API (token lives only in that browser's localStorage). Works on production with zero server setup and lifts the upload cap from 3 MB to **25 MB**. |
 | **GitHub CMS** | `GITHUB_TOKEN` env set (production) | Commits to the repo (`src/data/content.json` + regenerated `portfolio.js`) → Vercel redeploys → live in ~1 min. Message inbox commits use `[skip ci]` (no deploy). |
 | **Local file** | No `GITHUB_TOKEN` (sandbox/dev) | Writes the same files on disk → Vite HMR picks changes up instantly. Inbox lives in `data/messages.json` (gitignored). |
 
-Without `GITHUB_TOKEN` in production, saves fail with a clear `503` (serverless FS is read-only) —
-that's the safe default. Set the env vars below to enable real persistence.
+The admin client tries the server API first; on `503` (read-only serverless FS, no env persistence) it
+automatically retries through the browser bridge when connected. Server-side, read-only filesystem
+failures (`EROFS`/`EACCES`/`EPERM` on `/var/task/**`) are mapped to the actionable `503`, so the raw
+OS error never reaches the UI. Files > 3 MB skip the serverless route entirely (Vercel caps request
+bodies at ~4.5 MB) and go through the bridge directly.
+
+Without any persistence connected in production, saves fail with a clear `503` —
+that's the safe default. Connect the bridge in Settings (instant) or set the env vars below
+(also persists public contact-form messages).
 
 ## Environment variables (Vercel → Settings → Environment Variables)
 
