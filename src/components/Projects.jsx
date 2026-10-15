@@ -2,6 +2,82 @@ import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   Bento project cards — real screenshots where they exist (Farooq Agencies,
+   SpendSmart, School Management System), crafted art panels otherwise.
+   Subtle pointer tilt on fine pointers only. Case-study modal unchanged.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+const prefersReduced = () =>
+  typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+const finePointer = () =>
+  typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine)")?.matches;
+
+/** Restrained tilt: ±2.5° max, rAF-throttled, transform only. */
+function useTilt() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReduced() || !finePointer()) return;
+    let raf = 0;
+    const onMove = (e) => {
+      if (e.pointerType === "touch") return;
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      if (!raf) {
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          el.style.transform = `perspective(900px) rotateY(${(px * 5).toFixed(2)}deg) rotateX(${(-py * 5).toFixed(2)}deg)`;
+        });
+      }
+    };
+    const onLeave = () => {
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      el.style.transform = "";
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+    return () => {
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerleave", onLeave);
+      el.style.transform = "";
+    };
+  }, []);
+  return ref;
+}
+
+/* ── Visual header per project ─────────────────────────────────────────────── */
+function ProjectVisual({ project }) {
+  const shot = project.screenshots?.[0];
+  if (shot) {
+    const isBrowserApp = project.id !== "sms"; // SMS is a Java desktop app
+    const url = project.live ? new URL(project.live).hostname : `${project.id}.app`;
+    return (
+      <div className="bento-visual h-44 sm:h-52 mb-5">
+        {isBrowserApp && (
+          <div className="bento-chrome" aria-hidden="true">
+            <i /><i /><i />
+            <span>{url}</span>
+          </div>
+        )}
+        <img
+          src={`/screenshots/${shot}`}
+          alt={`${project.title} interface preview`}
+          decoding="async"
+        />
+      </div>
+    );
+  }
+  // Crafted art panel for projects without a public screenshot
+  return (
+    <div className="bento-art h-44 sm:h-52 mb-5 rounded-xl" style={{ "--acc": project.accentHex }} aria-hidden="true">
+      <span className="bento-art-tag">{project.badge}</span>
+      <span className="bento-art-glyph">&lt;/&gt;</span>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    Case-study modal: Problem → Approach → Outcome, with metrics, screenshots,
    features and the full stack. Falls back to the legacy details list when a
    project has no caseStudy object.
@@ -59,7 +135,7 @@ function CaseStudyModal({ project, onClose }) {
                 <img
                   src={`/screenshots/${screenshots[imgIdx]}`}
                   alt={`${project.title} screenshot ${imgIdx + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top"
                   loading="lazy"
                 />
               </div>
@@ -195,18 +271,26 @@ function CaseStudyModal({ project, onClose }) {
   );
 }
 
-/* ─── Card ─────────────────────────────────────────────────────────────────── */
+/* ─── Bento card ─────────────────────────────────────────────────────────── */
+// Wide slots: the live client site and the storefront lead the grid
+const SPAN_MAP = {
+  farooq: "md:col-span-2 lg:col-span-2",
+  eshop: "md:col-span-2 lg:col-span-2",
+};
+
 function ProjectCard({ project, onClick, index }) {
   const [hovered, setHovered] = useState(false);
+  const tiltRef = useTilt();
+  const featured = Boolean(SPAN_MAP[project.id]);
 
   return (
     <article
-      className="animate-on-scroll card-border-glow card-glow-border rounded-2xl p-6 sm:p-7 bg-bg-card flex flex-col gap-4 cursor-pointer group"
+      ref={tiltRef}
+      className={`bento-card bento-tilt animate-on-scroll card-border-glow card-glow-border rounded-2xl p-5 sm:p-6 bg-bg-card flex flex-col gap-4 cursor-pointer group ${SPAN_MAP[project.id] || ""}`}
       style={{
         transitionDelay: `${0.06 * index}s`,
         borderColor: hovered ? `${project.accentHex}40` : "rgb(var(--border-subtle))",
-        boxShadow: hovered ? `0 20px 48px -16px ${project.accentHex}20` : "",
-        transform: hovered ? "translateY(-4px)" : ""
+        boxShadow: hovered ? `0 20px 48px -16px ${project.accentHex}22` : "",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -216,6 +300,8 @@ function ProjectCard({ project, onClick, index }) {
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
       aria-label={`Open ${project.title} case study`}
     >
+      <ProjectVisual project={project} />
+
       <div className="flex items-start justify-between gap-3">
         <span className="project-num">{project.num} /</span>
         <span
@@ -238,7 +324,9 @@ function ProjectCard({ project, onClick, index }) {
           {project.title}
         </h3>
         <p className="font-body text-text-secondary/70 text-xs italic mb-3">{project.tagline}</p>
-        <p className="font-body text-text-secondary text-sm leading-relaxed line-clamp-3">{project.caseStudy?.problem || project.description}</p>
+        <p className={`font-body text-text-secondary text-sm leading-relaxed ${featured ? "line-clamp-3" : "line-clamp-2"}`}>
+          {project.caseStudy?.problem || project.description}
+        </p>
       </div>
 
       {/* Case-study metrics */}
@@ -254,11 +342,11 @@ function ProjectCard({ project, onClick, index }) {
       )}
 
       <div className="flex flex-wrap gap-2">
-        {project.stack.slice(0, 4).map((tech) => (
+        {project.stack.slice(0, featured ? 5 : 4).map((tech) => (
           <span key={tech} className="skill-chip font-mono text-[10px] px-2.5 py-1 rounded-md">{tech}</span>
         ))}
-        {project.stack.length > 4 && (
-          <span className="font-mono text-[10px] px-2.5 py-1 rounded-md text-text-muted">+{project.stack.length - 4}</span>
+        {project.stack.length > (featured ? 5 : 4) && (
+          <span className="font-mono text-[10px] px-2.5 py-1 rounded-md text-text-muted">+{project.stack.length - (featured ? 5 : 4)}</span>
         )}
       </div>
 
@@ -286,11 +374,14 @@ function ProjectCard({ project, onClick, index }) {
 }
 
 /* ─── Section ──────────────────────────────────────────────────────────────── */
+const MAX_FILTERS = 9;
+
 export default function Projects() {
   const { projects } = usePortfolio();
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState("");
   const [activeStack, setActiveStack] = useState("All");
+  const [showAllFilters, setShowAllFilters] = useState(false);
   const ref = useRef(null);
 
   const allStacks = ["All", ...Array.from(
@@ -319,6 +410,8 @@ export default function Projects() {
     ref.current?.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [filtered]);
+
+  const visibleFilters = showAllFilters ? allStacks : allStacks.slice(0, MAX_FILTERS);
 
   return (
     <>
@@ -363,7 +456,7 @@ export default function Projects() {
             </div>
 
             <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by tech stack">
-              {allStacks.map((s) => (
+              {visibleFilters.map((s) => (
                 <button
                   key={s}
                   onClick={() => setActiveStack(s)}
@@ -377,6 +470,15 @@ export default function Projects() {
                   {s}
                 </button>
               ))}
+              {allStacks.length > MAX_FILTERS && (
+                <button
+                  onClick={() => setShowAllFilters((v) => !v)}
+                  className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-dashed border-border-mid text-text-muted hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
+                  aria-expanded={showAllFilters}
+                >
+                  {showAllFilters ? "− less" : `+${allStacks.length - MAX_FILTERS} more`}
+                </button>
+              )}
             </div>
 
             <div className="font-mono text-[10px] text-text-muted">
@@ -394,7 +496,7 @@ export default function Projects() {
             </div>
           </div>
 
-          {/* Grid */}
+          {/* Bento grid */}
           {filtered.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-5xl mb-4 opacity-50" aria-hidden="true">🔍</div>
@@ -408,7 +510,7 @@ export default function Projects() {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((p, i) => (
                 <ProjectCard key={p.id} project={p} index={i} onClick={() => setSelected(p)} />
               ))}

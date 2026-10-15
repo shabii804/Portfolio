@@ -1,11 +1,29 @@
 import { useState, useEffect } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import { scrollToSection } from "../hooks/useLenis";
 
 const navLinks = ["About", "Skills", "Projects", "Journey", "Activity", "Contact"];
 
-export default function Navbar() {
+function SunIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+  );
+}
+function MoonIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+
+export default function Navbar({ theme = "dark", onToggleTheme }) {
   const { personal } = usePortfolio();
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState("");
   const [isApple] = useState(() =>
@@ -13,14 +31,28 @@ export default function Navbar() {
   );
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    let last = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setScrolled(y > 50);
+        // Hide when scrolling down past the hero, reveal on any upward move
+        if (y > 180 && y > last + 4) setHidden(true);
+        else if (y < last - 4 || y <= 180) setHidden(false);
+        last = y;
+        ticking = false;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const scrollTo = (id) => {
-    document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
+    scrollToSection(id.toLowerCase());
     setMobileOpen(false);
     setActive(id);
   };
@@ -31,11 +63,11 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`fixed left-0 right-0 z-50 transition-all duration-500 ${
-      scrolled
-        ? "top-3 md:top-4 px-4 sm:px-6"
-        : "top-0 px-0"
-    }`}>
+    <nav
+      className={`nav-shell fixed left-0 right-0 z-50 ${hidden ? "nav-hidden" : ""} transition-all duration-500 ${
+        scrolled ? "top-3 md:top-4 px-4 sm:px-6" : "top-0 px-0"
+      }`}
+    >
       <div className={`mx-auto max-w-5xl transition-all duration-500 ${
         scrolled
           ? "bg-bg-card/85 backdrop-blur-xl border border-border-subtle rounded-2xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.7)]"
@@ -43,7 +75,7 @@ export default function Navbar() {
       }`}>
         <div className="px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => scrollToSection("home")}
             className="group flex items-center gap-3"
             aria-label="Back to top"
           >
@@ -81,6 +113,16 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* Theme toggle */}
+            <button
+              onClick={onToggleTheme}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
+            >
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            </button>
+
             {/* Command palette trigger */}
             <button
               onClick={openPalette}
@@ -91,16 +133,6 @@ export default function Navbar() {
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <span className="font-mono text-[10px] tracking-wide">{isApple ? "⌘" : "Ctrl+"}K</span>
-            </button>
-
-            <button
-              onClick={openPalette}
-              aria-label="Open command palette"
-              className="sm:hidden w-9 h-9 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo transition-all"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
             </button>
 
             <button

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { GraduationCap, Rocket, Building2, Globe2 } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import Terminal from "./Terminal";
 
 export default function About() {
   const { personal } = usePortfolio();
@@ -16,10 +18,10 @@ export default function About() {
   }, []);
 
   const highlights = [
-    { icon: "🎓", label: "CGPA 4.0", sub: "Riphah International University" },
-    { icon: "🚀", label: "4 Production Apps", sub: "React · Node.js · Firebase" },
-    { icon: "🏢", label: "Internship Certified", sub: "Developer Hub Corporation" },
-    { icon: "🌍", label: "Live Deployment", sub: "farooqagensies.com" },
+    { Icon: GraduationCap, label: "CGPA 4.0", sub: "Riphah International University" },
+    { Icon: Rocket, label: "4 Production Apps", sub: "React · Node.js · Firebase" },
+    { Icon: Building2, label: "Internship Certified", sub: "Developer Hub Corporation" },
+    { Icon: Globe2, label: "Live Deployment", sub: "farooqagensies.com" },
   ];
 
   const focusAreas = ["Web Apps", "Desktop Systems", "Databases", "UI Engineering"];
@@ -117,13 +119,30 @@ export default function About() {
             <div className="grid grid-cols-2 gap-4">
               {highlights.map((h, i) => (
                 <div key={h.label} className="animate-on-scroll card-border-glow card-glow-border rounded-2xl p-5 bg-bg-card" style={{ transitionDelay: `${0.16 + 0.06 * i}s` }}>
-                  <div className="text-xl mb-2.5">{h.icon}</div>
+                  <h.Icon className="w-5 h-5 text-accent-indigo mb-3" strokeWidth={1.8} aria-hidden="true" />
                   <div className="font-display font-semibold text-text-primary text-sm mb-1">{h.label}</div>
                   <div className="font-mono text-[10px] text-text-muted leading-relaxed">{h.sub}</div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Interactive terminal — query the portfolio like a CLI */}
+        <div className="animate-on-scroll mt-16 max-w-3xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="font-mono text-[10px] text-accent-cyan/70 uppercase tracking-[0.18em]">Interactive</span>
+            <div className="h-px flex-1 max-w-24" style={{ background: "linear-gradient(to right, rgba(34,211,238,0.4), transparent)" }} />
+          </div>
+          <p className="font-body text-text-secondary text-sm mb-5 max-w-xl">
+            Prefer CLIs to contact forms? Query my portfolio like a terminal — try
+            <code className="terminal-chip mx-1">skills</code>
+            or
+            <code className="terminal-chip mx-1">projects</code>
+            — or go straight for
+            <code className="terminal-chip mx-1">sudo hire shoaib</code>
+          </p>
+          <Terminal />
         </div>
       </div>
     </section>

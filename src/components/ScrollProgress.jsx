@@ -44,7 +44,7 @@ export default function ScrollProgress() {
       }}
     >
       <div
-        className="h-full bg-gradient-to-r from-accent-indigo via-accent-purple to-accent-cyan"
+        className="h-full bg-gradient-to-r from-accent-indigoSoft via-accent-indigo to-accent-cyan"
         style={{
           width: `${progress}%`,
           transition: "width 0.1s linear",

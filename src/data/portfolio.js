@@ -71,11 +71,7 @@ export const defaultProjects = [
     accentHex: "#818cf8",
     badge: "Live · Client Project",
     date: "May 2026",
-    screenshots: [
-      // "farooq-home.png",
-      // "farooq-products.png",
-      // "farooq-admin-dashboard.png"
-    ]
+    screenshots: ["farooq-home.png"]
 },
   {
     id: "spendsmart",
@@ -145,7 +141,7 @@ export const defaultProjects = [
     accentHex: "#22d3ee",
     badge: "Full Stack",
     date: "Jan 2023",
-    screenshots: [],
+    screenshots: ["spendsmart-home.png"],
   },
   {
     id: "eshop",

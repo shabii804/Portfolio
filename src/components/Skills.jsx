@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 
 // Restrained two-accent system (PRD: indigo→cyan only)
@@ -14,6 +14,8 @@ const categoryMeta = {
 export default function Skills() {
   const { skills } = usePortfolio();
   const ref = useRef(null);
+  const profRef = useRef(null);
+  const [barsOn, setBarsOn] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -22,6 +24,23 @@ export default function Skills() {
     );
     ref.current?.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
+  }, []);
+
+  // Proficiency bars animate from 0 the first time the card is seen
+  useEffect(() => {
+    const el = profRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setBarsOn(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   return (
@@ -60,7 +79,7 @@ export default function Skills() {
         </div>
 
         {/* Core proficiencies */}
-        <div className="animate-on-scroll card-border-glow card-glow-border mt-16 rounded-2xl p-6 md:p-8 bg-bg-card" style={{ transitionDelay: "0.35s" }}>
+        <div ref={profRef} className="animate-on-scroll card-border-glow card-glow-border mt-16 rounded-2xl p-6 md:p-8 bg-bg-card" style={{ transitionDelay: "0.35s" }}>
           <div className="flex items-center justify-between mb-7 flex-wrap gap-2">
             <h3 className="font-display font-semibold text-text-primary">Core proficiencies</h3>
             <span className="font-mono text-[10px] text-text-muted">self-assessed · honest numbers</span>
@@ -73,7 +92,7 @@ export default function Skills() {
               { label: "Node.js / Express", pct: 80 },
               { label: "SQL / MSSQL", pct: 85 },
               { label: "Firebase / Supabase", pct: 84 },
-            ].map((item) => (
+            ].map((item, i) => (
               <div key={item.label}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-body text-sm text-text-secondary">{item.label}</span>
@@ -81,11 +100,12 @@ export default function Skills() {
                 </div>
                 <div className="h-1 bg-border-subtle rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full"
+                    className="prof-bar h-full rounded-full"
                     style={{
-                      width: `${item.pct}%`,
+                      "--w": `${item.pct}%`,
+                      "--d": `${i * 0.09}s`,
+                      width: barsOn ? `${item.pct}%` : "0%",
                       background: "linear-gradient(90deg, #6366f1, #818cf8 55%, #22d3ee)",
-                      transition: "width 1.2s ease",
                     }}
                   />
                 </div>

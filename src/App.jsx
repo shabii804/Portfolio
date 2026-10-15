@@ -13,17 +13,26 @@ import ChatButton from './components/ChatButton'
 import CommandPalette from './components/CommandPalette'
 import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
+import Preloader from './components/Preloader'
+import Cursor from './components/Cursor'
+import useLenis from './hooks/useLenis'
+import useTheme from './hooks/useTheme'
 
 /* PRD fixed section order:
    Nav → Hero → About → Skills → Projects → Journey → GitHub Activity → Contact → Footer */
 export default function App() {
+  useLenis()
+  const { theme, toggle } = useTheme()
+
   return (
     <PortfolioProvider>
       <div className="relative">
         <a href="#home" className="skip-link">Skip to content</a>
         <div className="noise-overlay" />
+        <Preloader />
+        <Cursor />
         <ScrollProgress />
-        <Navbar />
+        <Navbar theme={theme} onToggleTheme={toggle} />
         <main>
           <Hero />
           <About />

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { motion, useScroll, useSpring, useReducedMotion } from "framer-motion";
 import { usePortfolio } from "../hooks/usePortfolio";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -8,6 +9,14 @@ import { usePortfolio } from "../hooks/usePortfolio";
 export default function Journey() {
   const { journey } = usePortfolio();
   const ref = useRef(null);
+  const reduced = useReducedMotion();
+
+  // Scroll-drawn spine — the hairline fills as the visitor travels the timeline
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 0.72", "end 0.55"],
+  });
+  const scaleY = useSpring(scrollYProgress, { stiffness: 65, damping: 21, mass: 0.4 });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -33,8 +42,19 @@ export default function Journey() {
         </p>
 
         <div className="relative">
-          {/* Spine */}
-          <div className="absolute left-[19px] md:left-1/2 md:-translate-x-1/2 top-1 bottom-1 w-px bg-gradient-to-b from-transparent via-accent-indigo/35 to-transparent" aria-hidden="true" />
+          {/* Spine — static faint track + scroll-drawn bright line on top */}
+          <div className="absolute left-[19px] md:left-1/2 md:-translate-x-1/2 top-1 bottom-1 w-px bg-gradient-to-b from-transparent via-accent-indigo/15 to-transparent" aria-hidden="true" />
+          {!reduced && (
+            <motion.div
+              className="journey-spine absolute left-[19px] md:left-1/2 md:-translate-x-1/2 top-1 bottom-1 w-px"
+              style={{
+                scaleY,
+                background: "linear-gradient(to bottom, #6366f1, #818cf8 40%, #22d3ee)",
+                boxShadow: "0 0 10px rgba(129, 140, 248, 0.45)",
+              }}
+              aria-hidden="true"
+            />
+          )}
 
           <div className="space-y-10 md:space-y-14">
             {journey.map((step, i) => {

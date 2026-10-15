@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import { scrollToSection } from "../hooks/useLenis";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CommandPalette — Cmd/Ctrl+K launcher (PRD requirement).
@@ -63,9 +64,9 @@ export default function CommandPalette() {
     if (cmd.event) window.dispatchEvent(new CustomEvent(cmd.event));
     if (cmd.href) window.open(cmd.href, "_blank", "noreferrer");
     if (cmd.scroll) {
-      document.getElementById(cmd.scroll)?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection(cmd.scroll);
     }
-    if (cmd.top) window.scrollTo({ top: 0, behavior: "smooth" });
+    if (cmd.top) scrollToSection("home");
     close();
   }, [personal.email, close]);
 
@@ -78,6 +79,8 @@ export default function CommandPalette() {
     { group: "Navigate", label: "GitHub Activity", hint: "Live commits & stats", icon: "◈", scroll: "activity" },
     { group: "Navigate", label: "Contact", hint: "Start a conversation", icon: "✉", scroll: "contact" },
     { group: "Actions", label: "Ask the AI assistant", hint: "GLM-powered, fact-grounded", icon: "✦", event: "toggle-chatbot" },
+    { group: "Actions", label: "Toggle light / dark theme", hint: "Smooth cross-fade", icon: "◐", event: "sa:toggle-theme" },
+    { group: "Actions", label: "Open the terminal", hint: "whoami · skills · projects", icon: "▸", scroll: "about" },
     { group: "Actions", label: "Download CV", hint: "resume.pdf", icon: "↓", href: personal.resumePdf },
     { group: "Actions", label: "Copy email address", hint: copied ? "Copied ✓" : personal.email, icon: "⧉", copy: true },
     { group: "Links", label: "Open GitHub", hint: "github.com/shabii804", icon: "↗", href: personal.github },
