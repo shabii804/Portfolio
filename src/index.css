@@ -879,43 +879,65 @@ html.theme-anim *::after {
   align-items: center;
   gap: 26px;
 }
-/* "SA" tile with a rotating conic brand ring */
+/* Photo badge — his portrait as the brand mark, wrapped in a live
+   indigo→violet→cyan progress ring (gradient arc + comet head synced to
+   the counter) over a faint track, with a breathing brand glow behind */
 .pre-badge {
   position: relative;
-  width: 58px;
-  height: 58px;
-  border-radius: 17px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.035);
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  font-size: 20px;
-  letter-spacing: 0.02em;
+  width: clamp(78px, 18vw, 96px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  animation: pre-badge-glow 2.4s ease-in-out infinite;
 }
-.pre-badge span {
-  background: linear-gradient(120deg, #a5b4fc, #818cf8 45%, #67e8f9);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.pre-badge-photo {
+  position: absolute;
+  inset: 7.5%;
+  width: 85%;
+  height: 85%;
+  border-radius: 9999px;
+  object-fit: cover;
+  object-position: 50% 22%;
+  filter: saturate(0.94) contrast(1.05);
+  user-select: none;
 }
-.pre-badge::before {
+/* inner hairline + a bottom grade that melts the photo into the ring */
+.pre-badge::after {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.5px;
-  background: conic-gradient(from 0deg, rgba(99, 102, 241, 0.95), rgba(34, 211, 238, 0.95), rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.95));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  animation: pre-spin 2.8s linear infinite;
+  inset: 7.5%;
+  border-radius: 9999px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 -20px 26px -14px rgba(5, 6, 15, 0.55);
+  pointer-events: none;
 }
-@keyframes pre-spin { to { transform: rotate(360deg); } }
+.pre-badge-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.pre-ring-track { fill: none; stroke: rgba(255, 255, 255, 0.09); stroke-width: 2; }
+.pre-ring-fill {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(129, 140, 248, 0.65));
+  transition: stroke-dashoffset 0.14s linear;
+}
+.pre-ring-head {
+  fill: #a5f3fc;
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.9));
+}
+@keyframes pre-badge-glow {
+  0%, 100% { box-shadow: 0 0 60px -10px rgba(99, 102, 241, 0.4), 0 16px 44px -14px rgba(0, 0, 0, 0.7); }
+  50% { box-shadow: 0 0 86px -6px rgba(99, 102, 241, 0.62), 0 16px 44px -14px rgba(0, 0, 0, 0.7); }
+}
 
 /* Name — per-letter mask reveal, indigo→violet→cyan ramp (colors inline) */
 .pre-name {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -924,6 +946,35 @@ html.theme-anim *::after {
   font-size: clamp(44px, 9.5vw, 92px);
   line-height: 1.04;
   letter-spacing: -0.03em;
+}
+/* One light-shine sweep across the name once the letters land — a soft
+   skewed streak on screen-blend, so it brightens the ramp as it passes */
+.pre-name-shine {
+  position: absolute;
+  top: -6%;
+  bottom: -6%;
+  left: -12%;
+  width: 26%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: blur(3px);
+  background: linear-gradient(
+    100deg,
+    transparent 8%,
+    rgba(232, 233, 255, 0.13) 42%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(232, 233, 255, 0.13) 58%,
+    transparent 92%
+  );
+  transform: translateX(-130%) skewX(-14deg);
+  opacity: 0;
+  animation: pre-shine 1.1s cubic-bezier(0.45, 0, 0.2, 1) 1.3s 1 forwards;
+}
+@keyframes pre-shine {
+  0% { opacity: 0; transform: translateX(-130%) skewX(-14deg); }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(620%) skewX(-14deg); }
 }
 .pre-line { display: flex; overflow: hidden; padding: 0.05em 0.12em; }
 .pre-letter {
@@ -1371,36 +1422,6 @@ html.custom-cursor textarea { cursor: text; }
 [data-theme="light"] .hero-3d-active .grid-pan { opacity: 0.75; }
 [data-theme="light"] .hero-3d-active .aurora { opacity: 0.8; }
 
-/* Animated motion icons — glass tiles floating around the CSS orb
-   (fallback mode: mobile / reduced-power devices) */
-.hero-float-chip {
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-.hero-float-chip-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: rgb(var(--bg-card) / 0.72);
-  border: 1px solid rgb(var(--border-mid));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow:
-    0 14px 34px -14px rgba(0, 0, 0, 0.55),
-    0 0 22px -6px rgba(99, 102, 241, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-[data-theme="light"] .hero-float-chip-inner {
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow:
-    0 14px 30px -14px rgba(30, 30, 70, 0.25),
-    0 0 20px -6px rgba(99, 102, 241, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
 /* Light-theme halo: keep the glow gentle on the bright canvas */
 [data-theme="light"] .orb-halo {
   background:
@@ -1410,14 +1431,53 @@ html.custom-cursor textarea { cursor: text; }
 
 /* Small screens: shrink the fallback icon tiles slightly */
 @media (max-width: 640px) {
-  .hero-float-chip-inner { width: 40px; height: 40px; border-radius: 12px; }
+  .orb-halo { opacity: 0.9; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
    v10 — CINEMATIC VIDEO HERO · "floating code" clip as the hero backdrop
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Full-bleed looping clip — object-cover so any viewport crops it cleanly.
+/* v12 — FRAMED CINEMA HERO · the clip sits INSET inside the hero canvas
+   with padding/margin all around (framed-panel look) */
+
+/* The frame: a rounded "cinema screen" floating on the dark hero canvas.
+   Top margin clears the fixed nav; height is computed so the bottom edge
+   ALWAYS lands 22px above the fold — even when the hero copy overflows
+   100svh and the section keeps scrolling. Hairline border + deep shadow +
+   soft brand glow make the inset read as intentional design. */
+.hero-video-frame {
+  position: absolute;
+  z-index: 0;
+  top: clamp(76px, 11vh, 96px);
+  left: clamp(12px, 2.2vw, 24px);
+  right: clamp(12px, 2.2vw, 24px);
+  height: calc(100svh - clamp(76px, 11vh, 96px) - clamp(12px, 2.4vh, 22px));
+  border-radius: clamp(18px, 2.4vw, 28px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 42px 120px -42px rgba(0, 0, 0, 0.85),
+    0 0 90px -32px rgba(99, 102, 241, 0.3);
+  transform: translateZ(0); /* GPU-clip the rounded corners while drifting */
+}
+.hero-video-media {
+  position: absolute;
+  inset: 0;
+}
+/* Static filmic vignette pressed into the panel edges */
+.hero-video-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 110px rgba(5, 6, 15, 0.42),
+    inset 0 0 34px rgba(5, 6, 15, 0.18);
+  pointer-events: none;
+}
+
+/* Looping clip — object-cover so any viewport crops it cleanly.
    Slow Ken Burns drift adds cinematic life; loop fades (baked into the
    encode) melt the restart through dark. */
 .hero-video {
@@ -1451,25 +1511,42 @@ html.custom-cursor textarea { cursor: text; }
   inset: 0;
   background: linear-gradient(180deg, rgba(5, 6, 15, 0.62) 0%, rgba(5, 6, 15, 0) 24%);
 }
+/* Mobile: copy is centered, so the desktop left-heavy scrim misses it.
+   Switch to a vertical melt + mild side darkening to hold contrast over
+   the footage's bright center (light code windows) while keeping the
+   panel alive. */
+@media (max-width: 768px) {
+  .hero-video-scrim {
+    background:
+      linear-gradient(180deg, rgba(5, 6, 15, 0.6) 0%, rgba(5, 6, 15, 0.34) 38%, rgba(5, 6, 15, 0.52) 68%, rgba(5, 6, 15, 0.85) 100%),
+      linear-gradient(90deg, rgba(5, 6, 15, 0.5) 0%, rgba(5, 6, 15, 0.3) 50%, rgba(5, 6, 15, 0.5) 100%);
+  }
+}
 .hero-video-fade-bottom {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   height: 30%;
-  /* Fixed dark — the hero is a cinema slab in BOTH themes; the light theme
-     bridges out at the very bottom edge (see ::after below) */
-  background: linear-gradient(180deg, rgba(5, 6, 15, 0) 0%, rgba(5, 6, 15, 0.45) 55%, #05060f 94%);
+  /* Fixed dark floor under the stats/marquee zone — capped just short of
+     solid so the framed panel keeps a visible edge above the canvas */
+  background: linear-gradient(180deg, rgba(5, 6, 15, 0) 0%, rgba(5, 6, 15, 0.5) 55%, rgba(5, 6, 15, 0.88) 100%);
 }
 
 /* The clip is a dark, cinematic scene — keep the hero copy light in BOTH
    themes ("cinema mode") by re-scoping the text tokens onto the section,
-   which always wins over the html-level theme definitions. */
+   which always wins over the html-level theme definitions. The section is
+   an always-dark canvas: faint brand auroras live in the padding zone
+   around the framed panel. */
 .hero-video-active {
   --text-primary: 240 240 246;
   --text-secondary: 197 200 218;
   --text-muted: 151 153 174;
   --border-subtle: 44 45 64;
+  background:
+    radial-gradient(55% 45% at 78% 14%, rgba(99, 102, 241, 0.08), transparent 62%),
+    radial-gradient(42% 38% at 10% 88%, rgba(34, 211, 238, 0.06), transparent 60%),
+    #05060f;
 }
 .hero-video-active .text-shimmer {
   background: linear-gradient(110deg, #a5b4fc 12%, #818cf8 30%, #e8e9ff 46%, #22d3ee 60%, #818cf8 80%);
@@ -1484,33 +1561,11 @@ html.custom-cursor textarea { cursor: text; }
   background-clip: text;
 }
 
-/* Icon tiles gain presence over moving footage (dark glass in both themes
-   — the hero stays cinema-dark even when the page flips to light) */
-.hero-video-active .hero-float-chip-inner {
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
-  background: rgba(10, 11, 22, 0.62);
-  border-color: rgba(129, 140, 248, 0.28);
-  box-shadow:
-    0 14px 34px -14px rgba(0, 0, 0, 0.65),
-    0 0 26px -6px rgba(99, 102, 241, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09);
-}
-[data-theme="light"] .hero-video-active .hero-float-chip-inner {
-  background: rgba(10, 11, 22, 0.62);
-  border-color: rgba(129, 140, 248, 0.28);
-  box-shadow:
-    0 14px 34px -14px rgba(0, 0, 0, 0.65),
-    0 0 26px -6px rgba(99, 102, 241, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09);
-}
-
-/* Reduced motion: no playback — a static poster frame carries the scene.
-   The scrim divs stay up, so copy legibility is unchanged. */
+/* Reduced motion: no playback — a static poster still, INSIDE the frame, so
+   the framed-panel design holds. Scrim divs stay up for copy legibility. */
 @media (prefers-reduced-motion: reduce) {
   .hero-video { display: none; }
-  .hero-video-active {
+  .hero-video-media {
     background: url("/hero-poster.jpg") center / cover no-repeat rgb(5, 6, 15);
   }
 }

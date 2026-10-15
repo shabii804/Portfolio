@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/profile.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Preloader portrait badge — fetch at top priority so the boot screen
+         never shows an empty ring -->
+    <link rel="preload" as="image" href="/profile.jpeg" fetchpriority="high" />
 
     <!-- Primary Meta Tags -->
     <title>Shoaib Arshad — Full Stack Developer | React, Node.js, Java, Flutter</title>

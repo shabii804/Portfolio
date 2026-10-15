@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Cinematic video hero background — the "floating code" clip as a full-bleed
- * layer under the hero copy, with gradient scrims for text legibility.
- * (The footage itself features the developer surrounded by floating tech
- * icons, so no overlay chips are needed.)
+ * Cinematic video hero background — the "floating code" clip presented as a
+ * FRAMED CINEMA SCREEN: inset inside the hero canvas with padding/margin all
+ * around, rounded corners, hairline border and a soft brand glow. Gradient
+ * scrims inside the panel keep the hero copy legible.
  *
  * Playback rules:
  *  - muted + loop + playsInline → autoplays on every modern engine (iOS too)
@@ -55,26 +55,28 @@ export default function HeroVideo() {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-0" aria-hidden="true">
-      <video
-        ref={videoRef}
-        className="hero-video"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster="/hero-poster.jpg"
-        disablePictureInPicture
-        disableRemotePlayback
-        tabIndex={-1}
-      >
-        <source src="/hero-video.mp4" type="video/mp4" />
-      </video>
-      {/* Legibility: dark scrim on the copy side + top/bottom melts */}
-      <div className="hero-video-scrim" />
-      <div className="hero-video-fade-top" />
-      <div className="hero-video-fade-bottom" />
+    <div className="hero-video-frame" aria-hidden="true">
+      <div className="hero-video-media">
+        <video
+          ref={videoRef}
+          className="hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/hero-poster.jpg"
+          disablePictureInPicture
+          disableRemotePlayback
+          tabIndex={-1}
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
+        {/* Legibility: dark scrim on the copy side + top/bottom melts */}
+        <div className="hero-video-scrim" />
+        <div className="hero-video-fade-top" />
+        <div className="hero-video-fade-bottom" />
+      </div>
     </div>
   );
 }

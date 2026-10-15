@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Boot preloader v2 — name-forward, brand-colored:
- *   glowing "SA" tile with rotating conic ring
+ * Boot preloader v3 — portrait-forward, brand-colored:
+ *   his PHOTO as the logo mark inside a live indigo→cyan progress ring
+ *   (gradient arc + comet head synced to the counter)
  *   → "SHOAIB / ARSHAD." per-letter mask reveal with an indigo→cyan ramp
+ *     followed by a premium light-shine sweep
  *   → growing gradient rule + role line + mono boot log
  *   → glowing progress head + split-curtain exit
  * Always cinema-dark (it hands off to the video hero). Skips instantly under
@@ -17,7 +19,12 @@ const BOOT = [
   { at: 6, color: "#34d399", text: "initializing experience" },
   { at: 40, color: "#818cf8", text: "loading projects + visuals" },
   { at: 76, color: "#22d3ee", text: "rendering interface" },
+  { at: 92, color: "#c4b5fd", text: "brand identity online" },
 ];
+
+// SVG progress ring geometry (viewBox 96 → circle r=46 centered at 48,48)
+const RING_R = 46;
+const RING_LEN = 2 * Math.PI * RING_R;
 
 // Interpolate the letter color ramp: indigo-300 → violet-300 → cyan-300
 function rampColor(t) {
@@ -114,7 +121,38 @@ export default function Preloader() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
             >
-              <span>SA</span>
+              {/* His portrait as the brand mark */}
+              <img
+                className="pre-badge-photo"
+                src="/profile.jpeg"
+                alt=""
+                draggable={false}
+                fetchPriority="high"
+              />
+              {/* Live progress ring — gradient arc + comet head, synced to pct */}
+              <svg className="pre-badge-ring" viewBox="0 0 96 96" aria-hidden="true">
+                <defs>
+                  <linearGradient id="pre-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#818cf8" />
+                    <stop offset="55%" stopColor="#a78bfa" />
+                    <stop offset="100%" stopColor="#22d3ee" />
+                  </linearGradient>
+                </defs>
+                <circle className="pre-ring-track" cx="48" cy="48" r={RING_R} />
+                <circle
+                  className="pre-ring-fill"
+                  cx="48"
+                  cy="48"
+                  r={RING_R}
+                  stroke="url(#pre-ring-grad)"
+                  strokeDasharray={RING_LEN}
+                  strokeDashoffset={RING_LEN * (1 - pct / 100)}
+                  transform="rotate(-90 48 48)"
+                />
+                <g transform={`rotate(${pct * 3.6} 48 48)`}>
+                  <circle className="pre-ring-head" cx="48" cy="2" r="2.6" />
+                </g>
+              </svg>
             </motion.div>
 
             <div className="pre-name">
@@ -139,6 +177,8 @@ export default function Preloader() {
                   })}
                 </div>
               ))}
+              {/* One premium light sweep across the name once letters land */}
+              <span className="pre-name-shine" aria-hidden="true" />
             </div>
 
             <div className="pre-rule" />
