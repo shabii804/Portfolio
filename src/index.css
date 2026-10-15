@@ -1102,8 +1102,27 @@ html.is-ready .hero-gate > * { animation: fadeSlideUp 0.7s var(--ease-out) both;
   display: none;
   will-change: transform;
 }
+/* The glow trail — a big soft screen-blended comet tail that lags the
+   pointer on the slowest lerp and swells over interactive elements */
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 300px;
+  margin: -150px 0 0 -150px;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 299;
+  display: none;
+  will-change: transform;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.16) 0%, rgba(34, 211, 238, 0.07) 42%, transparent 68%);
+  mix-blend-mode: screen;
+  transition: opacity 0.4s ease;
+}
 html.custom-cursor .cursor-dot,
-html.custom-cursor .cursor-ring { display: block; }
+html.custom-cursor .cursor-ring,
+html.custom-cursor .cursor-glow { display: block; }
 .cursor-dot {
   width: 7px;
   height: 7px;
@@ -1137,7 +1156,7 @@ html.custom-cursor [role="button"] {
 html.custom-cursor input,
 html.custom-cursor textarea { cursor: text; }
 @media (hover: none), (pointer: coarse) {
-  .cursor-dot, .cursor-ring { display: none !important; }
+  .cursor-dot, .cursor-ring, .cursor-glow { display: none !important; }
 }
 
 /* ─── 3D orb zone (hero right column) ────────────────────────────────────── */
@@ -1438,59 +1457,49 @@ html.custom-cursor textarea { cursor: text; }
    v10 — CINEMATIC VIDEO HERO · "floating code" clip as the hero backdrop
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* v12 — FRAMED CINEMA HERO · the clip sits INSET inside the hero canvas
-   with padding/margin all around (framed-panel look) */
+/* v14 — FULL-BLEED CINEMA HERO · the clip IS the hero background:
+   edge-to-edge 100svh (object-fit cover), optically centered on the
+   subject (object-position center 30%), film grain + vignette pressed
+   over the footage, and a scroll-driven exit — the whole media stack
+   scales 1 → 1.15 and melts away via framer-motion useScroll
+   (transform/opacity only, GPU-composited). */
 
-/* The frame: a rounded "cinema screen" floating on the dark hero canvas.
-   Top margin clears the fixed nav; height is computed so the bottom edge
-   ALWAYS lands 22px above the fold — even when the hero copy overflows
-   100svh and the section keeps scrolling. Hairline border + deep shadow +
-   soft brand glow make the inset read as intentional design. */
-.hero-video-frame {
+/* The background layer — full-bleed, clipped, GPU-isolated */
+.hero-video-bg {
   position: absolute;
+  inset: 0;
   z-index: 0;
-  top: clamp(76px, 11vh, 96px);
-  left: clamp(12px, 2.2vw, 24px);
-  right: clamp(12px, 2.2vw, 24px);
-  height: calc(100svh - clamp(76px, 11vh, 96px) - clamp(12px, 2.4vh, 22px));
-  border-radius: clamp(18px, 2.4vw, 28px);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow:
-    0 42px 120px -42px rgba(0, 0, 0, 0.85),
-    0 0 90px -32px rgba(99, 102, 241, 0.3);
-  transform: translateZ(0); /* GPU-clip the rounded corners while drifting */
+  transform: translateZ(0);
 }
+/* Poster underlay: visible until playback starts — and forever for
+   reduced-motion / Data-Saver visitors (the <video> is not rendered).
+   Doubles as the CLS guard: the hero never shifts, no black flash. */
 .hero-video-media {
   position: absolute;
   inset: 0;
-}
-/* Static filmic vignette pressed into the panel edges */
-.hero-video-media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow:
-    inset 0 0 110px rgba(5, 6, 15, 0.42),
-    inset 0 0 34px rgba(5, 6, 15, 0.18);
-  pointer-events: none;
+  background: url("/hero-poster.jpg") center 30% / cover no-repeat rgb(5, 6, 15);
+  will-change: transform, opacity;
 }
 
-/* Looping clip — object-cover so any viewport crops it cleanly.
-   Slow Ken Burns drift adds cinematic life; loop fades (baked into the
-   encode) melt the restart through dark. */
+/* Looping clip — cover crop with the subject on the upper third. The
+   poster underlay shows through until .is-playing fades the video in
+   over 0.8s. Slow Ken Burns drift keeps the frame alive between scroll
+   events; loop fades (baked into the encode) melt the restart. */
 .hero-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 30%;
   filter: saturate(1.14) contrast(1.06) brightness(1.07);
+  opacity: 0;
+  transition: opacity 0.8s ease;
   animation: video-drift 30s ease-in-out infinite alternate;
-  will-change: transform;
+  will-change: transform, opacity;
 }
+.hero-video.is-playing { opacity: 1; }
 @keyframes video-drift {
   from { transform: scale(1.03) translate3d(0, 0, 0); }
   to { transform: scale(1.1) translate3d(-1.4%, 1%, 0); }
@@ -1528,9 +1537,58 @@ html.custom-cursor textarea { cursor: text; }
   right: 0;
   bottom: 0;
   height: 30%;
-  /* Fixed dark floor under the stats/marquee zone — capped just short of
-     solid so the framed panel keeps a visible edge above the canvas */
-  background: linear-gradient(180deg, rgba(5, 6, 15, 0) 0%, rgba(5, 6, 15, 0.5) 55%, rgba(5, 6, 15, 0.88) 100%);
+  /* Deep dark floor under the stats/marquee zone — with no frame edge to
+     protect anymore it pushes near-solid for a clean melt into the next
+     section (the fade/blur transition) */
+  background: linear-gradient(180deg, rgba(5, 6, 15, 0) 0%, rgba(5, 6, 15, 0.52) 55%, rgba(5, 6, 15, 0.94) 100%);
+}
+
+/* Filmic texture over the footage: animated grain (steps() jitter —
+   transform-only, cheap) + a soft lens vignette for cinematic depth */
+.hero-grain {
+  position: absolute;
+  inset: -8%;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  animation: hero-grain-shift 1.4s steps(4) infinite;
+}
+@keyframes hero-grain-shift {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-1.6%, 1.1%, 0); }
+  50% { transform: translate3d(1.2%, -1.6%, 0); }
+  75% { transform: translate3d(-1.1%, 1.7%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-grain { animation: none; }
+}
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 70% at 50% 42%, transparent 56%, rgba(4, 5, 10, 0.42) 100%);
+}
+
+/* Split-text statement — word-by-word masked slide-up reveal.
+   The negative margin trick keeps descenders (g, y, p) unclipped by
+   the overflow-hidden masks. */
+.hero-split { display: flex; flex-wrap: wrap; column-gap: 0.32em; }
+.hero-split-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.hero-split-word { display: inline-block; will-change: transform; }
+.hero-split-accent {
+  background: linear-gradient(100deg, #a5b4fc 0%, #818cf8 45%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* The clip is a dark, cinematic scene — keep the hero copy light in BOTH
@@ -1561,15 +1619,12 @@ html.custom-cursor textarea { cursor: text; }
   background-clip: text;
 }
 
-/* Reduced motion: no playback — a static poster still, INSIDE the frame, so
-   the framed-panel design holds. Scrim divs stay up for copy legibility. */
+/* Reduced motion: no playback — the <video> is not even rendered
+   (HeroVideo skips it) and the poster underlay IS the visual. Scrims,
+   grain and vignette stay up for copy legibility and texture. */
 @media (prefers-reduced-motion: reduce) {
   .hero-video { display: none; }
-  .hero-video-media {
-    background: url("/hero-poster.jpg") center / cover no-repeat rgb(5, 6, 15);
-  }
 }
-/* (video-drift needs no extra guard here: the element is hidden above) */
 
 /* Light theme over the cinema-dark hero:
    1) the at-top transparent nav gets a frosted light pill so its dark text

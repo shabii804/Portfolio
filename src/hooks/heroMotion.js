@@ -95,16 +95,20 @@ export function useMagnetic({ strength = 0.16, max = 7 } = {}) {
 }
 
 /**
- * Spatial exit: hero content drifts down + fades as the visitor scrolls away.
- * transform/opacity only, rAF-throttled, listener only attached while the
- * hero is in view, cleared at the top. Disabled for reduced motion.
+ * Spatial exit: hero copy fades + soft-blurs as the visitor scrolls away
+ * (the natural upward scroll carries it; `rate` adds a slight linger).
+ * transform/opacity/filter only, rAF-throttled, listener only attached while
+ * the hero is in view, cleared at the top. The blur is a desktop luxury —
+ * fine pointers only — and everything is disabled for reduced motion.
  */
-export function useScrollParallax({ rate = 0.16, fade = 0.5 } = {}) {
+export function useScrollParallax({ rate = 0.16, fade = 0.5, blur = 0 } = {}) {
   const ref = useRef(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el || prefersReduced()) return;
+    // Filter blurs repaint the layer every frame — keep that cost on desktop
+    const canBlur = blur > 0 && finePointer();
 
     let ticking = false;
     const update = () => {
@@ -113,11 +117,13 @@ export function useScrollParallax({ rate = 0.16, fade = 0.5 } = {}) {
       if (y <= 4) {
         el.style.transform = "";
         el.style.opacity = "";
+        if (canBlur) el.style.filter = "";
         return;
       }
       const p = Math.min(1, y / (el.offsetHeight || 1));
       el.style.transform = `translate3d(0, ${(y * rate).toFixed(1)}px, 0)`;
       el.style.opacity = (1 - p * fade).toFixed(3);
+      if (canBlur) el.style.filter = `blur(${(p * blur).toFixed(1)}px)`;
     };
     const onScroll = () => {
       if (ticking) return;
@@ -143,8 +149,9 @@ export function useScrollParallax({ rate = 0.16, fade = 0.5 } = {}) {
       window.removeEventListener("scroll", onScroll);
       el.style.transform = "";
       el.style.opacity = "";
+      if (canBlur) el.style.filter = "";
     };
-  }, [rate, fade]);
+  }, [rate, fade, blur]);
 
   return ref;
 }

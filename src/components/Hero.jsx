@@ -3,6 +3,7 @@ import { usePortfolio } from "../hooks/usePortfolio";
 import { defaultSkills } from "../data/portfolio";
 import { scrollToSection } from "../hooks/useLenis";
 import HeroVideo from "./HeroVideo";
+import SplitText from "./SplitText";
 import { useCountUp, useMagnetic, useScrollParallax } from "../hooks/heroMotion";
 
 // Flat list of every skill across categories, for the hero marquee strip
@@ -41,7 +42,9 @@ export default function Hero() {
   const magneticPrimary = useMagnetic();
   const magneticCv = useMagnetic();
   const magneticTalk = useMagnetic();
-  const parallaxRef = useScrollParallax();
+  // Exit choreography: copy drifts up with the scroll, fades, and soft-blurs
+  // (desktop only) while the video behind it scales 1→1.15 in HeroVideo.
+  const parallaxRef = useScrollParallax({ rate: 0.08, fade: 0.55, blur: 4 });
 
   // Typewriter — starts only after the preloader lifts so the reveal is clean
   useEffect(() => {
@@ -117,6 +120,15 @@ export default function Hero() {
                   <span className="inline-block w-[2px] h-[20px] sm:h-[22px] bg-accent-indigo/80 ml-0.5 animate-blink align-middle rounded-full" />
                 </div>
               </div>
+
+              {/* Split-text statement — word-by-word masked slide-up */}
+              <SplitText
+                text="I build things that live on screens."
+                accent={["build", "screens."]}
+                ready={ready}
+                delay={0.35}
+                className="font-display text-xl sm:text-2xl font-semibold text-text-secondary mb-5 justify-center lg:justify-start"
+              />
 
               {/* Bio */}
               <p
