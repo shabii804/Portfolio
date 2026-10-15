@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import FloatingIcons from "./FloatingIcons";
 
 /**
  * Cinematic video hero background — the "floating code" clip as a full-bleed
- * layer under the hero copy, with gradient scrims for text legibility and the
- * animated glass tech-icon chips floating above it.
+ * layer under the hero copy, with gradient scrims for text legibility.
+ * (The footage itself features the developer surrounded by floating tech
+ * icons, so no overlay chips are needed.)
  *
  * Playback rules:
  *  - muted + loop + playsInline → autoplays on every modern engine (iOS too)
@@ -75,8 +75,6 @@ export default function HeroVideo() {
       <div className="hero-video-scrim" />
       <div className="hero-video-fade-top" />
       <div className="hero-video-fade-bottom" />
-      {/* Animated motion icons — glass tech chips drifting over the footage */}
-      <FloatingIcons />
     </div>
   );
 }

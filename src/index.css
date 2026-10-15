@@ -821,81 +821,217 @@ html.theme-anim *::after {
   transition-delay: 0s !important;
 }
 
-/* ─── Preloader ──────────────────────────────────────────────────────────── */
+/* ─── Preloader v2 — name-forward boot screen (always cinema-dark) ───────── */
 .preloader {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgb(var(--bg-primary));
+  color: #f0f0f6;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
-.preloader-glow {
-  position: absolute;
-  width: 480px;
-  height: 480px;
-  border-radius: 9999px;
-  filter: blur(120px);
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.14) 0%, transparent 65%);
-  animation: glowPulse 2.2s ease-in-out infinite;
-}
-.preloader-mono {
-  position: relative;
-  display: flex;
-  gap: 0.06em;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  font-size: clamp(64px, 12vw, 120px);
-  line-height: 1;
-  letter-spacing: -0.04em;
-}
-.preloader-mono span {
-  display: block;
-  overflow: hidden;
-}
-.preloader-mono span i {
-  display: block;
-  font-style: normal;
-  transform: translateY(115%);
-  animation: name-rise 0.8s var(--ease-out) forwards;
-}
-.preloader-mono span:nth-child(2) i { animation-delay: 0.12s; }
-.preloader-count {
-  position: absolute;
-  right: clamp(20px, 5vw, 56px);
-  bottom: clamp(16px, 4.5vw, 44px);
-  font-family: "JetBrains Mono", monospace;
-  font-size: clamp(28px, 4.5vw, 44px);
-  color: rgb(var(--text-primary));
-  font-variant-numeric: tabular-nums;
-}
-.preloader-count small {
-  font-size: 0.45em;
-  color: rgb(var(--text-muted));
-  margin-left: 2px;
-}
-.preloader-bar {
+/* Split curtain: two opaque halves that part on exit, each carrying a piece
+   of the grid, vignette and its own breathing color glow */
+.preloader-panel {
   position: absolute;
   left: 0;
-  bottom: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #6366f1, #818cf8, #22d3ee);
-  box-shadow: 0 0 12px rgba(129, 140, 248, 0.6);
-  transition: width 0.12s linear;
+  right: 0;
+  background: #05060f;
+  will-change: transform;
 }
+.preloader-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(129, 140, 248, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 140, 248, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 10%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 10%, transparent 80%);
+}
+.preloader-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 100% at 50% 50%, transparent 42%, rgba(0, 0, 0, 0.5) 100%);
+}
+.preloader-panel-top { top: 0; bottom: 50%; }
+.preloader-panel-bot { top: 50%; bottom: 0; }
+.pre-glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 9999px;
+  filter: blur(110px);
+  opacity: 0.6;
+  animation: glowPulse 2.4s ease-in-out infinite;
+}
+.pre-glow-a { left: -8%; top: -18%; background: radial-gradient(circle, rgba(99, 102, 241, 0.24) 0%, transparent 62%); }
+.pre-glow-b { right: -10%; bottom: -20%; background: radial-gradient(circle, rgba(34, 211, 238, 0.17) 0%, transparent 62%); animation-delay: 1.2s; }
+
+.preloader-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+/* "SA" tile with a rotating conic brand ring */
+.pre-badge {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.035);
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+.pre-badge span {
+  background: linear-gradient(120deg, #a5b4fc, #818cf8 45%, #67e8f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.pre-badge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from 0deg, rgba(99, 102, 241, 0.95), rgba(34, 211, 238, 0.95), rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.95));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: pre-spin 2.8s linear infinite;
+}
+@keyframes pre-spin { to { transform: rotate(360deg); } }
+
+/* Name — per-letter mask reveal, indigo→violet→cyan ramp (colors inline) */
+.pre-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(44px, 9.5vw, 92px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+.pre-line { display: flex; overflow: hidden; padding: 0.05em 0.12em; }
+.pre-letter {
+  display: inline-block;
+  transform: translateY(118%);
+  animation: pre-rise 0.85s var(--ease-out) forwards;
+  animation-delay: var(--d, 0.2s);
+}
+@keyframes pre-rise { to { transform: translateY(0); } }
+
+/* Growing gradient rule + role line */
+.pre-rule {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(129, 140, 248, 0.9) 30%, rgba(34, 211, 238, 0.9) 70%, transparent);
+  animation: pre-rule 0.9s var(--ease-out) 0.85s forwards;
+}
+@keyframes pre-rule { to { width: min(240px, 46vw); } }
+.pre-role {
+  margin-top: -10px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(197, 200, 218, 0.85);
+}
+
 .preloader-tag {
   position: absolute;
+  z-index: 2;
   top: clamp(20px, 5vw, 56px);
   left: 50%;
   transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
   letter-spacing: 0.34em;
   text-transform: uppercase;
-  color: rgb(var(--text-muted));
+  color: rgba(151, 153, 174, 0.9);
   white-space: nowrap;
+}
+.preloader-tag i {
+  width: 26px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(129, 140, 248, 0.7));
+}
+.preloader-tag i:last-child { background: linear-gradient(90deg, rgba(34, 211, 238, 0.7), transparent); }
+
+/* Boot log — bottom-left */
+.pre-boot {
+  position: absolute;
+  z-index: 2;
+  left: clamp(20px, 5vw, 56px);
+  bottom: clamp(56px, 9vh, 84px);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: rgba(158, 159, 172, 0.92);
+}
+.pre-boot-line { display: inline-flex; align-items: center; gap: 9px; animation: pre-fade 0.4s var(--ease-out) both; }
+.pre-boot-line i { width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; }
+@keyframes pre-fade { from { opacity: 0; transform: translateY(6px); } }
+@media (max-width: 560px) { .pre-boot { display: none; } }
+
+.preloader-count {
+  position: absolute;
+  z-index: 2;
+  right: clamp(20px, 5vw, 56px);
+  bottom: clamp(40px, 7vh, 64px);
+  font-family: "JetBrains Mono", monospace;
+  font-size: clamp(30px, 4.5vw, 46px);
+  color: #e8e9ff;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.preloader-count.is-done {
+  color: #67e8f9;
+  text-shadow: 0 0 26px rgba(34, 211, 238, 0.55);
+}
+.preloader-count small { font-size: 0.45em; color: rgb(104 105 119); margin-left: 2px; }
+
+/* Progress bar with glowing head riding the leading edge */
+.preloader-bar-wrap { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; height: 3px; }
+.preloader-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #4f46e5, #818cf8 55%, #22d3ee);
+  box-shadow: 0 0 14px rgba(129, 140, 248, 0.65);
+  transition: width 0.12s linear;
+}
+.preloader-bar::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-50%);
+  border-radius: 9999px;
+  background: #a5f3fc;
+  box-shadow: 0 0 16px 5px rgba(34, 211, 238, 0.55);
 }
 
 /* Hero elements gated on the preloader finishing (html.is-ready) */
@@ -1281,7 +1417,9 @@ html.custom-cursor textarea { cursor: text; }
    v10 — CINEMATIC VIDEO HERO · "floating code" clip as the hero backdrop
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Full-bleed looping clip — object-cover so any viewport crops it cleanly */
+/* Full-bleed looping clip — object-cover so any viewport crops it cleanly.
+   Slow Ken Burns drift adds cinematic life; loop fades (baked into the
+   encode) melt the restart through dark. */
 .hero-video {
   position: absolute;
   inset: 0;
@@ -1289,22 +1427,29 @@ html.custom-cursor textarea { cursor: text; }
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: saturate(1.06) contrast(1.03);
+  filter: saturate(1.14) contrast(1.06) brightness(1.07);
+  animation: video-drift 30s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes video-drift {
+  from { transform: scale(1.03) translate3d(0, 0, 0); }
+  to { transform: scale(1.1) translate3d(-1.4%, 1%, 0); }
 }
 
 /* Legibility scrims: heavy on the copy side (left), a breath on the right,
-   plus a floor shadow under the stats/marquee zone */
+   plus a floor shadow under the stats/marquee zone — tuned lighter now that
+   no icon chips compete with the footage */
 .hero-video-scrim {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(5, 6, 15, 0.92) 0%, rgba(5, 6, 15, 0.66) 30%, rgba(5, 6, 15, 0.16) 62%, rgba(5, 6, 15, 0.4) 100%),
-    radial-gradient(ellipse 120% 85% at 50% 118%, rgba(5, 6, 15, 0.6) 0%, transparent 58%);
+    linear-gradient(90deg, rgba(5, 6, 15, 0.86) 0%, rgba(5, 6, 15, 0.62) 32%, rgba(5, 6, 15, 0.12) 64%, rgba(5, 6, 15, 0.32) 100%),
+    radial-gradient(ellipse 120% 85% at 50% 118%, rgba(5, 6, 15, 0.55) 0%, transparent 58%);
 }
 .hero-video-fade-top {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 6, 15, 0.78) 0%, rgba(5, 6, 15, 0) 24%);
+  background: linear-gradient(180deg, rgba(5, 6, 15, 0.62) 0%, rgba(5, 6, 15, 0) 24%);
 }
 .hero-video-fade-bottom {
   position: absolute;
@@ -1369,6 +1514,7 @@ html.custom-cursor textarea { cursor: text; }
     background: url("/hero-poster.jpg") center / cover no-repeat rgb(5, 6, 15);
   }
 }
+/* (video-drift needs no extra guard here: the element is hidden above) */
 
 /* Light theme over the cinema-dark hero:
    1) the at-top transparent nav gets a frosted light pill so its dark text
