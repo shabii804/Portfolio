@@ -968,11 +968,8 @@ html.custom-cursor textarea { cursor: text; }
 }
 .orb-fallback {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(64%, 340px);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100%;
   border-radius: 9999px;
   background:
     radial-gradient(circle at 32% 28%, rgba(165, 180, 252, 0.34) 0%, transparent 42%),
@@ -1215,5 +1212,67 @@ html.custom-cursor textarea { cursor: text; }
 }
 .nav-shell.nav-hidden { transform: translateY(-130%); }
 
-/* ─── Light theme fix for hero orb badge glass ───────────────────────────── */
+/* ─── Light theme fix for hero orb badge glass ───────────────────────── */
 [data-theme="light"] .hero-orb-badge { background: rgba(255, 255, 255, 0.85); }
+/* soft-indigo text is unreadable on the white orb — darken in light mode */
+[data-theme="light"] .hero-orb-badge .text-accent-indigoSoft { color: #4f46e5; }
+[data-theme="light"] .hero-orb-badge .text-accent-cyan { color: #0891b2; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   v9 — FULL-BLEED 3D HERO · theme-aware scene · animated motion icons
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* The WebGL canvas is a pure background layer: never eats clicks/touch.
+   Pointer parallax is tracked at window level instead. */
+.hero-canvas-wrap {
+  pointer-events: none;
+  touch-action: auto;
+}
+
+/* When the 3D scene is live, calm the CSS atmosphere so the scene leads */
+.hero-3d-active .grid-pan { opacity: 0.5; }
+.hero-3d-active .aurora { opacity: 0.65; }
+[data-theme="light"] .hero-3d-active .grid-pan { opacity: 0.75; }
+[data-theme="light"] .hero-3d-active .aurora { opacity: 0.8; }
+
+/* Animated motion icons — glass tiles floating around the CSS orb
+   (fallback mode: mobile / reduced-power devices) */
+.hero-float-chip {
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.hero-float-chip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgb(var(--bg-card) / 0.72);
+  border: 1px solid rgb(var(--border-mid));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 14px 34px -14px rgba(0, 0, 0, 0.55),
+    0 0 22px -6px rgba(99, 102, 241, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .hero-float-chip-inner {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 14px 30px -14px rgba(30, 30, 70, 0.25),
+    0 0 20px -6px rgba(99, 102, 241, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Light-theme halo: keep the glow gentle on the bright canvas */
+[data-theme="light"] .orb-halo {
+  background:
+    radial-gradient(circle at 34% 30%, rgba(99, 102, 241, 0.24) 0%, transparent 46%),
+    radial-gradient(circle at 66% 68%, rgba(8, 145, 178, 0.15) 0%, transparent 48%);
+}
+
+/* Small screens: shrink the fallback icon tiles slightly */
+@media (max-width: 640px) {
+  .hero-float-chip-inner { width: 40px; height: 40px; border-radius: 12px; }
+}

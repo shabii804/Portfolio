@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { defaultSkills } from "../data/portfolio";
 import { scrollToSection } from "../hooks/useLenis";
@@ -47,11 +47,17 @@ export default function Hero() {
   const [roleIdx, setRoleIdx] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [heroMode, setHeroMode] = useState("pending");
+  const [scene3dReady, setScene3dReady] = useState(false);
   const heroRef = useRef(null);
   const magneticPrimary = useMagnetic();
   const magneticCv = useMagnetic();
   const magneticTalk = useMagnetic();
   const parallaxRef = useScrollParallax();
+
+  const is3D = heroMode === "3d" && scene3dReady;
+  const handleMode = useCallback((m) => setHeroMode(m), []);
+  const handleSceneReady = useCallback(() => setScene3dReady(true), []);
 
   // Typewriter — starts only after the preloader lifts so the reveal is clean
   useEffect(() => {
@@ -78,33 +84,38 @@ export default function Hero() {
     <section
       id="home"
       ref={heroRef}
-      className="relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16"
+      className={`relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16 ${is3D ? "hero-3d-active" : ""}`}
     >
-      {/* Atmosphere: drifting grid + aurora + constellation + streaks + glow blobs */}
+      {/* Atmosphere: drifting grid + aurora + glow blobs */}
       <div className="absolute inset-0 grid-pan-wrap z-0" aria-hidden="true">
         <div className="grid-pan" />
       </div>
       <div className="aurora" aria-hidden="true" />
-      <HeroParticles />
-      <div className="shooting-stars" aria-hidden="true">
-        {SHOOTING_STARS.map((s, i) => (
-          <span
-            key={i}
-            className="shooting-star"
-            style={{ top: s.top, left: s.left, "--delay": s.delay, "--dur": s.dur }}
-          />
-        ))}
-      </div>
       <div className="absolute top-1/4 left-[12%] w-[560px] h-[560px] rounded-full opacity-[0.05] blur-[130px] bg-accent-indigo pointer-events-none z-0 bg-blob-indigo" />
       <div className="absolute bottom-[10%] right-[8%] w-[440px] h-[440px] rounded-full opacity-[0.04] blur-[110px] bg-accent-cyan pointer-events-none z-0 bg-blob-cyan" />
+
+      {/* Full-bleed 3D scene (desktop + capable mobile) or CSS orb fallback.
+          2D constellation + shooting stars only render until the WebGL scene
+          is live, so the hero never runs two animation loops at once. */}
+      <Hero3D heroRef={heroRef} onMode={handleMode} onSceneReady={handleSceneReady} />
+      {!is3D && <HeroParticles />}
+      {!is3D && (
+        <div className="shooting-stars" aria-hidden="true">
+          {SHOOTING_STARS.map((s, i) => (
+            <span
+              key={i}
+              className="shooting-star"
+              style={{ top: s.top, left: s.left, "--delay": s.delay, "--dur": s.dur }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Main content (outer layer takes the scroll-parallax exit) */}
       <div ref={parallaxRef} className="hero-parallax relative w-full">
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
-          <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-6 items-center">
-            {/* Left — copy (entrance choreography starts when the preloader lifts) */}
-            <div className={`text-center lg:text-left order-2 lg:order-1 hero-gate ${ready ? "is-ready" : ""}`}>
-              {/* Availability badge */}
+          <div className={`text-center lg:text-left hero-gate ${ready ? "is-ready" : ""} lg:max-w-[54%]`}>
+            {/* Availability badge */}
               <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/[0.07] border border-emerald-500/20 mb-8" style={{ "--d": "0s" }}>
                 <div className="relative flex h-2 w-2">
                   <span className="pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
@@ -195,12 +206,6 @@ export default function Hero() {
                 ))}
               </div>
             </div>
-
-            {/* Right — 3D orb centerpiece (loads during the preloader) */}
-            <div className="order-1 lg:order-2">
-              <Hero3D heroRef={heroRef} />
-            </div>
-          </div>
 
           {/* Stats strip */}
           <div
