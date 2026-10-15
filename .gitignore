@@ -36,3 +36,6 @@ pnpm-debug.log*
 .cache
 .temp
 coverage
+
+# admin panel — local message inbox (file driver only; production uses GitHub)
+/data/

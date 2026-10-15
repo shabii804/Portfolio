@@ -22,7 +22,7 @@ if (EMAILJS_ENABLED) {
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 }
 
-const INITIAL_FORM = { name: "", email: "", subject: "", message: "" };
+const INITIAL_FORM = { name: "", email: "", subject: "", message: "", website: "" };
 
 export default function Contact() {
   const { personal } = usePortfolio();
@@ -66,6 +66,37 @@ export default function Contact() {
     if (!validate()) return;
 
     setStatus("sending");
+
+    // Primary path: persist to the admin inbox (/api/messages → /admin → Messages).
+    // The hidden `website` field is a honeypot — bots fill it, humans never see it.
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          subject: form.subject,
+          message: form.message,
+          website: form.website,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        // Deliver an email copy too when EmailJS is configured (best effort).
+        if (EMAILJS_ENABLED) {
+          try {
+            await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formRef.current, {
+              publicKey: EMAILJS_PUBLIC_KEY,
+            });
+          } catch { /* inbox already has it */ }
+        }
+        setStatus("success");
+        setForm(INITIAL_FORM);
+        setTimeout(() => setStatus("idle"), 5000);
+        return;
+      }
+    } catch { /* API unreachable → fall through to fallback paths */ }
 
     // Fallback path: EmailJS not configured → open mail client
     if (!EMAILJS_ENABLED) {
@@ -123,6 +154,19 @@ export default function Contact() {
           >
             <input type="hidden" name="to_email" value={personal.email} />
             <input type="hidden" name="portfolio_owner" value={personal.name} />
+            {/* Honeypot — hidden from humans, catches bots */}
+            <div className="absolute -left-[9999px] top-auto" aria-hidden="true">
+              <label htmlFor="contact-website">Website</label>
+              <input
+                id="contact-website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={form.website}
+                onChange={handleChange}
+              />
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
