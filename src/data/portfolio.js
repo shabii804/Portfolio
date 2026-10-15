@@ -448,7 +448,7 @@ export const content = {
       "webm": "/hero.webm",
       "mobile": "/hero-mobile.mp4",
       "poster": "/hero-poster.jpg",
-      "image": "/og-image.jpg",
+      "image": "",
       "objectPosition": "center 30%",
       "scrim": 1,
       "grain": true,
