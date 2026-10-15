@@ -26,7 +26,7 @@ import {
   rateLimit,
 } from "../server/admin/http.js";
 import { isAuthorized } from "../server/admin/auth.js";
-import { ghWriteRaw, sendStoreError, storageMode } from "../server/admin/store.js";
+import { ghWriteRaw, mapStorageError, sendStoreError, storageMode } from "../server/admin/store.js";
 
 const ROOT = path.resolve(fileURLToPath(new URL("..", import.meta.url))); // → Portfolio/
 const UPLOAD_DIR = "public/uploads";
@@ -114,7 +114,8 @@ export default async function handler(req, res) {
       await fs.writeFile(target, buf);
     }
   } catch (err) {
-    return sendStoreError(res, err);
+    // Read-only host (Vercel /var/task/**) → actionable 503, never a raw EROFS.
+    return sendStoreError(res, mapStorageError(err));
   }
 
   return json(res, 200, {

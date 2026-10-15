@@ -30,12 +30,22 @@ export function persistenceNotConfigured(err) {
   return err?.message === "PERSISTENCE_NOT_CONFIGURED";
 }
 
+// Map filesystem write failures on read-only hosts (Vercel serverless =
+// EROFS on /var/task/**) onto the canonical PERSISTENCE_NOT_CONFIGURED error
+// so sendStoreError answers with the actionable 503 instead of a raw OS error.
+export function mapStorageError(err) {
+  if (err && ["EROFS", "EACCES", "EPERM"].includes(err.code)) {
+    return new Error("PERSISTENCE_NOT_CONFIGURED", { cause: err });
+  }
+  return err;
+}
+
 export function sendStoreError(res, err) {
   if (persistenceNotConfigured(err)) {
     return error(
       res,
       503,
-      "Persistence is not configured on this deployment. Set GITHUB_TOKEN (and ADMIN_PASSWORD) in Vercel → Settings → Environment Variables, then redeploy."
+      "Persistence is not configured on this deployment. Fix it in one of two ways: (1) /admin → Settings → “Connect GitHub” — paste a token, works instantly from your browser; or (2) set GITHUB_TOKEN in Vercel → Settings → Environment Variables and redeploy."
     );
   }
   return error(res, 500, err?.message || "Storage error");
@@ -106,10 +116,7 @@ export async function writeContent(content, sections) {
     await fileWrite(CONTENT_FILE, json);
     await fileWrite("src/data/portfolio.js", renderPortfolioModule(content));
   } catch (err) {
-    if (err.code === "EROFS" || err.code === "EACCES" || err.code === "EPERM") {
-      throw new Error("PERSISTENCE_NOT_CONFIGURED", { cause: err });
-    }
-    throw err;
+    throw mapStorageError(err);
   }
   return { mode: "file", message };
 }
@@ -142,10 +149,7 @@ export async function writeMessages(messages) {
   try {
     await fileWrite(MESSAGES_FILE, json);
   } catch (err) {
-    if (err.code === "EROFS" || err.code === "EACCES" || err.code === "EPERM") {
-      throw new Error("PERSISTENCE_NOT_CONFIGURED", { cause: err });
-    }
-    throw err;
+    throw mapStorageError(err);
   }
   return { mode: "file" };
 }

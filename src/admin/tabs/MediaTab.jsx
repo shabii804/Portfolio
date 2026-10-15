@@ -2,8 +2,9 @@
 // Hero & Media — manage the hero section background from the admin panel:
 //
 //   • switch between video / static image / off
-//   • upload new clips, posters and images (≤3 MB, lands in /uploads/ on the
-//     repo → Vercel rebuild serves them from the CDN)
+//   • upload new clips, posters and images (≤3 MB via the API — up to 25 MB
+//     straight from the browser once GitHub is connected in Settings; lands
+//     in /uploads/ on the repo → Vercel rebuild serves them from the CDN)
 //   • or paste any external URL
 //   • tune the frame: object position, dark overlay strength, grain, vignette
 //   • live preview of the composition before saving
@@ -12,10 +13,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useRef, useState } from "react";
-import { api } from "../api.js";
+import { maxUploadMb, uploadMedia } from "../media.js";
 import { Badge, Btn, Field, Panel, Spinner, Toggle, inputCls } from "../ui.jsx";
 
-const MAX_MB = 3;
+const HARD_MAX_MB = 25; // browser-bridge ceiling (serverless route caps at 3 MB)
 
 const DEFAULTS = {
   enabled: true,
@@ -148,8 +149,9 @@ export default function MediaTab({ content, saveContent, notify }) {
           </div>
         )}
         <p className="font-mono text-[10px] text-text-muted mt-4 leading-relaxed">
-          Uploads: up to {MAX_MB} MB per file (Vercel request limit) — they commit to <code>public/uploads/</code> and go
-          live after the automatic redeploy (~1 min). Larger clips: compress to H.264/VP9 first, or paste a URL.
+          Uploads go live after the automatic redeploy (~1 min). Up to 3 MB through the API; with GitHub connected
+          (Settings → Connect GitHub) up to {HARD_MAX_MB} MB straight from your browser — full-size hero clips welcome.
+          Larger clips: compress to H.264/VP9 first, or paste an external URL.
         </p>
       </Panel>
 
@@ -222,19 +224,19 @@ function MediaField({ label, hint, value, onChange, accept, onNotify }) {
     const file = e.target.files?.[0];
     e.target.value = ""; // allow re-picking the same file later
     if (!file || busy) return;
-    if (file.size > MAX_MB * 1024 * 1024) {
-      onNotify(`"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)} MB — the limit is ${MAX_MB} MB. Compress it first.`, "err");
+    const cap = maxUploadMb(); // 3 MB via API — 25 MB with the browser bridge
+    if (file.size > cap * 1024 * 1024) {
+      onNotify(
+        `"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)} MB — the limit is ${cap} MB.` +
+          (cap < HARD_MAX_MB ? " Connect GitHub in Settings to unlock up to " + HARD_MAX_MB + " MB." : " Compress it first."),
+        "err"
+      );
       return;
     }
     setBusy(true);
     try {
-      const data = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(",").pop() || "");
-        reader.onerror = () => reject(new Error("Could not read the file"));
-        reader.readAsDataURL(file);
-      });
-      const res = await api("/api/upload", { method: "POST", body: { name: file.name, data } });
+      // Smart transport: API (≤3 MB) → automatic browser-GitHub bridge fallback.
+      const res = await uploadMedia(file);
       onChange(res.path);
       onNotify(res.message || `Uploaded ${file.name}`, "info");
     } catch (err) {

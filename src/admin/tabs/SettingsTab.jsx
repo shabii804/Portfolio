@@ -9,7 +9,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react";
-import { Badge, Btn, Panel, Spinner, TextArea, TextInput, Toggle } from "../ui.jsx";
+import { Badge, Btn, Field, Panel, Spinner, TextArea, TextInput, Toggle, inputCls } from "../ui.jsx";
+import {
+  clearGhConfig,
+  getGhConfig,
+  ghConnected,
+  ghValidate,
+  setGhConfig,
+} from "../ghBridge.js";
 
 const API_REFERENCE = [
   ["POST", "/api/auth", "public", "Login with the admin password → bearer token (7 days)."],
@@ -107,8 +114,133 @@ function SiteSettingsPanel({ content, saveContent }) {
   );
 }
 
+// ── 1b. Browser GitHub bridge — the zero-setup persistence fix ────────────────
+// Vercel's serverless filesystem is read-only (EROFS on /var/task/**), so
+// without persistence every save/upload fails on production. This panel
+// connects the bridge: a GitHub token stored ONLY in this browser commits
+// content/uploads straight from the page → Vercel rebuilds → live in ~1 min.
+export function GitHubBridgePanel({ onGhChanged }) {
+  const [connected, setConnected] = useState(ghConnected());
+  const [account, setAccount] = useState(null); // { login, repo, branch }
+  const [token, setToken] = useState("");
+  const [repo, setRepo] = useState(getGhConfig().repo);
+  const [branch, setBranch] = useState(getGhConfig().branch);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  const connect = async (e) => {
+    e?.preventDefault?.();
+    if (!token.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const info = await ghValidate({ token: token.trim(), repo: repo.trim(), branch: branch.trim() });
+      setGhConfig({ token: token.trim(), repo: repo.trim(), branch: branch.trim() });
+      setAccount(info);
+      setConnected(true);
+      setToken("");
+      onGhChanged?.();
+    } catch (err) {
+      setError(err.message || "Could not connect.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const disconnect = () => {
+    clearGhConfig();
+    setConnected(false);
+    setAccount(null);
+    onGhChanged?.();
+  };
+
+  if (connected) {
+    return (
+      <Panel
+        title="GitHub connection — browser mode"
+        desc="Saves and uploads commit straight from this browser. Token never leaves your machine."
+        actions={<Badge tone="green">● connected{account?.login ? ` as ${account.login}` : ""}</Badge>}
+      >
+        <div className="rounded-xl bg-bg-primary border border-border-subtle p-4 font-mono text-[11px] text-text-secondary space-y-1">
+          <div>repo <span className="text-accent-cyan">{getGhConfig().repo}</span> @ branch <span className="text-accent-cyan">{getGhConfig().branch}</span></div>
+          <div className="text-text-muted">content saves · media uploads (up to 25 MB) · auto-redeploy on commit</div>
+        </div>
+        <div className="flex items-center gap-3 mt-4">
+          <Btn variant="ghost" onClick={disconnect}>Disconnect</Btn>
+          <span className="font-mono text-[10px] text-text-muted">Everything in Hero &amp; Media, Content, Projects… now persists on production.</span>
+        </div>
+      </Panel>
+    );
+  }
+
+  return (
+    <Panel
+      title="Connect GitHub — browser mode"
+      desc="One paste, zero Vercel setup: makes every save and upload on this production panel persist for real."
+      actions={<Badge tone="amber">not connected</Badge>}
+    >
+      <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.06] p-4 mb-5">
+        <p className="font-mono text-[10px] text-amber-400 uppercase tracking-widest mb-1.5">Why you saw “EROFS: read-only file system”</p>
+        <p className="font-body text-xs text-text-secondary leading-relaxed">
+          The production server runs on a read-only filesystem, so uploads/saves bounced until persistence is connected.
+          Connect GitHub below and every save commits from your browser — no Vercel settings needed.
+        </p>
+      </div>
+
+      <form onSubmit={connect} className="space-y-4">
+        <Field label="GitHub token" hint="Fine-grained PAT with “Contents: Read and write” on the repo (GitHub → Settings → Developer settings). Stored only in this browser.">
+          <input
+            type="password"
+            value={token}
+            onChange={(e) => { setToken(e.target.value); setError(null); }}
+            placeholder="github_pat_…"
+            autoComplete="off"
+            spellCheck={false}
+            className={`${inputCls} font-mono text-xs`}
+          />
+        </Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Repository" hint="owner/name with your portfolio code.">
+            <input
+              value={repo}
+              onChange={(e) => setRepo(e.target.value)}
+              placeholder="shabii804/Portfolio"
+              spellCheck={false}
+              className={`${inputCls} font-mono text-xs`}
+            />
+          </Field>
+          <Field label="Branch" hint="The branch Vercel deploys from.">
+            <input
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
+              placeholder="main"
+              spellCheck={false}
+              className={`${inputCls} font-mono text-xs`}
+            />
+          </Field>
+        </div>
+
+        {error && (
+          <p role="alert" className="font-mono text-[10px] text-red-400">{error}</p>
+        )}
+
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={!token.trim() || busy}
+            className="btn-primary px-4 py-2.5 rounded-xl font-mono text-xs disabled:opacity-40 flex items-center gap-2"
+          >
+            {busy ? <><Spinner className="!w-3.5 !h-3.5" /> Validating…</> : "Connect & validate"}
+          </button>
+          <span className="font-mono text-[10px] text-text-muted">Checks token identity + push access + branch before saving anything.</span>
+        </div>
+      </form>
+    </Panel>
+  );
+}
+
 // ── 2. Infrastructure / env / API reference ───────────────────────────────────
-export default function SettingsTab({ status, content, saveContent }) {
+export default function SettingsTab({ status, content, saveContent, onGhChanged }) {
   const env = status?.env || {};
   const envRows = [
     ["ADMIN_PASSWORD", env.ADMIN_PASSWORD, "Custom admin password set (default disabled)."],
@@ -120,6 +252,7 @@ export default function SettingsTab({ status, content, saveContent }) {
 
   return (
     <div className="space-y-6">
+      <GitHubBridgePanel onGhChanged={onGhChanged} />
       {content !== undefined && <SiteSettingsPanel content={content} saveContent={saveContent} />}
 
       <Panel
@@ -149,7 +282,7 @@ export default function SettingsTab({ status, content, saveContent }) {
         )}
       </Panel>
 
-      <Panel title="Production setup (Vercel)" desc="One-time — makes admin saves persist for real.">
+      <Panel title="Production setup (Vercel env) — optional alternative" desc="The browser connection above is instant; this server-side route makes EVERY request (including contact-form inbox writes) persist without the browser.">
         <ol className="space-y-3 list-none">
           {[
             <>
@@ -183,8 +316,9 @@ export default function SettingsTab({ status, content, saveContent }) {
           ))}
         </ol>
         <p className="font-mono text-[10px] text-text-muted mt-4 leading-relaxed">
-          Without GITHUB_TOKEN the panel still works (login, stats, inbox reading) but saves fall back to the
-          read-only filesystem and fail with a clear 503 — this is the safe default.
+          Without either option the panel still works (login, stats, inbox reading) but saves fall back to the
+          read-only filesystem and fail with a clear 503 — this is the safe default. The browser connection above
+          covers all admin saves &amp; uploads; the Vercel env route additionally persists public contact-form messages.
         </p>
       </Panel>
 

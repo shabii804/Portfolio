@@ -13,6 +13,7 @@
 
 import { useEffect, useState } from "react";
 import { api, clearToken, getToken, login, timeAgo } from "./api.js";
+import { bridgeSaveContent, ghConnected } from "./ghBridge.js";
 import { Badge, Btn, Spinner } from "./ui.jsx";
 import OverviewTab from "./tabs/OverviewTab.jsx";
 import ContentTab from "./tabs/ContentTab.jsx";
@@ -41,6 +42,10 @@ export default function AdminApp() {
   const [content, setContent] = useState(null);
   const [tab, setTab] = useState("overview");
   const [toast, setToast] = useState(null); // { id, msg, kind }
+  // Bumped when the browser-GitHub connection changes so the header badge
+  // (and anything reading ghConnected() at render time) refreshes.
+  const [ghVersion, setGhVersion] = useState(0);
+  const bumpGh = () => setGhVersion((v) => v + 1);
 
   const notify = (msg, kind = "ok") => setToast({ id: Date.now(), msg, kind });
 
@@ -92,16 +97,25 @@ export default function AdminApp() {
     setContent(null);
   };
 
-  // Central save — every tab persists through here.
+  // Central save — every tab persists through here. Transport: server API
+  // first; on 503 (read-only host, driver unconfigured) retry through the
+  // browser GitHub bridge when it's connected (Settings → Connect GitHub).
   const saveContent = async (patch, label) => {
     try {
-      const res = await api("/api/content", { method: "PUT", body: { content: patch } });
+      let res;
+      try {
+        res = await api("/api/content", { method: "PUT", body: { content: patch } });
+      } catch (err) {
+        if (!(err.status === 503 && ghConnected())) throw err;
+        const next = await bridgeSaveContent(content, patch); // commits from the browser
+        res = { content: next, storage: "github-browser" };
+      }
       setContent(res.content);
       notify(
-        res.storage === "github"
+        res.storage === "github" || res.storage === "github-browser"
           ? `${label} saved — committing… live in ~1 min`
           : `${label} saved`,
-        res.storage === "github" ? "info" : "ok"
+        res.storage === "file" ? "ok" : "info"
       );
       setStatus((s) => (s ? { ...s, counts: { ...s.counts } } : s));
       return res;
@@ -153,9 +167,12 @@ export default function AdminApp() {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-3">
-            <Badge tone={status?.storage === "github" ? "green" : "amber"} className="hidden md:inline-flex">
-              {status?.storage === "github" ? "GitHub CMS" : "Local driver"}
+          <div className="flex items-center gap-2 md:gap-3" data-gh-version={ghVersion}>
+            <Badge
+              tone={status?.storage === "github" || ghConnected() ? "green" : "amber"}
+              className="hidden md:inline-flex"
+            >
+              {status?.storage === "github" ? "GitHub CMS" : ghConnected() ? "GitHub CMS · browser" : "Local driver"}
             </Badge>
             {unread > 0 && <Badge tone="cyan">{unread} new</Badge>}
             <a href="/" target="_blank" rel="noreferrer" className="btn-ghost px-3 py-1.5 rounded-lg font-mono text-xs">
@@ -247,7 +264,7 @@ export default function AdminApp() {
             {tab === "projects" && <ProjectsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "skills" && <SkillsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "messages" && <MessagesTab notify={notify} />}
-            {tab === "settings" && <SettingsTab key={content?.meta?.updatedAt || "init"} status={status} content={content} saveContent={saveContent} />}
+            {tab === "settings" && <SettingsTab key={content?.meta?.updatedAt || "init"} status={status} content={content} saveContent={saveContent} onGhChanged={bumpGh} />}
             {tab === "tools" && <ToolsTab content={content} />}
           </div>
         </main>
