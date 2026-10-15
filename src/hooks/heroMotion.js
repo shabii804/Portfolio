@@ -51,6 +51,13 @@ export function useMagnetic({ strength = 0.16, max = 7 } = {}) {
     let x = 0;
     let y = 0;
     const apply = (scale = 1) => {
+      // At rest (identity) CLEAR the transform instead of writing
+      // translate(0,0) scale(1): a kept transform would hold the button on
+      // a composited layer and render its label blurry between hovers.
+      if (x === 0 && y === 0 && scale === 1) {
+        el.style.transform = "";
+        return;
+      }
       el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${scale})`;
     };
     const onMove = (e) => {
@@ -121,7 +128,9 @@ export function useScrollParallax({ rate = 0.16, fade = 0.5, blur = 0 } = {}) {
         return;
       }
       const p = Math.min(1, y / (el.offsetHeight || 1));
-      el.style.transform = `translate3d(0, ${(y * rate).toFixed(1)}px, 0)`;
+      // Integer translate — fractional offsets keep the copy subpixel-shifted
+      // after the scroll stops (soft text). Whole pixels stay crisp.
+      el.style.transform = `translate3d(0, ${Math.round(y * rate)}px, 0)`;
       el.style.opacity = (1 - p * fade).toFixed(3);
       if (canBlur) el.style.filter = `blur(${(p * blur).toFixed(1)}px)`;
     };

@@ -43,9 +43,10 @@ export default function Hero() {
   const magneticPrimary = useMagnetic();
   const magneticCv = useMagnetic();
   const magneticTalk = useMagnetic();
-  // Exit choreography: copy drifts up with the scroll, fades, and soft-blurs
-  // (desktop only) while the video behind it scales 1→1.15 in HeroVideo.
-  const parallaxRef = useScrollParallax({ rate: 0.08, fade: 0.55, blur: 4 });
+  // Exit choreography: copy drifts up with the scroll and fades while the
+  // video behind it scales 1→1.15 in HeroVideo. NO blur — a filter blur on
+  // the copy container smeared the text/buttons during (and after) scrolls.
+  const parallaxRef = useScrollParallax({ rate: 0.08, fade: 0.55, blur: 0 });
   // Admin toggle (content.media.heroBackground.enabled) — when the background
   // is off the section drops the cinema-dark scope and shows theme tokens.
   const heroMediaOn = heroBackgroundConfig().enabled !== false;

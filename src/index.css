@@ -238,7 +238,10 @@ body {
 
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  /* `none` (not translateY(0)) — combined with the `backwards` fill on
+     .hero-gate > * the end state equals the base style: no lingering
+     transform, no composited layer, crisp text. */
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes spin-slow {
@@ -646,19 +649,24 @@ body {
 }
 .name-line {
   display: block;
-  transform: translateY(115%);
-  will-change: transform;
 }
 html.is-ready .name-line {
-  animation: name-rise 0.9s var(--ease-out) forwards;
+  /* `backwards` (not `forwards`): the BASE style is the final state, the
+     keyframe only supplies the masked start. With `forwards` a finished
+     animation keeps an animation-driven transform (identity matrix) applied
+     forever → the H1 stays on a composited layer → blurry name text. */
+  animation: name-rise 0.9s var(--ease-out) backwards;
 }
 .name-mask-a .name-line { animation-delay: 0.18s; }
 .name-mask-b .name-line { animation-delay: 0.32s; }
 @keyframes name-rise {
-  to { transform: translateY(0); }
+  from { transform: translateY(115%); }
+  to { transform: none; }
 }
 
-/* Magnetic CTAs — named properties only (never `all`); trailing + release */
+/* Magnetic CTAs — named properties only (never `all`); trailing + release.
+   No `will-change: transform`: it would keep the buttons on a composited
+   layer at rest → blurry button labels. JS clears the transform at rest. */
 .magnetic {
   transition:
     transform 240ms var(--ease-out),
@@ -666,7 +674,6 @@ html.is-ready .name-line {
     border-color 300ms var(--ease-out),
     color 300ms var(--ease-out),
     box-shadow 300ms var(--ease-out);
-  will-change: transform;
 }
 
 /* Pointer-tracked glare over the portrait (fine pointers only) */
@@ -690,8 +697,11 @@ html.is-ready .name-line {
 /* Badge depth layer — inner wrapper that counter-parallaxes with tilt */
 .depth-layer { will-change: transform; }
 
-/* Scroll-parallax exit layer (transform/opacity driven by rAF) */
-.hero-parallax { will-change: transform, opacity; }
+/* Scroll-parallax exit layer (transform/opacity driven by rAF).
+   Deliberately NO `will-change` and NO translateZ(0) — either would
+   composite the ENTIRE hero copy permanently and soften every line of
+   text with grayscale AA; the browser promotes the layer on demand while
+   the rAF-driven transform is actually running. */
 
 :focus-visible {
   outline: 2px solid #818cf8;
@@ -1085,10 +1095,13 @@ html.theme-anim *::after {
   box-shadow: 0 0 16px 5px rgba(34, 211, 238, 0.55);
 }
 
-/* Hero elements gated on the preloader finishing (html.is-ready) */
+/* Hero elements gated on the preloader finishing (html.is-ready).
+   `backwards` fill — see .name-line: after the entrance ends the elements
+   return to their base style (no transform) so ALL hero copy renders crisp
+   instead of living on a permanent composited layer. */
 .hero-gate { visibility: hidden; }
 html.is-ready .hero-gate { visibility: visible; }
-html.is-ready .hero-gate > * { animation: fadeSlideUp 0.7s var(--ease-out) both; animation-delay: var(--d, 0s); }
+html.is-ready .hero-gate > * { animation: fadeSlideUp 0.7s var(--ease-out) backwards; animation-delay: var(--d, 0s); }
 
 /* ─── Custom cursor (fine pointers, reduced-motion off only) ─────────────── */
 .cursor-dot,
@@ -1593,7 +1606,7 @@ img.hero-video-img {
   padding-bottom: 0.12em;
   margin-bottom: -0.12em;
 }
-.hero-split-word { display: inline-block; will-change: transform; }
+.hero-split-word { display: inline-block; }
 .hero-split-accent {
   background: linear-gradient(100deg, #a5b4fc 0%, #818cf8 45%, #22d3ee 100%);
   -webkit-background-clip: text;
