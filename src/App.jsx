@@ -13,6 +13,7 @@ import ChatButton from './components/ChatButton'
 import CommandPalette from './components/CommandPalette'
 import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
+import VideoBackground from './components/VideoBackground'
 import Preloader from './components/Preloader'
 import Cursor from './components/Cursor'
 import useLenis from './hooks/useLenis'
@@ -26,7 +27,10 @@ export default function App() {
 
   return (
     <PortfolioProvider>
-      <div className="relative">
+      {/* global-video-on scopes the frosted-glass section panels that float
+          over the fixed footage (see index.css v13 block) */}
+      <div className="relative global-video-on">
+        <VideoBackground />
         <a href="#home" className="skip-link">Skip to content</a>
         <div className="noise-overlay" />
         <Preloader />

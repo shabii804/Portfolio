@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { defaultSkills } from "../data/portfolio";
 import { scrollToSection } from "../hooks/useLenis";
-import HeroVideo from "./HeroVideo";
 import { useCountUp, useMagnetic, useScrollParallax } from "../hooks/heroMotion";
 
 // Flat list of every skill across categories, for the hero marquee strip
@@ -69,10 +68,10 @@ export default function Hero() {
       id="home"
       className="hero-video-active relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16"
     >
-      {/* Cinematic video background — "floating code" clip + scrims +
-          animated motion icons. Replaces the previous 3D/particle layers:
-          one hero, one animation, zero loop contention. */}
-      <HeroVideo />
+      {/* The video no longer lives here — it is a GLOBAL fixed layer
+          (VideoBackground in App) behind the whole site. The hero sits
+          directly on it with cinema-mode copy; as you scroll, the frame
+          expands and the footage becomes the full-website background. */}
 
       {/* Main content (outer layer takes the scroll-parallax exit) */}
       <div ref={parallaxRef} className="hero-parallax relative w-full">
