@@ -1975,10 +1975,10 @@ img.hero-video-img {
   inset: 0;
   background: linear-gradient(180deg, rgba(5, 6, 15, 0.62) 0%, rgba(5, 6, 15, 0) 24%);
 }
-/* Mobile: copy is centered, so the desktop left-heavy scrim misses it.
-   Switch to a vertical melt + mild side darkening to hold contrast over
-   the footage's bright center (light code windows) while keeping the
-   panel alive. */
+/* Mobile: copy is left-aligned in a single column (v31.1), so the desktop
+   left-heavy scrim alone misses the lower half of the column. Keep the
+   vertical melt + mild side darkening — the copy veil (left radial) adds
+   the copy-side depth on top, and the floor shadow holds the stats. */
 @media (max-width: 768px) {
   .hero-video-scrim {
     background:
@@ -2081,33 +2081,12 @@ img.hero-video-img {
   .hero-video { display: none; }
 }
 
-/* ─── v31 — MOBILE HERO STAGE · the clip fitted into a framed panel ───────
-   Below lg the hero no longer paints the footage full-bleed behind the
-   copy. The same admin-driven media stack renders IN FLOW as a title-card
-   panel (16/10, rounded, hairline border) between the CTAs and the stats:
-   the video FITS the hero instead of smearing behind the text. The scroll
-   exit choreography (scale + melt) keeps working — rootRef is the panel. */
-.hero-video-stage {
-  position: relative;
-  inset: auto;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: 1.25rem;
-  border: 1px solid rgba(129, 140, 248, 0.22);
-  box-shadow:
-    0 24px 60px -24px rgba(0, 0, 0, 0.65),
-    0 0 44px -18px rgba(99, 102, 241, 0.35);
-}
-/* The panel is small and sits on the dark cinema canvas — swap the heavy
-   left/vertical scrims for a whisper of top shade and a soft floor so the
-   footage reads bright and complete inside its frame. */
-.hero-video-stage .hero-video-scrim {
-  background: linear-gradient(180deg, rgba(5, 6, 15, 0.12) 0%, rgba(5, 6, 15, 0.04) 55%, rgba(5, 6, 15, 0.38) 100%);
-}
-.hero-video-stage .hero-video-fade-top,
-.hero-video-stage .hero-video-fade-bottom { display: none; }
-/* Keep the framed panel clear of the section's absolute bottom-melt. */
-.hero-stage-slot { position: relative; z-index: 1; }
+/* ─── v31.1 — MOBILE HERO = FULL-BLEED BACKGROUND (user call) ─────────────
+   The v31 fitted stage panel is gone: every viewport paints the footage
+   edge-to-edge behind the copy, exactly like the desktop cinema hero.
+   Mobile keeps its own scrim recipe below (vertical melt + side shade,
+   tuned for the left-aligned single-column copy) and the copy veil now
+   covers all viewports. */
 
 /* ─── v31 — NAVBAR · mobile at-top glass pill + full-screen menu ────────── */
 /* Dark theme: at the very top the mobile bar floats as a glass capsule

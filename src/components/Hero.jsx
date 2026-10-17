@@ -35,28 +35,10 @@ function useReady() {
   return ready;
 }
 
-/* v31 — desktop (≥1024px) keeps the full-bleed cinema background; below lg
-   the hero becomes the stacked layout: left-aligned copy + the clip fitted
-   into a framed stage panel (single mounted instance — the variant swaps
-   with the breakpoint via this hook). */
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const onChange = (e) => setIsDesktop(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return isDesktop;
-}
-
 export default function Hero() {
   const { personal } = usePortfolio();
   const navigate = useNavigate();
   const ready = useReady();
-  const isDesktop = useIsDesktop();
   const [roleIdx, setRoleIdx] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -97,15 +79,15 @@ export default function Hero() {
       id="home"
       className={`${heroMediaOn ? "hero-video-active " : ""}relative min-h-[92svh] flex items-center justify-center overflow-hidden pt-24 md:pt-20 pb-10`}
     >
-      {/* Cinematic video — desktop: full-bleed background. Mobile/tablet:
-          the same clip fitted into a framed stage panel in the content flow
-          (placed after the CTAs below), so it FITS the hero instead of
-          hiding behind the copy. */}
-      {isDesktop && <HeroVideo variant="bg" />}
+      {/* v31.1 — cinematic video as the hero BACKGROUND on every viewport
+          (user call: the fitted mobile stage panel was the wrong read —
+          mobile wants the same full-bleed cinema as desktop). The copy is
+          left-aligned on all sizes and sits on the veil + mobile scrims. */}
+      <HeroVideo variant="bg" />
 
-      {/* Copy-side legibility veil — desktop only (the mobile stage does not
-          sit under the copy, so there is nothing to veil). */}
-      {heroMediaOn && isDesktop && <div className="hero-copy-veil" aria-hidden="true" />}
+      {/* Copy-side legibility veil — all viewports now (mobile copy sits on
+          the footage too, left-aligned). */}
+      {heroMediaOn && <div className="hero-copy-veil" aria-hidden="true" />}
 
       {/* Main content (outer layer takes the scroll-parallax exit).
           z-10: the parallax transform creates a stacking context, so without
@@ -214,18 +196,6 @@ export default function Hero() {
                 ))}
               </div>
             </div>
-
-          {/* v31 — the fitted hero stage (mobile/tablet): the same admin-driven
-              clip, framed like a title card between the CTAs and the stats. */}
-          {!isDesktop && (
-            <div
-              className={`hero-gate hero-stage-slot mt-8 ${ready ? "is-ready" : ""}`}
-              style={{ "--d": "0.68s" }}
-              data-hero-stage
-            >
-              <HeroVideo variant="stage" />
-            </div>
-          )}
 
           {/* Stats strip — glass panel so numbers stay clearly visible over any footage */}
           <div className={`hero-gate mt-9 lg:mt-7 ${ready ? "is-ready" : ""}`} style={{ "--d": "0.7s" }}>

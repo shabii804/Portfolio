@@ -25,11 +25,9 @@ import { useLocalMediaSrc } from "../data/localMedia";
  * film grain → vignette. The whole media stack is wrapped in a scroll-driven
  * motion.div: scale 1 → 1.15 + fade while the hero scrolls away.
  *
- * variant (v31):
- *   "bg"    (default) full-bleed absolute background — desktop cinema hero
- *   "stage" fitted framed panel (16/10, rounded, border) rendered IN FLOW —
- *           the mobile hero: the clip keeps its grain/vignette/scrub exit
- *           but sits in a proper frame instead of smearing behind the copy
+ * v31.1: single full-bleed background on EVERY viewport again (the fitted
+ * mobile stage experiment is gone) — mobile gets the same cinema hero as
+ * desktop, with its own scrim recipe in CSS.
  *
  * Playback rules (video mode):
  *  - <source> webm (VP9) first, mp4 fallback; small screens get the lighter
@@ -50,7 +48,7 @@ const SCRUB_MODE = import.meta.env.VITE_VIDEO_SCRUB === "1";
 // Wrapper — decides whether the background mounts at all (admin toggle).
 // Keeps the early-return OUT of the hookful component below so the Rules of
 // Hooks hold no matter how the admin flips the switches.
-export default function HeroVideo({ variant = "bg" }) {
+export default function HeroVideo() {
   // Reactive: re-renders when a runtime snapshot lands (Supabase save, or a
   // local-test-mode save in this browser) — no rebuild needed.
   const hb = useHeroBackgroundConfig();
@@ -61,10 +59,10 @@ export default function HeroVideo({ variant = "bg" }) {
   const image = useLocalMediaSrc(hb.image);
   const resolved = { ...hb, desktop, webm, mobile, poster, image };
   if (hb.enabled === false) return null;
-  return <HeroVideoMedia key={`${webm}|${desktop}|${mobile}|${poster}|${image}`} hb={resolved} variant={variant} />;
+  return <HeroVideoMedia key={`${webm}|${desktop}|${mobile}|${poster}|${image}`} hb={resolved} />;
 }
 
-function HeroVideoMedia({ hb, variant = "bg" }) {
+function HeroVideoMedia({ hb }) {
   const isVideo = hb.type !== "image"; // unknown types fall back to video
   const isImage = hb.type === "image";
 
@@ -163,7 +161,7 @@ function HeroVideoMedia({ hb, variant = "bg" }) {
   return (
     <div
       ref={rootRef}
-      className={`hero-video-bg ${variant === "stage" ? "hero-video-stage" : ""}`}
+      className="hero-video-bg"
       aria-hidden="true"
     >
       <motion.div
