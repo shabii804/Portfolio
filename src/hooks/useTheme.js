@@ -1,3 +1,4 @@
+import { flushSync } from "react-dom";
 import { useCallback, useEffect, useState } from "react";
 
 const KEY = "sa-theme";
@@ -26,9 +27,10 @@ export default function useTheme() {
     root.classList.add("theme-anim");
     root.dataset.theme = theme;
     root.style.colorScheme = theme;
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", theme === "dark" ? "#07070B" : "#F3F3F8");
+    // Keep BOTH media-scoped theme-color metas in sync — the browser picks
+    // per system preference, so we overwrite both to the active color
+    const hex = theme === "dark" ? "#07070B" : "#F5F6FA";
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", hex));
     try {
       localStorage.setItem(KEY, theme);
     } catch {
@@ -38,10 +40,26 @@ export default function useTheme() {
     return () => clearTimeout(t);
   }, [theme]);
 
-  const toggle = useCallback(() => setTheme((t) => (t === "dark" ? "light" : "dark")), []);
+  /* Toggle with a circular wipe from the button (View Transitions API when
+     available, instant cross-fade fallback via .theme-anim otherwise). */
+  const toggle = useCallback((origin) => {
+    const apply = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+    let reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { /* old engines */ }
+    if (typeof document.startViewTransition !== "function" || reduce) {
+      apply();
+      return;
+    }
+    const root = document.documentElement;
+    const x = origin?.x ?? window.innerWidth - 72;
+    const y = origin?.y ?? 60;
+    root.style.setProperty("--wipe-x", `${Math.round(x)}px`);
+    root.style.setProperty("--wipe-y", `${Math.round(y)}px`);
+    document.startViewTransition(() => flushSync(apply));
+  }, []);
 
   useEffect(() => {
-    const onToggle = () => toggle();
+    const onToggle = (e) => toggle(e?.detail);
     window.addEventListener("sa:toggle-theme", onToggle);
     return () => window.removeEventListener("sa:toggle-theme", onToggle);
   }, [toggle]);

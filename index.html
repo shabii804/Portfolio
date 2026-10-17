@@ -13,8 +13,24 @@
     <meta name="author" content="Shoaib Arshad" />
     <meta name="description" content="Full Stack Developer building production-grade web apps (React, Node.js, Firebase), Java desktop systems and Flutter apps. CGPA 4.0 Software Engineering student at Riphah International University, Islamabad." />
     <meta name="keywords" content="Shoaib Arshad, Full Stack Developer, React Developer, Node.js, Firebase, Java Developer, Software Engineer, Islamabad, Pakistan, Portfolio" />
-    <meta name="theme-color" content="#07070B" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07070B" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F6FA" />
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      /* Apply saved/system theme BEFORE first paint — no flash of wrong theme.
+         Brand default is dark; light is an explicit opt-in (sa-theme). */
+      (function () {
+        try {
+          var t = localStorage.getItem("sa-theme");
+          if (t !== "light" && t !== "dark") t = "dark";
+          var r = document.documentElement;
+          r.dataset.theme = t;
+          r.style.colorScheme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://shoaibarshad-seven.vercel.app/" />
 

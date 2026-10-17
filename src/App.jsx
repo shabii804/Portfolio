@@ -43,6 +43,23 @@ function ReadyBroadcast() {
   return null
 }
 
+// v21: reveal fallback — if IntersectionObserver never fires (old engines,
+// restore-from-bfcache, print), no card may stay at opacity 0. After 3.5s
+// force-reveal anything still hidden; below-fold items simply appear without
+// their scroll animation instead of being invisible forever.
+function RevealFallback() {
+  useEffect(() => {
+    const t = setTimeout(() => {
+      document.querySelectorAll(".animate-on-scroll:not(.visible)").forEach((el) => {
+        const r = el.getBoundingClientRect()
+        if (r.top < window.innerHeight && r.bottom > 0) el.classList.add("visible")
+      })
+    }, 3500)
+    return () => clearTimeout(t)
+  }, [])
+  return null
+}
+
 /* PRD fixed section order:
    Nav → Hero → About → Skills → Projects → Journey → GitHub Activity → Contact → Footer
    (individual layers can be toggled from the admin panel's Settings tab) */
@@ -68,6 +85,7 @@ export default function App() {
         <a href="#home" className="skip-link">Skip to content</a>
         <div className="noise-overlay" />
         {settings.showPreloader === false ? <ReadyBroadcast /> : <Preloader />}
+        <RevealFallback />
         {settings.showCursor !== false && <Cursor />}
         {settings.showScrollProgress !== false && <ScrollProgress />}
         <Navbar theme={theme} onToggleTheme={toggle} />

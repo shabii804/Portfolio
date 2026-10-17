@@ -18,18 +18,20 @@ export default function About() {
     return () => observer.disconnect();
   }, []);
 
+  // v21: qualitative highlights — the NUMBERS (CGPA 4.0, 4+ apps, deployments)
+  // live once, in the hero stats panel. No duplication.
   const highlights = [
-    { Icon: GraduationCap, label: "CGPA 4.0", sub: "Riphah International University" },
-    { Icon: Rocket, label: "4 Production Apps", sub: "React · Node.js · Firebase" },
+    { Icon: GraduationCap, label: "BS Software Engineering", sub: "Riphah International University" },
     { Icon: Building2, label: "Internship Certified", sub: "Developer Hub Corporation" },
-    { Icon: Globe2, label: "Live Deployment", sub: "farooqagensies.com" },
+    { Icon: Globe2, label: "Live Client Deployment", sub: "farooqagensies.com" },
+    { Icon: Rocket, label: "Ship-first mindset", sub: "idea → production, every time" },
   ];
 
   const focusAreas = ["Web Apps", "Desktop Systems", "Databases", "UI Engineering"];
 
   return (
-    <section id="about" ref={ref} className="py-24 md:py-28 relative">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="about" ref={ref} className="section-y relative">
+      <div className="container-x">
         <div className="animate-on-scroll flex items-center gap-4 mb-12">
           <span className="section-label">About</span>
           <div className="grad-line flex-1 max-w-16" />
@@ -44,7 +46,7 @@ export default function About() {
         <div className="grid lg:grid-cols-[1.08fr_0.92fr] gap-12 lg:gap-16 items-center">
           {/* Left — story */}
           <div>
-            <div className="animate-on-scroll space-y-5 font-body text-text-secondary leading-relaxed text-[15px] sm:text-base" style={{ transitionDelay: "0.1s" }}>
+            <div className="animate-on-scroll space-y-5 font-body text-text-secondary leading-relaxed text-[15px] sm:text-base max-w-[68ch]" style={{ transitionDelay: "0.1s" }}>
               <p>{personal.bio}</p>
               <p>
                 My core stack is React and Node.js, extended with Firebase for serverless deployments,
@@ -64,7 +66,7 @@ export default function About() {
             <div className="animate-on-scroll mt-8 flex flex-wrap gap-2.5" style={{ transitionDelay: "0.15s" }}>
               {focusAreas.map((area) => (
                 <span key={area} className="skill-chip font-mono text-[11px] px-3.5 py-2 rounded-lg">
-                  <TechIcon name={area} className="chip-ico w-3.5 h-3.5" />
+                  <TechIcon name={area} className="chip-ico w-4 h-4" />
                   {area}
                 </span>
               ))}

@@ -1,13 +1,16 @@
 import { FILLED, FILLED_128, STROKED } from "./techIconPaths";
+import { COLOR } from "./techIconColor";
 import { iconSlugFor } from "./techIconAlias";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   TechIcon — self-hosted brand/tech glyph for a skill or stack name.
-   • Filled brand marks: simple-icons@13 (+ devicon for VS Code, Java, C#,
-     Visual Studio, MSSQL — the ones simple-icons dropped).
-   • Stroke glyphs (soft skills, generics): lucide-static 0.462.0.
-   • Everything renders in `currentColor` so chips/themes stay in control.
-   • Unknown names fall back to a neutral ring-dot glyph (admin-added skills).
+   TechIcon — self-hosted vector marks for a skill or stack name.
+   Resolution order (v21):
+     1. COLOR — official full-color brand marks (@iconify-json/logos +
+        skill-icons bodies, bundled). Crisp at any DPI, both themes.
+     2. STROKED — lucide glyphs (soft skills, generic UI marks), currentColor.
+     3. FILLED — simple-icons/devicon monochrome paths, currentColor — used by
+        monochrome-only brands (GitHub, MSSQL) so they adapt to the theme.
+     4. Fallback — neutral ring-dot for admin-added skills.
    Name→slug resolution lives in ./techIconAlias (react-refresh constraint).
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -25,6 +28,21 @@ export default function TechIcon({ name, className = "w-3.5 h-3.5", strokeWidth 
   const slug = iconSlugFor(name);
   if (!slug) return <Fallback className={className} />;
 
+  /* 1 — full-color official brand mark */
+  const color = COLOR[slug];
+  if (color) {
+    return (
+      <svg
+        viewBox={color.viewBox}
+        className={className}
+        role="img"
+        aria-hidden="true"
+        dangerouslySetInnerHTML={{ __html: color.body }}
+      />
+    );
+  }
+
+  /* 2 — lucide stroke glyph (currentColor) */
   if (STROKED[slug]) {
     return (
       <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -33,6 +51,7 @@ export default function TechIcon({ name, className = "w-3.5 h-3.5", strokeWidth 
     );
   }
 
+  /* 3 — monochrome brand path (currentColor → theme-adaptive) */
   const d128 = FILLED_128[slug];
   return (
     <svg viewBox={d128 ? "0 0 128 128" : "0 0 24 24"} className={className} fill="currentColor" aria-hidden="true">

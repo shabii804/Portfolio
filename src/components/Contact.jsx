@@ -125,7 +125,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" ref={ref} className="py-16 md:py-28 relative">
+    <section id="contact" ref={ref} className="section-y relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-indigo/[0.025] to-transparent pointer-events-none" />
       <div className="max-w-5xl mx-auto px-6">
         <div className="animate-on-scroll flex items-center justify-center gap-4 mb-8">

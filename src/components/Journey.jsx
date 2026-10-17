@@ -11,6 +11,13 @@ export default function Journey() {
   const ref = useRef(null);
   const reduced = useReducedMotion();
 
+  // v21: data hygiene — drop entries with no title, de-duplicate repeats
+  // (same year + title can sneak in via admin-edited content)
+  const steps = journey.filter(
+    (s, i) => s?.title?.trim() &&
+      journey.findIndex((o) => o?.year === s.year && o?.title === s.title) === i
+  );
+
   // Scroll-drawn spine — the hairline fills as the visitor travels the timeline
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -24,12 +31,20 @@ export default function Journey() {
       { threshold: 0.12 }
     );
     ref.current?.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    // v21: each node pulses exactly once when the timeline reaches it
+    const nodeObserver = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add("pulse-once"); nodeObserver.unobserve(e.target); }
+      }),
+      { threshold: 0.9 }
+    );
+    ref.current?.querySelectorAll(".journey-node").forEach((el) => nodeObserver.observe(el));
+    return () => { observer.disconnect(); nodeObserver.disconnect(); };
   }, []);
 
   return (
-    <section id="journey" ref={ref} className="py-24 md:py-28 relative">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="journey" ref={ref} className="section-y relative">
+      <div className="container-x">
         <div className="animate-on-scroll flex items-center gap-4 mb-4">
           <span className="section-label">Journey</span>
           <div className="grad-line flex-1 max-w-16" />
@@ -57,13 +72,13 @@ export default function Journey() {
           )}
 
           <div className="space-y-10 md:space-y-14">
-            {journey.map((step, i) => {
+            {steps.map((step, i) => {
               const leftSide = i % 2 === 0;
               return (
-                <div key={`${step.year}-${step.title}`} className={`relative md:grid md:grid-cols-2 md:gap-16 items-center`}>
+                <div key={`${step.year}-${step.title}-${i}`} className={`relative md:grid md:grid-cols-2 md:gap-16 items-center`}>
                   {/* Node on the spine */}
                   <div
-                    className="absolute left-[19px] md:left-1/2 top-7 md:top-1/2 -translate-x-1/2 md:-translate-y-1/2 z-10"
+                    className="journey-node absolute left-[19px] md:left-1/2 top-7 md:top-1/2 -translate-x-1/2 md:-translate-y-1/2 z-10"
                     aria-hidden="true"
                   >
                     <div className="w-3.5 h-3.5 rounded-full bg-bg-primary border-2 border-accent-indigo shadow-[0_0_12px_rgba(129,140,248,0.55)]" />

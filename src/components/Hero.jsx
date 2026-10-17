@@ -89,7 +89,7 @@ export default function Hero() {
 
       {/* Main content (outer layer takes the scroll-parallax exit) */}
       <div ref={parallaxRef} className="hero-parallax relative w-full">
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
+        <div className="relative z-10 container-x w-full">
           <div className={`text-center lg:text-left hero-gate ${ready ? "is-ready" : ""} lg:max-w-[54%]`}>
             {/* Availability badge */}
               <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/[0.12] border border-emerald-500/30 backdrop-blur-md mb-5" style={{ "--d": "0s" }}>
@@ -234,6 +234,14 @@ export default function Hero() {
         <div className="w-px h-8 bg-gradient-to-b from-transparent to-accent-indigo/60" />
         <span className="font-mono text-[9px] tracking-[0.3em] text-text-muted">SCROLL</span>
       </div>
+
+      {/* v21: bottom seam blend — hero media melts into the page background in
+          BOTH themes (dark: invisible; light: smooth dark→light transition) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 md:h-32"
+        style={{ background: "linear-gradient(to bottom, transparent, rgb(var(--bg-primary)))" }}
+      />
     </section>
   );
 }

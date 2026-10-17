@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import TechIcon from "./TechIcon";
 import { iconSlugFor } from "./techIconAlias";
@@ -34,7 +34,7 @@ function SkillRails({ skills }) {
             {[...row.items, ...row.items].map((skill, i) => (
               <span key={`${skill}-${i}`} className="skill-tile">
                 <span className="tile-ico" style={{ color: i % 2 ? "#22d3ee" : "#818cf8" }}>
-                  <TechIcon name={skill} className="w-4 h-4" />
+                  <TechIcon name={skill} className="w-5 h-5" />
                 </span>
                 <span className="tile-label">{skill}</span>
               </span>
@@ -49,8 +49,6 @@ function SkillRails({ skills }) {
 export default function Skills() {
   const { skills } = usePortfolio();
   const ref = useRef(null);
-  const profRef = useRef(null);
-  const [barsOn, setBarsOn] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -61,27 +59,10 @@ export default function Skills() {
     return () => observer.disconnect();
   }, []);
 
-  // Proficiency bars animate from 0 the first time the card is seen
-  useEffect(() => {
-    const el = profRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setBarsOn(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.35 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
   return (
-    <section id="skills" ref={ref} className="py-24 md:py-28 relative">
+    <section id="skills" ref={ref} className="section-y relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-indigo/[0.015] to-transparent pointer-events-none" />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="container-x">
         <div className="animate-on-scroll flex items-center gap-4 mb-4">
           <span className="section-label">Skills</span>
           <div className="grad-line flex-1 max-w-16" />
@@ -102,7 +83,7 @@ export default function Skills() {
               <div key={cat} className="animate-on-scroll" style={{ transitionDelay: `${0.06 * i}s` }}>
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-8 h-8 rounded-lg bg-bg-card border border-border-subtle flex items-center justify-center" aria-hidden="true">
-                    <TechIcon name={meta.icon} className="w-4 h-4" strokeWidth={1.8} />
+                    <TechIcon name={meta.icon} className="w-5 h-5" strokeWidth={1.8} />
                   </span>
                   <span className="font-mono text-[11px] tracking-[0.15em] uppercase" style={{ color: meta.color }}>{cat}</span>
                   <div className="h-px flex-1 max-w-24" style={{ background: `linear-gradient(to right, ${meta.color}40, transparent)` }} />
@@ -110,7 +91,7 @@ export default function Skills() {
                 <div className="flex flex-wrap gap-2">
                   {items.map((skill) => (
                     <span key={skill} className="skill-chip font-mono text-xs px-3 py-1.5 rounded-lg cursor-default">
-                      <TechIcon name={skill} className="chip-ico w-3.5 h-3.5" />
+                      <TechIcon name={skill} className="chip-ico w-4 h-4" />
                       {skill}
                     </span>
                   ))}
@@ -120,44 +101,9 @@ export default function Skills() {
           })}
         </div>
 
-        {/* Core proficiencies */}
-        <div ref={profRef} className="animate-on-scroll card-border-glow card-glow-border mt-16 rounded-2xl p-6 md:p-8 bg-bg-card" style={{ transitionDelay: "0.35s" }}>
-          <div className="flex items-center justify-between mb-7 flex-wrap gap-2">
-            <h3 className="font-display font-semibold text-text-primary">Core proficiencies</h3>
-            <span className="font-mono text-[10px] text-text-muted">self-assessed · honest numbers</span>
-          </div>
-          <div className="grid md:grid-cols-2 gap-x-12 gap-y-5">
-            {[
-              { label: "React.js", pct: 90 },
-              { label: "JavaScript (ES6+)", pct: 88 },
-              { label: "Tailwind CSS", pct: 92 },
-              { label: "Node.js / Express", pct: 80 },
-              { label: "SQL / MSSQL", pct: 85 },
-              { label: "Firebase / Supabase", pct: 84 },
-            ].map((item, i) => (
-              <div key={item.label}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-body text-sm text-text-secondary flex items-center gap-2">
-                    <TechIcon name={item.label} className="w-3.5 h-3.5 shrink-0" />
-                    {item.label}
-                  </span>
-                  <span className="font-mono text-xs text-text-muted">{item.pct}%</span>
-                </div>
-                <div className="h-1 bg-border-subtle rounded-full overflow-hidden">
-                  <div
-                    className="prof-bar h-full rounded-full"
-                    style={{
-                      "--w": `${item.pct}%`,
-                      "--d": `${i * 0.09}s`,
-                      width: barsOn ? `${item.pct}%` : "0%",
-                      background: "linear-gradient(90deg, #6366f1, #818cf8 55%, #22d3ee)",
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* v21: ONE visualization rule — moving icon rails (above) + categorized
+            chips (here) are the toolkit. The old self-assessed %-bars card was
+            the third repetition of the same skills and is gone. */}
       </div>
     </section>
   );

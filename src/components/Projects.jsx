@@ -13,7 +13,8 @@ const prefersReduced = () =>
 const finePointer = () =>
   typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine)")?.matches;
 
-/** Restrained tilt: ±2.5° max, rAF-throttled, transform only. */
+/** Restrained tilt: ±5° max, rAF-throttled, transform only + a light
+ *  reflection gradient that follows the cursor (--mx/--my + .tilting). */
 function useTilt() {
   const ref = useRef(null);
   useEffect(() => {
@@ -25,6 +26,8 @@ function useTilt() {
       const r = el.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width - 0.5;
       const py = (e.clientY - r.top) / r.height - 0.5;
+      el.style.setProperty("--mx", `${((px + 0.5) * 100).toFixed(1)}%`);
+      el.style.setProperty("--my", `${((py + 0.5) * 100).toFixed(1)}%`);
       if (!raf) {
         raf = requestAnimationFrame(() => {
           raf = 0;
@@ -69,10 +72,25 @@ function ProjectVisual({ project }) {
       </div>
     );
   }
-  // Crafted art panel for projects without a public screenshot
+  // Crafted art panel for projects without a public screenshot.
+  // v21: E-Shop gets a designed storefront wireframe instead of a faint
+  // placeholder; every other art panel gets its primary stack mark.
+  if (project.id === "eshop") {
+    return (
+      <div className="bento-art h-44 sm:h-52 mb-5 rounded-xl" style={{ "--acc": project.accentHex }} aria-hidden="true">
+        <span className="bento-art-tag">{project.badge}</span>
+        <div className="eshop-mock">
+          <div className="eshop-nav"><i /><i /><i /><span className="eshop-cart" /></div>
+          <div className="eshop-hero" />
+          <div className="eshop-grid"><i /><i /><i /></div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="bento-art h-44 sm:h-52 mb-5 rounded-xl" style={{ "--acc": project.accentHex }} aria-hidden="true">
       <span className="bento-art-tag">{project.badge}</span>
+      <span className="bento-art-ico"><TechIcon name={project.stack?.[0]} className="w-12 h-12" /></span>
       <span className="bento-art-glyph">&lt;/&gt;</span>
     </div>
   );
@@ -240,7 +258,7 @@ function CaseStudyModal({ project, onClose }) {
             <div className="flex flex-wrap gap-2">
               {project.stack.map((t) => (
                 <span key={t} className="inline-flex items-center gap-1.5 font-mono text-xs px-3 py-1.5 rounded-lg border" style={{ color: project.accentHex + "cc", borderColor: project.accentHex + "30", background: project.accentHex + "08" }}>
-                  <TechIcon name={t} className="w-3.5 h-3.5 shrink-0" />
+                  <TechIcon name={t} className="w-4 h-4 shrink-0" />
                   {t}
                 </span>
               ))}
@@ -346,7 +364,7 @@ function ProjectCard({ project, onClick, index }) {
       <div className="flex flex-wrap gap-2">
         {project.stack.slice(0, featured ? 5 : 4).map((tech) => (
           <span key={tech} className="skill-chip font-mono text-[10px] px-2.5 py-1 rounded-md">
-            <TechIcon name={tech} className="chip-ico w-3 h-3" />
+            <TechIcon name={tech} className="chip-ico w-4 h-4" />
             {tech}
           </span>
         ))}
@@ -420,9 +438,9 @@ export default function Projects() {
 
   return (
     <>
-      <section id="projects" ref={ref} className="py-24 md:py-28 relative">
+      <section id="projects" ref={ref} className="section-y relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-cyan/[0.015] to-transparent pointer-events-none" />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="container-x">
           <div className="animate-on-scroll flex items-center gap-4 mb-4">
             <span className="section-label">Projects</span>
             <div className="grad-line flex-1 max-w-16" />
@@ -466,7 +484,7 @@ export default function Projects() {
                   key={s}
                   onClick={() => setActiveStack(s)}
                   aria-pressed={activeStack === s}
-                  className={`font-mono text-[10px] px-3 py-1.5 rounded-lg border transition-all ${
+                  className={`font-mono text-xs min-h-[40px] px-3.5 py-2 rounded-lg border transition-all ${
                     activeStack === s
                       ? "bg-accent-indigo/15 text-accent-indigo border-accent-indigo/30"
                       : "text-text-muted border-border-mid hover:border-accent-indigo/40 hover:text-accent-indigo"
@@ -515,7 +533,7 @@ export default function Projects() {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {filtered.map((p, i) => (
                 <ProjectCard key={p.id} project={p} index={i} onClick={() => setSelected(p)} />
               ))}

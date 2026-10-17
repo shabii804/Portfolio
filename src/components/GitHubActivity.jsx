@@ -33,29 +33,32 @@ function timeAgo(iso) {
   return `${Math.floor(d / 30)}mo ago`;
 }
 
-function describeEvent(ev) {
-  const repoShort = ev.repo?.id ? ev.repo.name.replace(/^shabii804\//, "") : ev.repo?.name || "a repository";
-  const p = ev.payload || {};
-  switch (ev.type) {
-    case "PushEvent":
-      return `Pushed ${p.size || p.commits?.length || 1} commit${(p.size || 1) === 1 ? "" : "s"} to ${repoShort}`;
-    case "CreateEvent":
-      return `Created ${p.ref_type || "repo"}${p.ref ? ` “${p.ref}”` : ""} in ${repoShort}`;
-    case "WatchEvent":
-      return `Starred ${repoShort}`;
-    case "ForkEvent":
-      return `Forked ${repoShort}`;
-    case "IssuesEvent":
-      return `${p.action || "Updated"} an issue in ${repoShort}`;
-    case "PullRequestEvent":
-      return `${p.action || "Updated"} a pull request in ${repoShort}`;
-    case "ReleaseEvent":
-      return `Released ${p.release?.tag_name || "a version"} of ${repoShort}`;
-    case "PublicEvent":
-      return `Open-sourced ${repoShort}`;
-    default:
-      return `Activity in ${repoShort}`;
+/* v21: group the raw event stream by repository — “Pushed 3 commits to
+   Portfolio · 2d ago” instead of eight identical “PushEvent to Portfolio”. */
+function groupEvents(events, max = 6) {
+  const byRepo = new Map();
+  for (const ev of events || []) {
+    const repo = ev.repo?.name?.replace(/^shabii804\//, "") || "a repository";
+    const g = byRepo.get(repo) || { repo, commits: 0, starred: false, pr: false, released: false, created: false, latest: ev };
+    const p = ev.payload || {};
+    if (ev.type === "PushEvent") g.commits += p.size || p.commits?.length || 1;
+    if (ev.type === "WatchEvent") g.starred = true;
+    if (ev.type === "PullRequestEvent") g.pr = true;
+    if (ev.type === "ReleaseEvent") g.released = true;
+    if (ev.type === "CreateEvent") g.created = true;
+    if (new Date(ev.created_at) > new Date(g.latest.created_at)) g.latest = ev;
+    byRepo.set(repo, g);
   }
+  return [...byRepo.values()].slice(0, max);
+}
+
+function describeGroup(g) {
+  if (g.commits > 0) return `Pushed ${g.commits} commit${g.commits === 1 ? "" : "s"} to ${g.repo}`;
+  if (g.pr) return `Worked on a pull request in ${g.repo}`;
+  if (g.released) return `Shipped a release of ${g.repo}`;
+  if (g.created) return `Created ${g.repo}`;
+  if (g.starred) return `Starred ${g.repo}`;
+  return `Activity in ${g.repo}`;
 }
 
 function eventLink(ev) {
@@ -120,7 +123,7 @@ export default function GitHubActivity() {
           stars,
         },
         languages,
-        events: (events || []).slice(0, 8),
+        events: (events || []).slice(0, 30),
       };
       setState({ status: "ok", ...data });
       try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch { /* quota */ }
@@ -155,9 +158,9 @@ export default function GitHubActivity() {
   }, []);
 
   return (
-    <section id="activity" ref={ref} className="py-24 md:py-28 relative">
+    <section id="activity" ref={ref} className="section-y relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-indigo/[0.015] to-transparent pointer-events-none" />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="container-x">
         <div className="animate-on-scroll flex items-center gap-4 mb-4">
           <span className="section-label">GitHub Activity</span>
           <div className="grad-line flex-1 max-w-16" />
@@ -241,10 +244,10 @@ export default function GitHubActivity() {
             <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted mb-5">Recent public activity</h3>
             {state.status === "ok" && state.events?.length > 0 ? (
               <ul className="space-y-1">
-                {state.events.map((ev, i) => (
-                  <li key={`${ev.id}-${i}`}>
+                {groupEvents(state.events).map((g, i) => (
+                  <li key={`${g.repo}-${i}`}>
                     <a
-                      href={eventLink(ev)}
+                      href={eventLink(g.latest)}
                       target="_blank"
                       rel="noreferrer"
                       className="group flex items-start gap-3 px-3 py-2.5 -mx-3 rounded-xl hover:bg-bg-hover/60 transition-colors"
@@ -252,10 +255,10 @@ export default function GitHubActivity() {
                       <span className="mt-1 w-1.5 h-1.5 rounded-full bg-accent-cyan/70 flex-shrink-0 group-hover:bg-accent-indigo transition-colors" />
                       <span className="flex-1 min-w-0">
                         <span className="block font-body text-[13px] text-text-secondary group-hover:text-text-primary transition-colors leading-snug">
-                          {describeEvent(ev)}
+                          {describeGroup(g)}
                         </span>
                       </span>
-                      <span className="font-mono text-[9px] text-text-muted flex-shrink-0 mt-0.5">{timeAgo(ev.created_at)}</span>
+                      <span className="font-mono text-[9px] text-text-muted flex-shrink-0 mt-0.5">{timeAgo(g.latest.created_at)}</span>
                     </a>
                   </li>
                 ))}

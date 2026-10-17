@@ -87,6 +87,12 @@
     --text-primary: 240 240 246; /* #F0F0F6 */
     --text-secondary: 158 159 172; /* #9E9FAC */
     --text-muted: 104 105 119;   /* #686977 */
+    /* v21 — per-theme elevation: dark uses glow, light uses real shadows */
+    --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 24px 60px -30px rgb(0 0 0 / 0.7);
+    --shadow-lift: 0 18px 44px -18px rgb(0 0 0 / 0.75), 0 4px 12px -6px rgb(0 0 0 / 0.5);
+    --glow-strength: 1;
+    /* v21 — one vertical rhythm (8px scale) */
+    --section-y: clamp(4rem, 8vw, 7rem);
   }
 }
 
@@ -102,15 +108,38 @@ body {
   font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;   /* v21: clip (not hidden) — no scroll-trap, kills horizontal overflow */
+}
+
+/* v21 — rhythm + container utilities (8px scale, ~1200px, clamp side padding) */
+.section-y { padding-block: var(--section-y); }
+.container-x {
+  width: 100%;
+  max-width: 75rem; /* 1200px */
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 1.5rem);
 }
 
 ::selection { background: rgba(129, 140, 248, 0.28); color: #ffffff; }
+
+/* v21 — visible keyboard focus, both themes */
+:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: rgb(var(--bg-primary)); }
 ::-webkit-scrollbar-thumb { background: rgb(var(--border-bright)); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: #818cf8; }
+
+/* v21 — themed form controls (native widgets follow color-scheme; text fields styled) */
+input, textarea, select {
+  color: rgb(var(--text-primary));
+  caret-color: #818cf8;
+}
+input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
 
 /* ─── Atmosphere layers ─────────────────────────────────────────────────── */
 .noise-overlay {
@@ -242,6 +271,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  min-height: 40px;   /* v21: touch target */
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgb(var(--border-mid));
   background: rgb(var(--bg-secondary));
@@ -255,10 +285,14 @@ body {
 }
 .skill-chip .chip-ico {
   color: rgb(var(--text-muted));
-  transition: color 0.25s ease;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.28s ease, color 0.25s ease;
   flex-shrink: 0;
 }
-.skill-chip:hover .chip-ico { color: #a5b4fc; }
+.skill-chip:hover .chip-ico {
+  color: #a5b4fc;
+  transform: translateY(-2px) scale(1.12);
+  filter: drop-shadow(0 0 6px rgba(129, 140, 248, 0.55));
+}
 
 /* ─── v19: moving skill rails (icon carousel) ───────────────────────────── */
 .skill-rails {
@@ -306,6 +340,11 @@ body {
   display: inline-flex;
   flex-shrink: 0;
   filter: drop-shadow(0 0 6px rgba(129, 140, 248, 0.35));
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.28s ease;
+}
+.skill-tile:hover .tile-ico {
+  transform: translateY(-3px) scale(1.12);
+  filter: drop-shadow(0 0 9px rgba(129, 140, 248, 0.6));
 }
 .skill-tile .tile-label {
   font-family: 'JetBrains Mono', monospace;
@@ -339,15 +378,15 @@ body {
 }
 .avatar-core {
   position: relative;
-  width: 12.5rem;
-  height: 12.5rem;
+  width: 15rem;
+  height: 15rem;
   border-radius: 9999px;
   overflow: hidden;
   border: 1px solid rgb(var(--border-mid));
   background: rgb(var(--bg-secondary));
 }
 @media (min-width: 640px) {
-  .avatar-core { width: 14rem; height: 14rem; }
+  .avatar-core { width: 16rem; height: 16rem; }
 }
 .avatar-status {
   position: absolute;
@@ -370,11 +409,16 @@ body {
 .animate-on-scroll {
   opacity: 0;
   transform: translateY(22px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
+  filter: blur(5px);   /* v21: blur-to-sharp entry */
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .animate-on-scroll.visible {
   opacity: 1;
   transform: translateY(0);
+  filter: blur(0);
 }
 
 .section-label {
@@ -1001,16 +1045,20 @@ html.is-ready .name-line {
 /* ─── Light theme tokens (toggle via data-theme on <html>) ───────────────── */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg-primary: 243 243 248;   /* #F3F3F8 */
+  --bg-primary: 245 246 250;   /* #F5F6FA */
   --bg-secondary: 255 255 255; /* #FFFFFF */
   --bg-card: 255 255 255;      /* #FFFFFF */
   --bg-hover: 236 237 245;     /* #ECEDF5 */
-  --border-subtle: 226 227 238; /* #E2E3EE */
+  --border-subtle: 226 227 238; /* ≈10% of text color on white */
   --border-mid: 208 210 226;   /* #D0D2E2 */
-  --border-bright: 184 187 210; /* #B8BBD2 */
+  --border-bright: 181 184 208; /* #B5B8D0 */
   --text-primary: 18 18 30;    /* #12121E */
-  --text-secondary: 74 76 100; /* #4A4C64 */
-  --text-muted: 120 123 152;   /* #787B98 */
+  --text-secondary: 74 76 100; /* #4A4C64 — 7.4:1 on white (AA+) */
+  --text-muted: 100 103 138;   /* #64678A — 5.1:1 on white (AA) */
+  /* Light uses REAL layered shadows — glow does not work on white */
+  --shadow-card: 0 1px 2px rgb(23 23 58 / 0.05), 0 8px 24px -12px rgb(23 23 58 / 0.14), 0 24px 56px -28px rgb(23 23 58 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(23 23 58 / 0.06), 0 18px 44px -16px rgb(23 23 58 / 0.22);
+  --glow-strength: 0;
 }
 [data-theme="light"] .noise-overlay { opacity: 0.014; }
 [data-theme="light"] ::selection { background: rgba(99, 102, 241, 0.18); color: #12121e; }
@@ -1044,6 +1092,48 @@ html.is-ready .name-line {
 [data-theme="light"] .shooting-star::after { background: #4f46e5; box-shadow: 0 0 8px 2px rgba(99, 102, 241, 0.45); }
 [data-theme="light"] .chatbot-window { background: #ffffff; }
 [data-theme="light"] .chatbot-messages { color: rgb(var(--text-primary)); }
+
+/* v21 — light elevation: real shadows replace glow (shadow vars are theme-scoped) */
+.card-border-glow, .bento-card, .terminal, .stats-panel, .skill-tile { box-shadow: var(--shadow-card); }
+[data-theme="light"] .card-glow-border:hover { box-shadow: var(--shadow-lift); }
+[data-theme="light"] .btn-primary {
+  box-shadow: 0 8px 20px -8px rgb(79 70 229 / 0.45), 0 2px 6px -2px rgb(79 70 229 / 0.3);
+}
+[data-theme="light"] .text-gradient-indigo {
+  background: linear-gradient(120deg, #4338ca 0%, #4f46e5 38%, #3730a3 62%, #0e7490 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+[data-theme="light"] .text-gradient-cyan {
+  background: linear-gradient(120deg, #0e7490 0%, #0891b2 45%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+[data-theme="light"] ::-webkit-scrollbar-track { background: rgb(var(--bg-primary)); }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgb(var(--border-bright)); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+/* glow-based effects mute down in light (they read as smudge on white) */
+[data-theme="light"] .glow-on-hover { text-shadow: none; }
+[data-theme="light"] .skill-tile .tile-ico { filter: drop-shadow(0 1px 2px rgb(23 23 58 / 0.18)); }
+[data-theme="light"] .avatar-glow { background: radial-gradient(circle, rgba(99, 102, 241, 0.13) 0%, rgba(8, 145, 178, 0.05) 45%, transparent 68%); }
+
+/* v21 — theme toggle: circular wipe (View Transitions API; Chrome/Edge/Safari 18+) */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-wipe 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes theme-wipe {
+  from { clip-path: circle(0px at var(--wipe-x, 92% 44px) var(--wipe-y, 44px)); }
+  to { clip-path: circle(150vmax at var(--wipe-x, 92% 44px) var(--wipe-y, 44px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(root) { animation: none; }
+}
 
 /* Smooth theme transition — applied only during the toggle (550ms) */
 html.theme-anim,
@@ -1495,7 +1585,10 @@ html.custom-cursor textarea { cursor: text; }
 }
 .terminal-body {
   padding: 1rem;
-  height: 320px;
+  /* v21: size to content — no empty height (cap for long sessions) */
+  height: auto;
+  min-height: 180px;
+  max-height: 380px;
   overflow-y: auto;
   font-size: 12.5px;
   line-height: 1.75;
@@ -1631,6 +1724,61 @@ html.custom-cursor textarea { cursor: text; }
   color: rgb(var(--text-muted));
 }
 .bento-tilt { transition: transform 0.4s var(--ease-out); will-change: transform; }
+
+/* v21: art-panel stack mark + E-Shop storefront wireframe (designed thumbnail) */
+.bento-art-ico {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.5rem;
+  opacity: 0.55;
+  color: color-mix(in srgb, var(--acc, #818cf8) 82%, white 18%);
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--acc, #818cf8) 45%, transparent));
+}
+.eshop-mock {
+  position: relative;
+  width: min(76%, 290px);
+  margin-inline: auto;
+  padding: 0.55rem;
+  display: grid;
+  gap: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--acc, #818cf8) 38%, transparent);
+  border-bottom: none;
+  border-radius: 0.65rem 0.65rem 0 0;
+  background: rgb(var(--bg-card) / 0.6);
+  box-shadow: 0 -14px 36px -20px color-mix(in srgb, var(--acc, #818cf8) 50%, transparent);
+}
+.eshop-nav { display: flex; align-items: center; gap: 0.3rem; }
+.eshop-nav i {
+  width: 5px; height: 5px; border-radius: 999px;
+  background: color-mix(in srgb, var(--acc, #818cf8) 62%, transparent);
+}
+.eshop-cart {
+  margin-left: auto;
+  width: 13px; height: 9px;
+  border: 1.5px solid color-mix(in srgb, var(--acc, #818cf8) 70%, transparent);
+  border-radius: 2px;
+  position: relative;
+}
+.eshop-cart::after {
+  content: "";
+  position: absolute;
+  right: -3px; top: -3px;
+  width: 5px; height: 5px;
+  border-radius: 999px;
+  background: #22d3ee;
+}
+.eshop-hero {
+  height: 34px;
+  border-radius: 6px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--acc, #818cf8) 55%, transparent), rgba(34, 211, 238, 0.28));
+}
+.eshop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; }
+.eshop-grid i {
+  height: 26px;
+  border-radius: 5px;
+  background: rgb(var(--bg-hover));
+  border: 1px solid rgb(var(--border-mid));
+}
 
 /* ─── Skill proficiency bars animate from 0 on view ──────────────────────── */
 .prof-bar {
@@ -1901,3 +2049,30 @@ img.hero-video-img {
 [data-theme="light"] .hero-video-active .hero-scroll-hint .text-text-muted { color: #56597a; }
 
 
+
+/* ─── v21: timeline node pulse (once per node, on reach) ─────────────────── */
+.journey-node.pulse-once > div {
+  animation: node-pulse 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 1 both;
+}
+@keyframes node-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.6); }
+  60% { box-shadow: 0 0 0 14px rgba(129, 140, 248, 0); }
+  100% { box-shadow: 0 0 12px rgba(129, 140, 248, 0.55); }
+}
+
+/* ─── v21: cursor light-reflection on project cards (fine pointers only) ── */
+.bento-card { position: relative; }
+.bento-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.09), transparent 55%);
+}
+.bento-card:hover::after { opacity: 1; }
+[data-theme="light"] .bento-card::after {
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(99, 102, 241, 0.10), transparent 55%);
+}

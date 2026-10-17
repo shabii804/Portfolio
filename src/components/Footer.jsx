@@ -16,7 +16,7 @@ export default function Footer() {
       <div className="absolute top-1/2 left-1/4 w-[250px] h-[250px] rounded-full opacity-[0.02] blur-[80px] bg-accent-indigo pointer-events-none z-0 bg-blob-indigo" />
       <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] rounded-full opacity-[0.015] blur-[80px] bg-accent-cyan pointer-events-none z-0 bg-blob-cyan" />
 
-      <div className="max-w-6xl mx-auto px-6 relative z-10">
+      <div className="container-x relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-12">
           {/* Brand */}
           <div>
