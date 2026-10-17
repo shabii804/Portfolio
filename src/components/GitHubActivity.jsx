@@ -89,7 +89,9 @@ async function fetchJSON(url) {
   return res.json();
 }
 
-export default function GitHubActivity() {
+// `index` — eyebrow number in the SectionHeader. Defaults to the site-wide
+// "05"; Home overrides it to "02" so the landing page numbering stays local.
+export default function GitHubActivity({ index = "05" }) {
   const { personal } = usePortfolio();
   const ref = useRef(null);
   const [state, setState] = useState({ status: "loading", stats: null, languages: null, events: null });
@@ -176,7 +178,7 @@ export default function GitHubActivity() {
             the @shabii804 chip stays, aligned with the header's baseline */}
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <SectionHeader
-            index="05"
+            index={index}
             icon={GithubIcon}
             tint="#fbbf24"
             label="GitHub Activity"

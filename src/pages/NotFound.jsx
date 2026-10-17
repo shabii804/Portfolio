@@ -47,9 +47,26 @@ export default function NotFound() {
           </a>
         </div>
 
-        <div className="mt-16 font-mono text-[10px] text-text-muted">
-          <Link to="/" className="hover:text-accent-indigo transition-colors">Home</Link>
-          <span className="mx-2">·</span>
+        {/* v28 — every real page is one hop away, even from the void */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-2">
+          {[
+            { label: "About", to: "/about" },
+            { label: "Skills", to: "/skills" },
+            { label: "Projects", to: "/projects" },
+            { label: "Journey", to: "/journey" },
+            { label: "Contact", to: "/contact" },
+          ].map(({ label, to }) => (
+            <Link
+              key={to}
+              to={to}
+              className="px-3.5 py-1.5 rounded-full border border-border-subtle bg-bg-card/60 font-mono text-[11px] text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-10 font-mono text-[10px] text-text-muted">
           <a href={`mailto:${personal.email}`} className="hover:text-accent-indigo transition-colors">Email</a>
           <span className="mx-2">·</span>
           <a href={personal.github} target="_blank" rel="noreferrer" className="hover:text-accent-indigo transition-colors">GitHub</a>

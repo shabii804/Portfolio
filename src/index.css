@@ -3011,3 +3011,42 @@ img.hero-video-img {
 @media (prefers-reduced-motion: reduce) {
   .skill-group::before { transform: scaleX(1); transition: none; }
 }
+
+/* ── v28 — multi-page build ──────────────────────────────────────────────── */
+
+/* Route transition: opacity-only fade on every page mount. Deliberately no
+   transform — fixed overlays inside pages (project case-study modal) must
+   keep their viewport positioning, and a transform on an ancestor would
+   re-anchor them. */
+.page-fade { animation: pageIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes pageIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-fade { animation: none; }
+}
+
+/* Home explore cards — tinted hover glow driven by the per-card --exp-tint.
+   color-mix keeps it theme-agnostic; a static shadow fallback rides along. */
+.exp-card {
+  --exp-tint: #818cf8;
+  box-shadow: 0 10px 30px -20px rgba(0, 0, 0, 0.55);
+}
+.exp-card:hover {
+  border-color: color-mix(in srgb, var(--exp-tint) 45%, transparent);
+  box-shadow:
+    0 24px 48px -24px color-mix(in srgb, var(--exp-tint) 42%, transparent),
+    0 10px 30px -20px rgba(0, 0, 0, 0.55);
+}
+.exp-card:focus-visible {
+  border-color: color-mix(in srgb, var(--exp-tint) 55%, transparent);
+}
+[data-theme="light"] .exp-card {
+  box-shadow: 0 10px 30px -22px rgba(36, 38, 74, 0.35);
+}
+[data-theme="light"] .exp-card:hover {
+  box-shadow:
+    0 24px 48px -26px color-mix(in srgb, var(--exp-tint) 38%, transparent),
+    0 10px 30px -22px rgba(36, 38, 74, 0.35);
+}

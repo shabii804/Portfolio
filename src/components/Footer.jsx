@@ -1,10 +1,24 @@
+import { Link } from "react-router-dom";
 import { usePortfolio } from "../hooks/usePortfolio";
+import { getLenis } from "../hooks/useLenis";
+
+// v28 — footer navigation walks the real routes now.
+const footerNav = [
+  { label: "Home", to: "/" },
+  { label: "About", to: "/about" },
+  { label: "Skills", to: "/skills" },
+  { label: "Projects", to: "/projects" },
+  { label: "Journey", to: "/journey" },
+  { label: "Contact", to: "/contact" },
+];
 
 export default function Footer() {
   const { personal } = usePortfolio();
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const lenis = getLenis();
+    if (lenis) lenis.scrollTo(0, { duration: 1.15 });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -45,14 +59,14 @@ export default function Footer() {
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-widest text-text-muted mb-5">Navigation</h4>
             <div className="space-y-2.5">
-              {["about", "skills", "projects", "journey", "activity", "contact"].map((id) => (
-                <button
-                  key={id}
-                  onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })}
-                  className="block font-body text-sm text-text-secondary hover:text-accent-indigo transition-colors capitalize text-left link-underline-effect"
+              {footerNav.map(({ label, to }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="block font-body text-sm text-text-secondary hover:text-accent-indigo transition-colors link-underline-effect w-fit"
                 >
-                  {id}
-                </button>
+                  {label}
+                </Link>
               ))}
             </div>
           </div>

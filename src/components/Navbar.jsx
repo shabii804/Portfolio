@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { usePortfolio } from "../hooks/usePortfolio";
-import { scrollToSection } from "../hooks/useLenis";
-import { content } from "../data/portfolio";
+import { getLenis } from "../hooks/useLenis";
 
-// "Activity" disappears with the section when the admin turns GitHub
-// Activity off (content.settings.showGitHubActivity).
-const navLinks = ["About", "Skills", "Projects", "Journey", "Activity", "Contact"].filter(
-  (l) => l !== "Activity" || content?.settings?.showGitHubActivity !== false
-);
+// v28 — multi-page navigation. Each link is a real route; NavLink drives the
+// active state (`.nav-link.active`), Home needs `end` so it only matches "/".
+const navLinks = [
+  { label: "Home", to: "/", end: true },
+  { label: "About", to: "/about" },
+  { label: "Skills", to: "/skills" },
+  { label: "Projects", to: "/projects" },
+  { label: "Journey", to: "/journey" },
+  { label: "Contact", to: "/contact" },
+];
 
 function SunIcon() {
   return (
@@ -30,10 +35,10 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [active, setActive] = useState("");
   const [isApple] = useState(() =>
     /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
   );
+  const location = useLocation();
 
   useEffect(() => {
     let last = window.scrollY;
@@ -56,10 +61,15 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollTo = (id) => {
-    scrollToSection(id.toLowerCase());
+  // Logo: navigate home — or, already there, glide back to the top.
+  const goHome = (e) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      const lenis = getLenis();
+      if (lenis) lenis.scrollTo(0, { duration: 1.15 });
+      else window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     setMobileOpen(false);
-    setActive(id);
   };
 
   const openPalette = () => {
@@ -79,8 +89,9 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
           : "bg-transparent border-b border-transparent"
       }`}>
         <div className="px-4 sm:px-6 py-3.5 flex items-center justify-between">
-          <button
-            onClick={() => scrollToSection("home")}
+          <Link
+            to="/"
+            onClick={goHome}
             className="group flex items-center gap-3"
             aria-label="Back to top"
           >
@@ -95,17 +106,20 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
             <span className="font-display font-bold text-sm tracking-tight text-text-primary group-hover:text-accent-indigo transition-colors duration-300 hidden sm:inline-block">
               {personal.name}
             </span>
-          </button>
+          </Link>
 
           <div className="hidden md:flex items-center gap-1 lg:gap-2">
             {navLinks.map((link) => (
-              <button
-                key={link}
-                onClick={() => scrollTo(link)}
-                className={`nav-link font-body text-[13px] lg:text-sm font-medium ${active === link ? "active" : ""}`}
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                className={({ isActive }) =>
+                  `nav-link font-body text-[13px] lg:text-sm font-medium ${isActive ? "active" : ""}`
+                }
               >
-                {link}
-              </button>
+                {link.label}
+              </NavLink>
             ))}
             <a
               href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`}
@@ -158,13 +172,21 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
       {mobileOpen && (
         <div className="md:hidden max-w-5xl mx-auto mt-2 mx-4 bg-bg-card/95 backdrop-blur-xl border border-border-subtle rounded-2xl p-5 flex flex-col gap-2.5 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.7)] animate-fade-in">
           {navLinks.map((link) => (
-            <button
-              key={link}
-              onClick={() => scrollTo(link)}
-              className="text-left text-text-secondary hover:text-accent-indigo hover:bg-bg-hover/50 transition-all font-body text-sm py-2 px-3 rounded-xl"
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                `text-left font-body text-sm py-2 px-3 rounded-xl transition-all ${
+                  isActive
+                    ? "text-accent-indigo bg-bg-hover/50"
+                    : "text-text-secondary hover:text-accent-indigo hover:bg-bg-hover/50"
+                }`
+              }
             >
-              {link}
-            </button>
+              {link.label}
+            </NavLink>
           ))}
           <a
             href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`}

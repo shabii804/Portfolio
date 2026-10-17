@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "../hooks/useLenis";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -105,6 +106,7 @@ function HireBlock({ onDone }) {
 
 export default function Terminal() {
   const { personal, projects, experience, journey } = usePortfolio();
+  const navigate = useNavigate();
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
@@ -114,6 +116,12 @@ export default function Terminal() {
   const inputRef = useRef(null);
   const ranBootRef = useRef(false);
   const bootCancelRef = useRef(null);
+  // Ref mirror so the command runner (a plain closure, not a hook callback)
+  // can always reach the latest navigate without dependency churn.
+  const navigateRef = useRef(null);
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
 
   const education = journey.find((j) => j.tag === "Education");
   const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -135,7 +143,12 @@ export default function Terminal() {
       const target = args.join(" ").replace(/\s+/g, " ").trim();
       if (target === "hire-me" || target === "hire me" || target === "hire shoaib" || target === "hire") {
         push([{ k: "hire" }]);
-        setTimeout(() => scrollToSection("contact"), 2400);
+        // v28 — multi-page: glide to the on-page contact section when it
+        // exists; otherwise walk to the Contact page itself.
+        setTimeout(() => {
+          if (document.getElementById("contact")) scrollToSection("contact");
+          else navigateRef.current?.("/contact");
+        }, 2400);
       } else {
         push([
           { k: "err", text: `sudo: ${target || "?"}: command not found` },

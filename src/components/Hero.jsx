@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { defaultSkills } from "../data/portfolio";
-import { scrollToSection } from "../hooks/useLenis";
 import HeroVideo from "./HeroVideo";
 import TechIcon from "./TechIcon";
 import { heroBackgroundConfig } from "../data/heroMedia";
@@ -37,6 +37,7 @@ function useReady() {
 
 export default function Hero() {
   const { personal } = usePortfolio();
+  const navigate = useNavigate();
   const ready = useReady();
   const [roleIdx, setRoleIdx] = useState(0);
   const [displayed, setDisplayed] = useState("");
@@ -155,7 +156,7 @@ export default function Hero() {
               <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-7" style={{ "--d": "0.56s" }}>
                 <button
                   ref={magneticPrimary}
-                  onClick={() => scrollToSection("projects")}
+                  onClick={() => navigate("/projects")}
                   className="magnetic btn-primary px-5 py-3 rounded-xl font-display font-semibold text-sm flex items-center gap-2.5 group glow-on-hover"
                 >
                   View My Work
@@ -172,7 +173,7 @@ export default function Hero() {
                 </a>
                 <button
                   ref={magneticTalk}
-                  onClick={() => scrollToSection("contact")}
+                  onClick={() => navigate("/contact")}
                   className="magnetic btn-ghost px-5 py-3 rounded-xl font-display font-semibold text-sm group flex items-center gap-2 glow-on-hover"
                 >
                   Let's Talk
