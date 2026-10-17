@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { GraduationCap, MonitorSmartphone, Layers, Briefcase, Rocket, Sparkles } from "lucide-react";
+import { TAG_GRADIENTS } from "./tagColors";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -14,12 +15,12 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
    ────────────────────────────────────────────────────────────────────────── */
 
 const BADGES = {
-  Education: { Icon: GraduationCap, c1: "#6366f1", c2: "#8b5cf6" },
-  Desktop: { Icon: MonitorSmartphone, c1: "#0ea5e9", c2: "#22d3ee" },
-  "Full-Stack": { Icon: Layers, c1: "#6366f1", c2: "#22d3ee" },
-  Internship: { Icon: Briefcase, c1: "#f59e0b", c2: "#f97316" },
-  "Client Work": { Icon: Rocket, c1: "#22d3ee", c2: "#10b981" },
-  Next: { Icon: Sparkles, c1: "#8b5cf6", c2: "#ec4899" },
+  Education: { Icon: GraduationCap, c1: TAG_GRADIENTS.Education[0], c2: TAG_GRADIENTS.Education[1] },
+  Desktop: { Icon: MonitorSmartphone, c1: TAG_GRADIENTS.Desktop[0], c2: TAG_GRADIENTS.Desktop[1] },
+  "Full-Stack": { Icon: Layers, c1: TAG_GRADIENTS["Full-Stack"][0], c2: TAG_GRADIENTS["Full-Stack"][1] },
+  Internship: { Icon: Briefcase, c1: TAG_GRADIENTS.Internship[0], c2: TAG_GRADIENTS.Internship[1] },
+  "Client Work": { Icon: Rocket, c1: TAG_GRADIENTS["Client Work"][0], c2: TAG_GRADIENTS["Client Work"][1] },
+  Next: { Icon: Sparkles, c1: TAG_GRADIENTS.Next[0], c2: TAG_GRADIENTS.Next[1] },
 };
 
 const KNOWN_TECH = new Set([
@@ -64,7 +65,10 @@ export default function TimelineItem({ step }) {
   const tags = derived.length ? derived : (TAG_FALLBACK[step.tag] || []);
 
   return (
-    <div className={`tl-card ${isNow ? "tl-now" : ""}`}>
+    <div
+      className={`tl-card ${isNow ? "tl-now" : ""}`}
+      style={{ "--nc": c1, "--nc-1": c1, "--nc-2": c2 }}
+    >
       {/* header: badge · year + pill */}
       <div className="flex items-start gap-3.5 mb-3">
         <motion.span
@@ -81,7 +85,7 @@ export default function TimelineItem({ step }) {
         </motion.span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="font-display font-bold text-2xl leading-none text-gradient-indigo">{step.year}</span>
+            <span className="tl-year font-display font-bold text-2xl leading-none">{step.year}</span>
             <span className={`tl-period ${isNow ? "tl-live" : ""}`}>
               {isNow && <i aria-hidden="true" />}
               {step.period}

@@ -137,7 +137,7 @@ function SkillRails({ skills }) {
                 <span key={`${skill}-${i}`} className="skill-tile">
                   <motion.span
                     className="tile-ico"
-                    style={{ color: i % 2 ? "#22d3ee" : "#818cf8" }}
+                    style={{ color: brand }}
                     whileHover={reduced ? undefined : { y: -6, scale: 1.15, filter: `drop-shadow(0 6px 14px ${brand}66)` }}
                     transition={spring}
                   >
@@ -182,11 +182,17 @@ function SkillGroups({ skills }) {
       whileInView={reduced ? undefined : "show"}
       viewport={{ once: true, amount: 0.2 }}
     >
-      {Object.entries(skills).map(([cat, items]) => {
+      {Object.entries(skills).map(([cat, items], gi) => {
         const meta = categoryMeta[cat] || { icon: "boxes", color: "#818cf8" };
         return (
-          <motion.div key={cat} variants={reduced ? undefined : cardVariants} className="min-h-0">
+          <motion.div
+            key={cat}
+            variants={reduced ? undefined : cardVariants}
+            className="min-h-0"
+            style={{ "--sg-c": meta.color }}
+          >
             <TiltCard className="skill-group h-full" tabIndex={0} aria-label={`${cat} skills`}>
+              <span className="sg-num" aria-hidden="true">{String(gi + 1).padStart(2, "0")}</span>
               <div className="flex items-center gap-3 mb-4">
                 <span
                   className="skill-group-badge"
@@ -210,12 +216,20 @@ function SkillGroups({ skills }) {
                 <div className="h-px flex-1 min-w-4" style={{ background: `linear-gradient(to right, ${meta.color}40, transparent)` }} />
               </div>
               <div className="flex flex-wrap gap-2">
-                {items.map((skill) => (
-                  <span key={skill} className="skill-chip font-mono text-xs px-3 py-1.5 rounded-lg cursor-default">
-                    <TechIcon name={skill} className="chip-ico w-5 h-5" />
-                    {skill}
-                  </span>
-                ))}
+                {items.map((skill) => {
+                  const slug = iconSlugFor(skill);
+                  const brand = slug ? brandColorFor(slug) : null;
+                  return (
+                    <span key={skill} className="skill-chip font-mono text-xs px-3 py-1.5 rounded-lg cursor-default">
+                      <TechIcon
+                        name={skill}
+                        className="chip-ico w-5 h-5"
+                        style={brand ? { color: brand, filter: `drop-shadow(0 0 6px ${brand}40)` } : undefined}
+                      />
+                      {skill}
+                    </span>
+                  );
+                })}
               </div>
             </TiltCard>
           </motion.div>

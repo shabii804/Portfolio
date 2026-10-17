@@ -3,6 +3,7 @@ import { motion, useScroll, useSpring, useTransform, useReducedMotion } from "fr
 import { Milestone } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import TimelineItem from "./TimelineItem";
+import { TAG_COLORS } from "./tagColors";
 import SectionHeader from "./motion/SectionHeader";
 import { EASE_OUT } from "./motion/ease";
 
@@ -74,8 +75,9 @@ export default function Journey() {
               className="journey-spine h-full w-px origin-top"
               style={{
                 scaleY: reduced ? 1 : scaleY,
-                background: "linear-gradient(to bottom, #6366f1, #818cf8 40%, #22d3ee)",
-                boxShadow: "0 0 10px rgba(129, 140, 248, 0.45)",
+                /* v24.1 chromatic spine — indigo → violet → cyan → emerald */
+                background: "linear-gradient(to bottom, #6366f1, #a855f7 32%, #22d3ee 66%, #34d399)",
+                boxShadow: "0 0 12px rgba(129, 140, 248, 0.5)",
               }}
             />
           </div>
@@ -87,13 +89,21 @@ export default function Journey() {
             {steps.map((step, i) => {
               const leftSide = i % 2 === 0;
               const dir = leftSide ? "left" : "right";
+              /* v24.1 — each milestone owns its hue: node, connector arrow and
+                 card tint all inherit --nc (TimelineItem's badge color) */
+              const nc = TAG_COLORS[step.tag] || "#818cf8";
               return (
-                <div key={`${step.year}-${step.title}-${i}`} className="relative md:grid md:grid-cols-2 md:gap-14 items-center">
-                  {/* node on the spine — spring pop + one pulse
+                <div
+                  key={`${step.year}-${step.title}-${i}`}
+                  className="relative md:grid md:grid-cols-2 md:gap-14 items-center"
+                  style={{ "--nc": nc }}
+                >
+                  {/* node on the spine — milestone-colored, spring pop + one pulse
                       (outer span positions, inner motion span pops) */}
                   <span className="journey-node absolute left-[19px] md:left-1/2 top-7 md:top-1/2 -translate-x-1/2 md:-translate-y-1/2 z-10 block" aria-hidden="true">
                     <motion.span
-                      className="journey-node-pop block w-3.5 h-3.5 rounded-full bg-bg-primary border-2 border-accent-indigo shadow-[0_0_12px_rgba(129,140,248,0.55)]"
+                      className="journey-node-pop block w-3.5 h-3.5 rounded-full bg-bg-primary border-2"
+                      style={{ borderColor: nc, boxShadow: `0 0 12px ${nc}99` }}
                       initial={reduced ? undefined : { scale: 0 }}
                       whileInView={reduced ? undefined : { scale: 1 }}
                       viewport={{ once: true, amount: 0.9 }}

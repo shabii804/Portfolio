@@ -15,18 +15,18 @@ import { iconSlugFor } from "./techIconAlias";
    ────────────────────────────────────────────────────────────────────────── */
 
 /* Neutral fallback for admin-added skills without a known mark. */
-function Fallback({ className }) {
+function Fallback({ className, style }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={className} style={style} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="8.5" />
       <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
     </svg>
   );
 }
 
-export default function TechIcon({ name, className = "w-3.5 h-3.5", strokeWidth = 2 }) {
+export default function TechIcon({ name, className = "w-3.5 h-3.5", strokeWidth = 2, style }) {
   const slug = iconSlugFor(name);
-  if (!slug) return <Fallback className={className} />;
+  if (!slug) return <Fallback className={className} style={style} />;
 
   /* 1 — full-color official brand mark */
   const color = COLOR[slug];
@@ -35,6 +35,7 @@ export default function TechIcon({ name, className = "w-3.5 h-3.5", strokeWidth 
       <svg
         viewBox={color.viewBox}
         className={className}
+        style={style}
         role="img"
         aria-hidden="true"
         dangerouslySetInnerHTML={{ __html: color.body }}
@@ -45,7 +46,7 @@ export default function TechIcon({ name, className = "w-3.5 h-3.5", strokeWidth 
   /* 2 — lucide stroke glyph (currentColor) */
   if (STROKED[slug]) {
     return (
-      <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" className={className} style={style} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         {STROKED[slug].map((d, i) => <path key={i} d={d} />)}
       </svg>
     );
@@ -54,7 +55,7 @@ export default function TechIcon({ name, className = "w-3.5 h-3.5", strokeWidth 
   /* 3 — monochrome brand path (currentColor → theme-adaptive) */
   const d128 = FILLED_128[slug];
   return (
-    <svg viewBox={d128 ? "0 0 128 128" : "0 0 24 24"} className={className} fill="currentColor" aria-hidden="true">
+    <svg viewBox={d128 ? "0 0 128 128" : "0 0 24 24"} className={className} style={style} fill="currentColor" aria-hidden="true">
       <path d={d128 || FILLED[slug]} />
     </svg>
   );
