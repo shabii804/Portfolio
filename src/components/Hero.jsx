@@ -82,17 +82,21 @@ export default function Hero() {
           one hero, one animation, zero loop contention. */}
       <HeroVideo />
 
+      {/* Copy-side legibility veil — keeps text/CTAs/stats readable over any
+          footage (dark radial behind the copy column + bottom melt) */}
+      {heroMediaOn && <div className="hero-copy-veil" aria-hidden="true" />}
+
       {/* Main content (outer layer takes the scroll-parallax exit) */}
       <div ref={parallaxRef} className="hero-parallax relative w-full">
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
           <div className={`text-center lg:text-left hero-gate ${ready ? "is-ready" : ""} lg:max-w-[54%]`}>
             {/* Availability badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/[0.07] border border-emerald-500/20 mb-5" style={{ "--d": "0s" }}>
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/[0.12] border border-emerald-500/30 backdrop-blur-md mb-5" style={{ "--d": "0s" }}>
                 <div className="relative flex h-2 w-2">
                   <span className="pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </div>
-                <span className="font-mono text-[10px] font-semibold text-emerald-400 uppercase tracking-widest">
+                <span className="font-mono text-[10px] font-semibold text-emerald-300 uppercase tracking-widest">
                   {personal.available ? "Available for opportunities" : "Currently unavailable"}
                 </span>
               </div>
@@ -180,31 +184,30 @@ export default function Hero() {
                   { label: "WhatsApp", href: `https://wa.me/${(personal.phone || "").replace(/\D/g, "")}`, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.988 4.482-9.988 9.988 0 1.758.455 3.414 1.258 4.868L2 22l5.312-1.392c1.401.763 3.001 1.196 4.7 1.196 5.506 0 9.988-4.482 9.988-9.988C22 6.482 17.518 2 12.012 2zm4.786 14.193c-.272.763-1.392 1.4-2.155 1.508-.654.098-1.503.185-4.408-.98-3.723-1.492-6.13-5.267-6.315-5.512-.185-.245-1.503-2-1.503-3.816 0-1.815.959-2.709 1.303-3.069.344-.36.758-.45.998-.45.24 0 .48.01.688.02.218.01.512-.08.8-.08.288 0 .584.09.83.676.24.58.83 2.02.9 2.16.07.14.12.3.02.5-.1.2-.15.33-.3.51-.15.18-.32.4-.46.54-.15.15-.31.31-.13.62.18.3.8 1.31 1.71 2.12.91.81 1.67 1.06 1.91 1.19.24.13.38.11.52-.05.14-.17.62-.72.79-.97.17-.25.34-.21.58-.12.24.09 1.52.72 1.79.85.27.14.45.2.51.31.06.11.06.66-.21 1.42z" /></svg> },
                 ].map((s) => (
                   <a key={s.label} href={s.href} target={s.href?.startsWith("http") ? "_blank" : undefined} rel="noreferrer"
-                    className="contact-link flex items-center gap-1.5 text-xs font-mono link-underline-effect">
+                    className="contact-link flex items-center gap-1.5 text-xs font-mono text-text-secondary hover:text-text-primary link-underline-effect">
                     {s.icon} {s.label}
                   </a>
                 ))}
               </div>
             </div>
 
-          {/* Stats strip */}
-          <div
-            className={`hero-gate mt-9 lg:mt-7 pt-6 border-t border-border-subtle grid grid-cols-2 md:grid-cols-4 gap-6 ${ready ? "is-ready" : ""}`}
-            style={{ "--d": "0.7s" }}
-          >
-            {[
-              { num: 4, decimals: 1, label: "CGPA", grad: "text-gradient-indigo" },
-              { num: 4, suffix: "+", label: "Production Apps", grad: "text-gradient-cyan" },
-              { num: 2, label: "Live Deployments", grad: "text-gradient-indigo" },
-              { num: 4, suffix: "yrs", label: "Building Software", grad: "text-gradient-cyan" },
-            ].map((s, i) => (
-              <div key={s.label} className="text-center lg:text-left">
-                <div className={`font-display font-bold text-2xl sm:text-3xl ${s.grad}`}>
-                  <StatValue num={s.num} decimals={s.decimals || 0} suffix={s.suffix || ""} delay={700 + i * 90} />
+          {/* Stats strip — glass panel so numbers stay clearly visible over any footage */}
+          <div className={`hero-gate mt-9 lg:mt-7 ${ready ? "is-ready" : ""}`} style={{ "--d": "0.7s" }}>
+            <div className="stats-panel grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 rounded-2xl px-6 py-5 sm:px-8 sm:py-6">
+              {[
+                { num: 4, decimals: 1, label: "CGPA", grad: "text-gradient-indigo" },
+                { num: 4, suffix: "+", label: "Production Apps", grad: "text-gradient-cyan" },
+                { num: 2, label: "Live Deployments", grad: "text-gradient-indigo" },
+                { num: 4, suffix: "yrs", label: "Building Software", grad: "text-gradient-cyan" },
+              ].map((s, i) => (
+                <div key={s.label} className="text-center lg:text-left">
+                  <div className={`stat-value font-display font-bold text-3xl sm:text-[34px] ${s.grad}`}>
+                    <StatValue num={s.num} decimals={s.decimals || 0} suffix={s.suffix || ""} delay={700 + i * 90} />
+                  </div>
+                  <div className="font-mono text-[11px] font-medium text-text-secondary uppercase tracking-[0.14em] mt-2">{s.label}</div>
                 </div>
-                <div className="font-mono text-[10px] text-text-muted uppercase tracking-[0.12em] mt-1.5">{s.label}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Tech marquee */}

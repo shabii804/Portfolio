@@ -221,7 +221,10 @@ body {
 .btn-primary:active { transform: translateY(0); }
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.02);
+  /* Tailwind @apply (not raw backdrop-filter): Lightning CSS strips the
+     unprefixed property from raw CSS, Tailwind-emitted rules survive */
+  @apply backdrop-blur-md;
+  background: rgba(9, 9, 15, 0.5);
   border: 1px solid rgb(var(--border-mid));
   color: rgb(var(--text-primary));
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -517,6 +520,7 @@ body {
 }
 
 /* ─── Tech marquee ───────────────────────────────────────────────────────── */
+.hero-video-active .marquee-item { color: rgb(var(--text-secondary)); }
 .marquee-mask {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
@@ -708,6 +712,31 @@ body {
 }
 
 /* Name — mask reveal, line by line (gated until the preloader lifts) */
+
+/* Copy-side legibility veil — dark radial behind the copy column so text,
+   CTAs and the stats stay readable over ANY footage (even bright scenes),
+   independent of the admin's scrim setting. Video hero only. */
+.hero-copy-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(62% 80% at 26% 52%, rgba(7, 7, 11, 0.52), transparent 72%),
+    linear-gradient(to top, rgba(7, 7, 11, 0.38), transparent 32%);
+}
+
+/* Hero stats — glass panel so the numbers pop over any background.
+   Glow via parent drop-shadow (works with background-clip:text where
+   text-shadow would bleed through the transparent fill). */
+.stats-panel {
+  /* @apply for the blur — same Lightning CSS reason as .btn-ghost */
+  @apply backdrop-blur-md;
+  background: rgba(9, 9, 15, 0.62);
+  border: 1px solid rgba(129, 140, 248, 0.18);
+  box-shadow: 0 12px 40px -14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.stat-value { filter: drop-shadow(0 3px 14px rgba(99, 102, 241, 0.5)); }
+
 .name-mask {
   display: block;
   overflow: hidden;
