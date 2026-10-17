@@ -2544,7 +2544,7 @@ img.hero-video-img {
   align-items: center;
   gap: 0.4rem;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
+  font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 4px 10px;
@@ -2557,7 +2557,7 @@ img.hero-video-img {
 .tl-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.7rem; }
 .tl-tag {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
+  font-size: 10.5px;
   letter-spacing: 0.04em;
   padding: 3px 9px;
   border-radius: 9999px;

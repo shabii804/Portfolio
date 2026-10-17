@@ -5,11 +5,40 @@ import "../styles/ChatButton.css";
 
 export default function ChatButton() {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [fabHidden, setFabHidden] = useState(false);
   const { personal } = usePortfolio();
 
   const toggleChat = () => {
     setIsChatOpen((open) => !open);
   };
+
+  /* v25 UX: on phones the two floating buttons sit over real content
+     (form fields, timeline cards, body text). Hide them while the user
+     scrolls DOWN, reveal on scroll-up / at top — and never hide while
+     the chat panel is open (the button doubles as its close control). */
+  useEffect(() => {
+    if (isChatOpen) {
+      // reset on open (async so we don't setState synchronously in the effect)
+      return () => { requestAnimationFrame(() => setFabHidden(false)); };
+    }
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const goingDown = y > lastY + 4;
+        const goingUp = y < lastY - 4;
+        if (goingDown && y > 320) setFabHidden(true);
+        else if (goingUp || y <= 320) setFabHidden(false);
+        lastY = y;
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isChatOpen]);
 
   // Listen for "Ask the AI assistant" command from the command palette
   useEffect(() => {
@@ -23,7 +52,7 @@ export default function ChatButton() {
   return (
     <>
       {/* Floating actions container */}
-      <div className="fixed right-4 bottom-4 z-50 sm:right-6 sm:bottom-6 flex flex-col items-center gap-3 select-none pointer-events-none">
+      <div className={`fab-stack fixed right-4 bottom-4 z-50 sm:right-6 sm:bottom-6 flex flex-col items-center gap-3 select-none pointer-events-none ${fabHidden ? "fab-stack-hidden" : ""}`}>
         
         {/* Floating Chat Button (above WhatsApp) */}
         <button

@@ -195,7 +195,7 @@ function CaseStudyModal({ project, onClose }) {
               {cs.metrics.map((m) => (
                 <div key={m.label} className="rounded-xl border border-border-subtle bg-bg-secondary px-3 py-4 text-center">
                   <div className="font-display font-bold text-xl sm:text-2xl text-gradient-indigo leading-none">{m.value}</div>
-                  <div className="font-mono text-[9px] text-text-muted uppercase tracking-wide mt-2 leading-relaxed">{m.label}</div>
+                  <div className="font-mono text-[10px] text-text-muted uppercase tracking-wide mt-2 leading-relaxed">{m.label}</div>
                 </div>
               ))}
             </div>
@@ -364,7 +364,7 @@ function ProjectCard({ project, onClick, index }) {
           {project.caseStudy.metrics.map((m) => (
             <div key={m.label} className="flex-1 rounded-lg border border-border-subtle bg-bg-secondary px-2 py-2.5 text-center">
               <div className="font-display font-bold text-sm leading-none" style={{ color: project.accentHex }}>{m.value}</div>
-              <div className="font-mono text-[8px] text-text-muted mt-1 leading-tight">{m.label}</div>
+              <div className="font-mono text-[10px] text-text-secondary mt-1 leading-tight">{m.label}</div>
             </div>
           ))}
         </div>

@@ -87,8 +87,11 @@ export default function Hero() {
           footage (dark radial behind the copy column + bottom melt) */}
       {heroMediaOn && <div className="hero-copy-veil" aria-hidden="true" />}
 
-      {/* Main content (outer layer takes the scroll-parallax exit) */}
-      <div ref={parallaxRef} className="hero-parallax relative w-full">
+      {/* Main content (outer layer takes the scroll-parallax exit).
+          z-10: the parallax transform creates a stacking context, so without
+          an explicit z this whole column would paint BELOW the bottom-melt
+          gradient sibling — washing the stats panel out in light theme. */}
+      <div ref={parallaxRef} className="hero-parallax relative z-10 w-full">
         <div className="relative z-10 container-x w-full">
           <div className={`text-center lg:text-left hero-gate ${ready ? "is-ready" : ""} lg:max-w-[54%]`}>
             {/* Availability badge */}
@@ -194,7 +197,7 @@ export default function Hero() {
 
           {/* Stats strip — glass panel so numbers stay clearly visible over any footage */}
           <div className={`hero-gate mt-9 lg:mt-7 ${ready ? "is-ready" : ""}`} style={{ "--d": "0.7s" }}>
-            <div className="stats-panel grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 rounded-2xl px-6 py-5 sm:px-8 sm:py-6">
+            <div className="stats-panel relative z-10 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 rounded-2xl px-6 py-5 sm:px-8 sm:py-6">
               {[
                 { num: 4, decimals: 1, label: "CGPA", grad: "text-gradient-indigo" },
                 { num: 4, suffix: "+", label: "Production Apps", grad: "text-gradient-cyan" },

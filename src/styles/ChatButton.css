@@ -1,5 +1,23 @@
 /* ==================== FLOATING ACTIONS STACK — dark luxury ==================== */
 
+/* v25 — hide while scrolling down so the buttons never sit over real
+   content (mobile form fields, timeline cards, body text).
+   Transform-only → stays on the compositor, no jank. */
+.fab-stack {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+.fab-stack-hidden {
+  transform: translateY(calc(100% + 36px));
+  opacity: 0;
+}
+.fab-stack-hidden .chat-button,
+.fab-stack-hidden .whatsapp-float-button { pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fab-stack { transition: opacity 0.2s ease; }
+  .fab-stack-hidden { transform: none; }
+}
+
 .chat-button {
   width: 60px;
   height: 60px;

@@ -123,7 +123,7 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
               onClick={(e) => onToggleTheme({ x: e.clientX, y: e.clientY })}
               aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
               title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
             >
               {theme === "dark" ? <SunIcon /> : <MoonIcon />}
             </button>
@@ -142,7 +142,7 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
 
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden flex flex-col gap-1.5 p-2"
+              className="md:hidden flex flex-col items-center justify-center gap-1.5 p-2.5 -m-1 w-11 h-11"
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
             >
