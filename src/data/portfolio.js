@@ -153,7 +153,7 @@ export const content = {
       "badge": "Live · Client Project",
       "date": "May 2026",
       "screenshots": [
-        "farooq-home.png"
+        "farooq-home.webp"
       ]
     },
     {
@@ -238,7 +238,7 @@ export const content = {
       "badge": "Full Stack",
       "date": "Jan 2023",
       "screenshots": [
-        "spendsmart-home.png"
+        "spendsmart-home.webp"
       ]
     },
     {
@@ -360,12 +360,12 @@ export const content = {
       "badge": "Active Deployment",
       "date": "Jan 2022",
       "screenshots": [
-        "sms-1.png",
-        "sms-2.png",
-        "sms-3.png",
-        "sms-4.png",
-        "sms-5.png",
-        "sms-6.png"
+        "sms-1.webp",
+        "sms-2.webp",
+        "sms-3.webp",
+        "sms-4.webp",
+        "sms-5.webp",
+        "sms-6.webp"
       ]
     }
   ],

@@ -71,6 +71,7 @@ function ProjectVisual({ project }) {
         <img
           src={`/screenshots/${shot}`}
           alt={`${project.title} interface preview`}
+          loading="lazy"
           decoding="async"
         />
       </div>

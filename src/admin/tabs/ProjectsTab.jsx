@@ -170,7 +170,7 @@ function ProjectEditor({ project, onChange, onDuplicate, onDelete }) {
         <Field label="Features">
           <ListEditor value={p.features || []} onChange={(v) => set("features", v)} placeholder="Authentication" addLabel="+ Add feature" />
         </Field>
-        <Field label="Screenshots" hint="Files in public/screenshots/ — e.g. farooq-home.png">
+        <Field label="Screenshots" hint="Files in public/screenshots/ — e.g. farooq-home.webp">
           <ListEditor value={p.screenshots || []} onChange={(v) => set("screenshots", v)} placeholder="screenshot.png" addLabel="+ Add screenshot" />
         </Field>
         <Field label="Impact bullets">

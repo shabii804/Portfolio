@@ -716,6 +716,20 @@ input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
 
 /* ─── Tech marquee ───────────────────────────────────────────────────────── */
 .hero-video-active .marquee-item { color: rgb(var(--text-secondary)); }
+/* v26: the marquee row sits right in the video→page-bg melt zone — in light
+   theme the labels were washing out against the mixed dark/white backdrop.
+   Give the row its own backing strip (edge-faded by the same mask) so the
+   text always sits on a predictable surface in BOTH themes. */
+.hero-video-active .marquee-mask {
+  background: linear-gradient(to bottom, rgba(7, 7, 11, 0.45), rgba(7, 7, 11, 0.2));
+  border-radius: 14px;
+  padding: 0.55rem 0;
+}
+[data-theme="light"] .hero-video-active .marquee-mask {
+  background: linear-gradient(to bottom, rgba(245, 246, 250, 0.85), rgba(245, 246, 250, 0.55));
+}
+[data-theme="light"] .hero-video-active .marquee-item,
+[data-theme="light"] .hero-video-active .marquee-item.has-ico { color: #34375a; }
 .marquee-mask {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
@@ -1458,6 +1472,15 @@ html.theme-anim *::after {
 .hero-gate { visibility: hidden; }
 html.is-ready .hero-gate { visibility: visible; }
 html.is-ready .hero-gate > * { animation: fadeSlideUp 0.7s var(--ease-out) backwards; animation-delay: var(--d, 0s); }
+/* v26 fix: the gate rule above is a full `animation` shorthand — on the
+   marquee track it REPLACED the infinite scroll animation, so the tech
+   marquee faded up once and then sat frozen forever. Run both animations:
+   the entrance plays first, the 30s scroll persists after (and during). */
+html.is-ready .hero-gate > .marquee-track {
+  animation:
+    fadeSlideUp 0.7s var(--ease-out) backwards var(--d, 0s),
+    marquee 30s linear infinite;
+}
 
 /* ─── Custom cursor (fine pointers, reduced-motion off only) ─────────────── */
 .cursor-dot,

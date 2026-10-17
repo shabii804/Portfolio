@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
+import { Mail } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import SectionHeader from "./motion/SectionHeader";
 
 // ─── EmailJS configuration ────────────────────────────────────────────────
 // Replace these with your real EmailJS credentials. Get them from
@@ -128,20 +130,17 @@ export default function Contact() {
     <section id="contact" ref={ref} className="section-y relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-indigo/[0.025] to-transparent pointer-events-none" />
       <div className="max-w-5xl mx-auto px-6">
-        <div className="animate-on-scroll flex items-center justify-center gap-4 mb-8">
-          <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent-indigo/50" />
-          <span className="section-label">Contact</span>
-          <div className="h-px w-12 bg-gradient-to-l from-transparent to-accent-indigo/50" />
-        </div>
-
-        <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4 text-center" style={{ transitionDelay: "0.08s" }}>
-          Let's build something<br /><span className="text-gradient-indigo">together.</span>
-        </h2>
-
-        <p className="animate-on-scroll font-body text-text-secondary text-lg max-w-xl mx-auto mb-8 leading-relaxed text-center" style={{ transitionDelay: "0.12s" }}>
-          I'm actively looking for internships, junior roles, or freelance projects.
-          If you have something interesting in mind, I'd love to hear about it.
-        </p>
+        {/* v26: joined the v24 SectionHeader system — same numbered eyebrow,
+            blur-to-sharp H2 and drawn underline as About/Skills/Projects/Journey */}
+        <SectionHeader
+          index="06"
+          icon={Mail}
+          tint="#818cf8"
+          label="Contact"
+          title="Let's build something together."
+          accent={["together."]}
+          subtitle="I'm actively looking for internships, junior roles, or freelance projects. If you have something interesting in mind, I'd love to hear about it."
+        />
 
         <div className="grid lg:grid-cols-5 gap-8 items-start">
           {/* LEFT — Contact Form */}
