@@ -8,7 +8,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-border-subtle relative overflow-hidden bg-bg-primary py-12 md:py-20 z-10">
+    <footer className="border-t border-border-subtle relative overflow-hidden bg-bg-primary py-10 md:py-14 z-10">
       {/* Top glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-px bg-gradient-to-r from-transparent via-accent-indigo/50 to-transparent" />
 
@@ -17,7 +17,7 @@ export default function Footer() {
       <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] rounded-full opacity-[0.015] blur-[80px] bg-accent-cyan pointer-events-none z-0 bg-blob-cyan" />
 
       <div className="container-x relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-9">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">

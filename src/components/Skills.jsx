@@ -70,13 +70,13 @@ export default function Skills() {
         <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
           My toolkit.
         </h2>
-        <p className="animate-on-scroll font-body text-text-secondary text-lg mb-12 max-w-xl" style={{ transitionDelay: "0.1s" }}>
+        <p className="animate-on-scroll font-body text-text-secondary text-lg mb-8 max-w-xl" style={{ transitionDelay: "0.1s" }}>
           Technologies I use to build, ship, and maintain real products — every one of them battle-tested in the projects below.
         </p>
 
         <SkillRails skills={Object.entries(skills)} />
 
-        <div className="grid md:grid-cols-2 gap-x-12 gap-y-9">
+        <div className="grid md:grid-cols-2 gap-x-12 gap-y-7">
           {Object.entries(skills).map(([cat, items], i) => {
             const meta = categoryMeta[cat] || { icon: "boxes", color: "#818cf8" };
             return (

@@ -32,13 +32,13 @@ export default function About() {
   return (
     <section id="about" ref={ref} className="section-y relative">
       <div className="container-x">
-        <div className="animate-on-scroll flex items-center gap-4 mb-12">
+        <div className="animate-on-scroll flex items-center gap-4 mb-6">
           <span className="section-label">About</span>
           <div className="grad-line flex-1 max-w-16" />
         </div>
 
         {/* Full-width heading — no column owns the title, grid stays balanced */}
-        <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl leading-tight mb-10 lg:mb-12 max-w-2xl">
+        <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl leading-tight mb-7 lg:mb-8 max-w-2xl">
           Building software that<br />
           <span className="text-gradient-indigo">actually ships.</span>
         </h2>
@@ -123,7 +123,7 @@ export default function About() {
         </div>
 
         {/* Highlight strip — full width band, kills the old column dead-space */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-12 lg:mt-14">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10 lg:mt-12">
           {highlights.map((h, i) => (
             <div key={h.label} className="animate-on-scroll card-border-glow card-glow-border rounded-2xl p-5 bg-bg-card" style={{ transitionDelay: `${0.16 + 0.06 * i}s` }}>
               <h.Icon className="w-5 h-5 text-accent-indigo mb-3" strokeWidth={1.8} aria-hidden="true" />
@@ -134,12 +134,12 @@ export default function About() {
         </div>
 
         {/* Interactive terminal — query the portfolio like a CLI */}
-        <div className="animate-on-scroll mt-14 max-w-3xl mx-auto">
+        <div className="animate-on-scroll mt-10 lg:mt-12 max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <span className="font-mono text-[10px] text-accent-cyan/70 uppercase tracking-[0.18em]">Interactive</span>
             <div className="h-px flex-1 max-w-24" style={{ background: "linear-gradient(to right, rgba(34,211,238,0.4), transparent)" }} />
           </div>
-          <p className="font-body text-text-secondary text-sm mb-5 max-w-xl">
+          <p className="font-body text-text-secondary text-sm mb-4 max-w-xl">
             Prefer CLIs to contact forms? Query my portfolio like a terminal — try
             <code className="terminal-chip mx-1">skills</code>
             or

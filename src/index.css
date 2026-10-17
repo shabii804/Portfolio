@@ -91,8 +91,9 @@
     --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 24px 60px -30px rgb(0 0 0 / 0.7);
     --shadow-lift: 0 18px 44px -18px rgb(0 0 0 / 0.75), 0 4px 12px -6px rgb(0 0 0 / 0.5);
     --glow-strength: 1;
-    /* v21 — one vertical rhythm (8px scale) */
-    --section-y: clamp(4rem, 8vw, 7rem);
+    /* v21.1 — compact vertical rhythm: sections breathe, not yawn.
+       40px mobile → 60px desktop (was 64→112px, user-flagged dead space) */
+    --section-y: clamp(2.5rem, 4.5vw, 3.75rem);
   }
 }
 
@@ -298,7 +299,7 @@ input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
 .skill-rails {
   display: grid;
   gap: 0.9rem;
-  margin-bottom: 3.5rem;
+  margin-bottom: 2rem;
 }
 .skill-rail {
   overflow: hidden;

@@ -138,7 +138,7 @@ export default function Contact() {
           Let's build something<br /><span className="text-gradient-indigo">together.</span>
         </h2>
 
-        <p className="animate-on-scroll font-body text-text-secondary text-lg max-w-xl mx-auto mb-12 leading-relaxed text-center" style={{ transitionDelay: "0.12s" }}>
+        <p className="animate-on-scroll font-body text-text-secondary text-lg max-w-xl mx-auto mb-8 leading-relaxed text-center" style={{ transitionDelay: "0.12s" }}>
           I'm actively looking for internships, junior roles, or freelance projects.
           If you have something interesting in mind, I'd love to hear about it.
         </p>

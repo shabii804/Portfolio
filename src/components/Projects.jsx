@@ -448,12 +448,12 @@ export default function Projects() {
           <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
             Case studies.
           </h2>
-          <p className="animate-on-scroll font-body text-text-secondary text-lg mb-10 max-w-2xl" style={{ transitionDelay: "0.1s" }}>
+          <p className="animate-on-scroll font-body text-text-secondary text-lg mb-8 max-w-2xl" style={{ transitionDelay: "0.1s" }}>
             Four production builds — every card opens the full story: the problem, the approach, the outcome.
           </p>
 
           {/* Search + Filter */}
-          <div className="animate-on-scroll mb-10 space-y-4" style={{ transitionDelay: "0.12s" }}>
+          <div className="animate-on-scroll mb-8 space-y-3" style={{ transitionDelay: "0.12s" }}>
             <div className="relative">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" />

@@ -165,7 +165,7 @@ export default function GitHubActivity() {
           <span className="section-label">GitHub Activity</span>
           <div className="grad-line flex-1 max-w-16" />
         </div>
-        <div className="flex items-end justify-between gap-4 flex-wrap mb-12">
+        <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
           <div>
             <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
               In motion, live.

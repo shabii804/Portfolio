@@ -52,7 +52,7 @@ export default function Journey() {
         <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
           The road so far.
         </h2>
-        <p className="animate-on-scroll font-body text-text-secondary text-lg mb-16 max-w-xl" style={{ transitionDelay: "0.1s" }}>
+        <p className="animate-on-scroll font-body text-text-secondary text-lg mb-10 max-w-xl" style={{ transitionDelay: "0.1s" }}>
           From first semester to a live client deployment — every step shipped something real.
         </p>
 
@@ -71,7 +71,7 @@ export default function Journey() {
             />
           )}
 
-          <div className="space-y-10 md:space-y-14">
+          <div className="space-y-6 md:space-y-8">
             {steps.map((step, i) => {
               const leftSide = i % 2 === 0;
               return (
