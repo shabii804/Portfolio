@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Rocket } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import TechIcon from "./TechIcon";
+import SectionHeader from "./motion/SectionHeader";
+import { EASE_OUT } from "./motion/ease";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Bento project cards — real screenshots where they exist (Farooq Agencies,
@@ -50,14 +54,14 @@ function useTilt() {
   return ref;
 }
 
-/* ── Visual header per project ─────────────────────────────────────────────── */
+/* ── Visual header per project — consistent 16:9 (v24) ─────────────────── */
 function ProjectVisual({ project }) {
   const shot = project.screenshots?.[0];
   if (shot) {
     const isBrowserApp = project.id !== "sms"; // SMS is a Java desktop app
     const url = project.live ? new URL(project.live).hostname : `${project.id}.app`;
     return (
-      <div className="bento-visual h-44 sm:h-52 mb-5">
+      <div className="bento-visual aspect-video mb-5">
         {isBrowserApp && (
           <div className="bento-chrome" aria-hidden="true">
             <i /><i /><i />
@@ -72,12 +76,11 @@ function ProjectVisual({ project }) {
       </div>
     );
   }
-  // Crafted art panel for projects without a public screenshot.
-  // v21: E-Shop gets a designed storefront wireframe instead of a faint
-  // placeholder; every other art panel gets its primary stack mark.
+  // Designed gradient mockup for projects without a public screenshot (v24):
+  // accent-tinted wireframe skeleton — no more faint </> placeholder.
   if (project.id === "eshop") {
     return (
-      <div className="bento-art h-44 sm:h-52 mb-5 rounded-xl" style={{ "--acc": project.accentHex }} aria-hidden="true">
+      <div className="bento-art aspect-video mb-5 rounded-xl" style={{ "--acc": project.accentHex }} aria-hidden="true">
         <span className="bento-art-tag">{project.badge}</span>
         <div className="eshop-mock">
           <div className="eshop-nav"><i /><i /><i /><span className="eshop-cart" /></div>
@@ -88,10 +91,14 @@ function ProjectVisual({ project }) {
     );
   }
   return (
-    <div className="bento-art h-44 sm:h-52 mb-5 rounded-xl" style={{ "--acc": project.accentHex }} aria-hidden="true">
+    <div className="bento-art aspect-video mb-5 rounded-xl" style={{ "--acc": project.accentHex }} aria-hidden="true">
       <span className="bento-art-tag">{project.badge}</span>
+      <div className="bento-skel">
+        <div className="bento-skel-nav"><i /><i /><i /><span className="bento-skel-dot" /></div>
+        <div className="bento-skel-hero" />
+        <div className="bento-skel-row"><i /><i /><i /></div>
+      </div>
       <span className="bento-art-ico"><TechIcon name={project.stack?.[0]} className="w-12 h-12" /></span>
-      <span className="bento-art-glyph">&lt;/&gt;</span>
     </div>
   );
 }
@@ -291,24 +298,26 @@ function CaseStudyModal({ project, onClose }) {
   );
 }
 
-/* ─── Bento card ─────────────────────────────────────────────────────────── */
-// Wide slots: the live client site and the storefront lead the grid
-const SPAN_MAP = {
-  farooq: "md:col-span-2 lg:col-span-2",
-  eshop: "md:col-span-2 lg:col-span-2",
-};
-
+/* ─── Bento card (v24): alternating slide-in, spotlight border, 16:9 ────── */
 function ProjectCard({ project, onClick, index }) {
   const [hovered, setHovered] = useState(false);
   const tiltRef = useTilt();
-  const featured = Boolean(SPAN_MAP[project.id]);
+  const reduced = useReducedMotion();
+  const fromLeft = index % 2 === 0;
 
   return (
+    <motion.div
+      className="min-h-0"
+      initial={reduced ? { opacity: 0 } : { opacity: 0, x: fromLeft ? -48 : 48, filter: "blur(6px)" }}
+      whileInView={reduced ? { opacity: 1 } : { opacity: 1, x: 0, filter: "blur(0px)" }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, ease: EASE_OUT, delay: (index % 2) * 0.08 }}
+    >
     <article
       ref={tiltRef}
-      className={`bento-card bento-tilt animate-on-scroll card-border-glow card-glow-border rounded-2xl p-5 sm:p-6 bg-bg-card flex flex-col gap-4 cursor-pointer group ${SPAN_MAP[project.id] || ""}`}
+      className="bento-card bento-tilt card-border-glow card-glow-border rounded-2xl p-5 sm:p-6 bg-bg-card flex flex-col gap-4 cursor-pointer group h-full"
       style={{
-        transitionDelay: `${0.06 * index}s`,
+        "--acc": project.accentHex,
         borderColor: hovered ? `${project.accentHex}40` : "rgb(var(--border-subtle))",
         boxShadow: hovered ? `0 20px 48px -16px ${project.accentHex}22` : "",
       }}
@@ -344,7 +353,7 @@ function ProjectCard({ project, onClick, index }) {
           {project.title}
         </h3>
         <p className="font-body text-text-secondary/70 text-xs italic mb-3">{project.tagline}</p>
-        <p className={`font-body text-text-secondary text-sm leading-relaxed ${featured ? "line-clamp-3" : "line-clamp-2"}`}>
+        <p className="font-body text-text-secondary text-sm leading-relaxed line-clamp-2">
           {project.caseStudy?.problem || project.description}
         </p>
       </div>
@@ -362,37 +371,53 @@ function ProjectCard({ project, onClick, index }) {
       )}
 
       <div className="flex flex-wrap gap-2">
-        {project.stack.slice(0, featured ? 5 : 4).map((tech) => (
+        {project.stack.slice(0, 4).map((tech) => (
           <span key={tech} className="skill-chip font-mono text-[10px] px-2.5 py-1 rounded-md">
             <TechIcon name={tech} className="chip-ico w-4 h-4" />
             {tech}
           </span>
         ))}
-        {project.stack.length > (featured ? 5 : 4) && (
-          <span className="font-mono text-[10px] px-2.5 py-1 rounded-md text-text-muted">+{project.stack.length - (featured ? 5 : 4)}</span>
+        {project.stack.length > 4 && (
+          <span className="font-mono text-[10px] px-2.5 py-1 rounded-md text-text-muted">+{project.stack.length - 4}</span>
         )}
       </div>
 
-      <div className="flex items-center gap-3 pt-3 border-t border-border-subtle">
+      <div className="flex items-center gap-2.5 pt-3 border-t border-border-subtle">
         <span className="font-mono text-[10px] text-text-muted">{project.date}</span>
         <div className="flex-1" />
         {project.live && (
-          <span className="font-mono text-[10px] flex items-center gap-1.5" style={{ color: project.accentHex }}>
+          <a
+            href={project.live}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Visit ${project.title} live site`}
+            className="font-mono text-[10px] px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition-colors duration-300"
+            style={{ color: project.accentHex, borderColor: `${project.accentHex}45`, background: `${project.accentHex}0d` }}
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />Live
-          </span>
+          </a>
         )}
-        {project.github && !project.live && (
-          <span className="font-mono text-[10px] text-text-muted flex items-center gap-1">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-            GitHub
-          </span>
+        {project.github && (
+          <a
+            href={project.github}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`View ${project.title} source code`}
+            className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-border-mid text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-colors duration-300 flex items-center gap-1.5"
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            Code
+          </a>
         )}
         <span className="font-mono text-[10px] text-text-muted flex items-center gap-1 group-hover:text-accent-indigo transition-colors">
           Case study
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform group-hover:translate-x-0.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </span>
       </div>
     </article>
+    </motion.div>
   );
 }
 
@@ -441,16 +466,15 @@ export default function Projects() {
       <section id="projects" ref={ref} className="section-y relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-cyan/[0.015] to-transparent pointer-events-none" />
         <div className="container-x">
-          <div className="animate-on-scroll flex items-center gap-4 mb-4">
-            <span className="section-label">Projects</span>
-            <div className="grad-line flex-1 max-w-16" />
-          </div>
-          <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
-            Case <span className="text-gradient-indigo">studies.</span>
-          </h2>
-          <p className="animate-on-scroll font-body text-text-secondary text-lg mb-8 max-w-2xl" style={{ transitionDelay: "0.1s" }}>
-            Four production builds — every card opens the full story: the problem, the approach, the outcome.
-          </p>
+          <SectionHeader
+            index="03"
+            icon={Rocket}
+            tint="#f472b6"
+            label="Projects"
+            title="Work that ships."
+            accent={["ships"]}
+            subtitle="Four production builds — every card opens the full story: the problem, the approach, the outcome."
+          />
 
           {/* Search + Filter */}
           <div className="animate-on-scroll mb-8 space-y-3" style={{ transitionDelay: "0.12s" }}>
@@ -533,7 +557,7 @@ export default function Projects() {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+            <div className="grid md:grid-cols-2 gap-6 items-stretch">
               {filtered.map((p, i) => (
                 <ProjectCard key={p.id} project={p} index={i} onClick={() => setSelected(p)} />
               ))}

@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { GraduationCap, MonitorSmartphone, Layers, Briefcase, Rocket, Sparkles } from "lucide-react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    <TimelineItem /> — one card of "The road so far" (v22).
@@ -48,6 +50,16 @@ export default function TimelineItem({ step }) {
   const { Icon, c1, c2 } = badge;
   const isNow = step.tag === "Next" || /^now$/i.test(step.year || "");
 
+  /* v24 — scroll-linked parallax on the badge icon (±4px = 8px travel,
+     transform-only; static under prefers-reduced-motion) */
+  const badgeRef = useRef(null);
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: badgeRef,
+    offset: ["start end", "end start"],
+  });
+  const badgeY = useTransform(scrollYProgress, [0, 1], [4, -4]);
+
   const { location, tags: derived } = splitPlace(step.place);
   const tags = derived.length ? derived : (TAG_FALLBACK[step.tag] || []);
 
@@ -55,13 +67,18 @@ export default function TimelineItem({ step }) {
     <div className={`tl-card ${isNow ? "tl-now" : ""}`}>
       {/* header: badge · year + pill */}
       <div className="flex items-start gap-3.5 mb-3">
-        <span
+        <motion.span
+          ref={badgeRef}
           className="tl-badge"
-          style={{ background: `linear-gradient(135deg, ${c1}, ${c2})`, "--badge-c1": c1 }}
+          style={{
+            background: `linear-gradient(135deg, ${c1}, ${c2})`,
+            "--badge-c1": c1,
+            y: reduced ? 0 : badgeY,
+          }}
           aria-hidden="true"
         >
           <Icon className="w-5 h-5" strokeWidth={2.1} />
-        </span>
+        </motion.span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="font-display font-bold text-2xl leading-none text-gradient-indigo">{step.year}</span>

@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import { Milestone } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import TimelineItem from "./TimelineItem";
+import SectionHeader from "./motion/SectionHeader";
 import { EASE_OUT } from "./motion/ease";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -53,16 +55,15 @@ export default function Journey() {
   return (
     <section id="journey" ref={ref} className="section-y relative">
       <div className="container-x">
-        <div className="animate-on-scroll flex items-center gap-4 mb-4">
-          <span className="section-label">Journey</span>
-          <div className="grad-line flex-1 max-w-16" />
-        </div>
-        <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
-          The road <span className="text-gradient-indigo">so far.</span>
-        </h2>
-        <p className="animate-on-scroll font-body text-text-secondary text-lg mb-10 max-w-xl" style={{ transitionDelay: "0.1s" }}>
-          From first semester to a live client deployment — every step shipped something real.
-        </p>
+        <SectionHeader
+          index="04"
+          icon={Milestone}
+          tint="#34d399"
+          label="Journey"
+          title="My journey so far."
+          accent={["journey"]}
+          subtitle="From first semester to a live client deployment — every step shipped something real."
+        />
 
         <div className="relative">
           {/* spine — faint track + scroll-drawn bright line + traveling tip
@@ -100,13 +101,28 @@ export default function Journey() {
                     />
                   </span>
 
-                  {/* card — slides in from its own side */}
+                  {/* connector — draws from the spine toward the card, arrow tip
+                      pointing at the card; mobile always points right */}
+                  {!reduced && (
+                    <motion.span
+                      className="j-conn"
+                      data-side={dir}
+                      aria-hidden="true"
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{ duration: 0.4, ease: EASE_OUT, delay: 0.04 * i }}
+                    />
+                  )}
+                  {reduced && <span className="j-conn" data-side={dir} aria-hidden="true" />}
+
+                  {/* card — slides in from its own side (±60, blur-to-sharp) */}
                   <motion.div
                     className={`pl-12 md:pl-0 ${leftSide ? "md:col-start-1 md:pr-2" : "md:col-start-2 md:pl-2"}`}
-                    initial={reduced ? { opacity: 0 } : { opacity: 0, x: dir === "left" ? -40 : 40, filter: "blur(7px)" }}
+                    initial={reduced ? { opacity: 0 } : { opacity: 0, x: dir === "left" ? -60 : 60, filter: "blur(7px)" }}
                     whileInView={reduced ? { opacity: 1 } : { opacity: 1, x: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.6, ease: EASE_OUT, delay: 0.06 * i }}
+                    transition={{ duration: 0.65, ease: EASE_OUT, delay: 0.06 * i }}
                   >
                     <TimelineItem step={step} />
                   </motion.div>

@@ -92,8 +92,8 @@
     --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 24px 60px -30px rgb(0 0 0 / 0.7);
     --shadow-lift: 0 18px 44px -18px rgb(0 0 0 / 0.75), 0 4px 12px -6px rgb(0 0 0 / 0.5);
     --glow-strength: 1;
-    /* v22 — one vertical rhythm (brief spec): 56px mobile → 96px desktop */
-    --section-y: clamp(3.5rem, 7vw, 6rem);
+    /* v24 — one rhythm (brief spec): 48px mobile → 88px desktop */
+    --section-y: clamp(3rem, 6vw, 5.5rem);
   }
 }
 
@@ -114,6 +114,11 @@ body {
 
 /* v21 — rhythm + container utilities (8px scale, ~1200px, clamp side padding) */
 .section-y { padding-block: var(--section-y); overflow-x: clip; }
+/* v24 — collapse section boundaries: ONE rhythm unit between sections, not two
+   (the previous section's bottom padding IS the gap; successors add none) */
+.section-y + .section-y,
+.section-y + footer { padding-block-start: 0; }
+#home { padding-block-end: 0; } /* hero→about boundary is #about's top pad alone */
 .container-x {
   width: 100%;
   max-width: 75rem; /* 1200px */
@@ -1686,7 +1691,7 @@ html.custom-cursor textarea { cursor: text; }
   transition: transform 0.7s var(--ease-out);
 }
 .group:hover .bento-visual img,
-.bento-card:hover .bento-visual img { transform: scale(1.05); }
+.bento-card:hover .bento-visual img { transform: scale(1.04); }
 .bento-chrome {
   display: flex;
   align-items: center;
@@ -1814,15 +1819,8 @@ html.custom-cursor textarea { cursor: text; }
   border: 1px solid rgb(var(--border-mid));
 }
 
-/* ─── Skill proficiency bars animate from 0 on view ──────────────────────── */
-.prof-bar {
-  width: 0;
-  transition: width 1.15s var(--ease-out);
-  transition-delay: var(--d, 0s);
-}
-@media (prefers-reduced-motion: reduce) {
-  .prof-bar { width: var(--w, 100%) !important; transition: none !important; }
-}
+/* v24 — old CSS-only prof-bar rules removed; the v24 .prof-* block
+   (bottom of file) owns the new shimmer + count-up bars */
 
 /* ─── Journey scroll-drawn spine ─────────────────────────────────────────── */
 .journey-spine {
@@ -2104,7 +2102,8 @@ img.hero-video-img {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.09), transparent 55%);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--acc, #818cf8) 12%, transparent), transparent 58%);
 }
 .bento-card:hover::after { opacity: 1; }
 [data-theme="light"] .bento-card::after {
@@ -2635,3 +2634,205 @@ img.hero-video-img {
   .terminal-bar .tb-fill { transition: none !important; }
   .terminal-hire .hire-fill { transition: none !important; }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   v24 — header system · proficiency bars · journey connectors · bento polish
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── SectionHeader ─────────────────────────────────────────────────────── */
+.sh-wrap { margin-bottom: 2rem; }
+@media (min-width: 768px) { .sh-wrap { margin-bottom: 2.5rem; } }
+.sh-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+.sh-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--sh-tint, #818cf8);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sh-tint, #818cf8) 22%, transparent),
+              0 0 12px color-mix(in srgb, var(--sh-tint, #818cf8) 70%, transparent);
+  animation: sh-pulse 2.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes sh-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--sh-tint, #818cf8) 22%, transparent), 0 0 10px color-mix(in srgb, var(--sh-tint, #818cf8) 60%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--sh-tint, #818cf8) 14%, transparent), 0 0 18px color-mix(in srgb, var(--sh-tint, #818cf8) 85%, transparent); }
+}
+.sh-ico { width: 15px; height: 15px; flex-shrink: 0; }
+.sh-num, .sh-label, .sh-sep {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.sh-num { font-weight: 700; }
+.sh-sep { color: rgb(var(--text-muted)); }
+.sh-label { color: rgb(var(--text-secondary)); font-weight: 500; }
+.sh-line { flex: 1; max-width: 5.5rem; }
+.sh-title { letter-spacing: -0.02em; margin-bottom: 0.9rem; }
+.sh-word-wrap { display: inline-block; white-space: pre; }
+.sh-word { display: inline-block; will-change: transform, filter; }
+.sh-sub { margin-bottom: 0; }
+.sh-underline {
+  display: block;
+  width: 4.5rem;
+  height: 2px;
+  margin-top: 1rem;
+  border-radius: 9999px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--sh-tint, #818cf8), #22d3ee);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--sh-tint, #818cf8) 55%, transparent);
+}
+[data-theme="light"] .sh-dot { animation: none; }
+[data-theme="light"] .sh-underline { box-shadow: none; }
+[data-theme="light"] .sh-label { color: rgb(var(--text-secondary)); }
+
+/* ─── Core proficiency bars (v24 — spec: shimmer fill + counting %) ────── */
+.prof-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(var(--text-muted));
+  margin-bottom: 1rem;
+}
+.prof-grid { display: grid; grid-template-columns: 1fr; gap: 0.95rem 2.75rem; }
+@media (min-width: 640px) { .prof-grid { grid-template-columns: 1fr 1fr; } }
+.prof-bar { min-width: 0; }
+.prof-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+.prof-ico {
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgb(255 255 255 / 0.055);
+  border: 1px solid rgb(255 255 255 / 0.07);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+[data-theme="light"] .prof-ico {
+  background: rgb(255 255 255 / 0.95);
+  border-color: rgb(23 23 58 / 0.08);
+  box-shadow: 0 1px 2px rgb(23 23 58 / 0.10);
+}
+.prof-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgb(var(--text-secondary));
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prof-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #a5b4fc;
+  min-width: 3.2ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="light"] .prof-pct { color: #4f46e5; }
+.prof-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: rgb(var(--bg-hover));
+  border: 1px solid rgb(var(--border-subtle));
+  overflow: hidden;
+}
+.prof-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6366f1, #818cf8 55%, #22d3ee);
+  box-shadow: 0 0 12px rgb(129 140 248 / 0.35);
+  position: relative;
+  overflow: hidden;
+}
+.prof-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.5), transparent);
+}
+.prof-bar.visible .prof-fill::after { animation: prof-shimmer 1.7s ease-in-out 0.5s 2; }
+@keyframes prof-shimmer { to { transform: translateX(100%); } }
+[data-theme="light"] .prof-fill { box-shadow: none; }
+
+/* ─── Journey connectors + badge hover (v24) ────────────────────────────── */
+.j-conn {
+  position: absolute;
+  top: 28px;
+  left: 27px;
+  width: 16px;
+  height: 1.5px;
+  pointer-events: none;
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(129, 140, 248, 0.75), rgba(34, 211, 238, 0.55));
+  z-index: 5;
+}
+.j-conn::before {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-top: 1.5px solid rgba(34, 211, 238, 0.85);
+  border-right: 1.5px solid rgba(34, 211, 238, 0.85);
+  transform: translateY(-50%) rotate(45deg);
+}
+@media (min-width: 768px) {
+  .j-conn { top: 50%; margin-top: -1px; width: 22px; }
+  .j-conn[data-side="right"] { left: calc(50% + 8px); transform-origin: left center; }
+  .j-conn[data-side="left"] {
+    left: auto;
+    right: calc(50% + 8px);
+    transform-origin: right center;
+    background: linear-gradient(270deg, rgba(129, 140, 248, 0.75), rgba(34, 211, 238, 0.55));
+  }
+  .j-conn[data-side="left"]::before {
+    right: auto;
+    left: -2px;
+    border: none;
+    border-bottom: 1.5px solid rgba(34, 211, 238, 0.85);
+    border-left: 1.5px solid rgba(34, 211, 238, 0.85);
+    transform: translateY(-50%) rotate(45deg);
+  }
+}
+.tl-badge svg { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.tl-card:hover .tl-badge svg,
+.tl-card:focus-visible .tl-badge svg { transform: rotate(-8deg) scale(1.12); }
+
+/* ─── Bento: designed skeleton fallback (replaces the </> glyph) ────────── */
+.bento-skel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 16px;
+}
+.bento-skel-nav { display: flex; gap: 6px; align-items: center; }
+.bento-skel-nav i {
+  width: 34px; height: 8px; border-radius: 4px;
+  background: color-mix(in srgb, var(--acc, #818cf8) 32%, rgb(var(--border-mid)));
+}
+.bento-skel-nav i:first-child { width: 46px; }
+.bento-skel-nav .bento-skel-dot { width: 8px; height: 8px; border-radius: 9999px; margin-left: auto; background: color-mix(in srgb, var(--acc, #818cf8) 55%, transparent); }
+.bento-skel-hero {
+  flex: 1.15;
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--acc, #818cf8) 36%, transparent), transparent 72%),
+    rgb(var(--bg-hover));
+}
+.bento-skel-row { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.bento-skel-row i { border-radius: 8px; background: rgb(var(--bg-hover)); border: 1px solid rgb(var(--border-subtle)); }

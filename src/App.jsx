@@ -49,13 +49,33 @@ function ReadyBroadcast() {
 // their scroll animation instead of being invisible forever.
 function RevealFallback() {
   useEffect(() => {
-    const t = setTimeout(() => {
+    const sweep = () => {
       document.querySelectorAll(".animate-on-scroll:not(.visible)").forEach((el) => {
         const r = el.getBoundingClientRect()
-        if (r.top < window.innerHeight && r.bottom > 0) el.classList.add("visible")
+        if (r.top < window.innerHeight * 0.96 && r.bottom > 0) el.classList.add("visible")
       })
-    }, 3500)
-    return () => clearTimeout(t)
+    }
+    const t = setTimeout(sweep, 3500)
+    // v24 — continuous scroll-linked failsafe: fast scrolls, anchor jumps and
+    // IO edge cases must NEVER leave content at opacity 0 (brief requirement).
+    let raf = 0
+    let last = 0
+    const onScroll = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        const now = performance.now()
+        if (now - last < 250) return
+        last = now
+        sweep()
+      })
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener("scroll", onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
   }, [])
   return null
 }

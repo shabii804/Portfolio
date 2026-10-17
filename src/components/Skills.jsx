@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
+import { Code2 } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import TechIcon from "./TechIcon";
 import { iconSlugFor } from "./techIconAlias";
 import { brandColorFor } from "./brandColors";
 import TiltCard from "./motion/TiltCard";
+import SectionHeader from "./motion/SectionHeader";
 import { EASE_OUT } from "./motion/ease";
 
 /* Restrained two-accent system (PRD: indigo→cyan only) — icons are lucide slugs */
@@ -19,8 +21,8 @@ const categoryMeta = {
   "Soft Skills": { icon: "handshake", color: "#60a5fa" },
 };
 
-/* Real proficiency numbers — reused from the site's own historical
-   "Core proficiencies" data (not invented). Shown in rail tooltips. */
+/* Real proficiency numbers — the site's own historical "Core proficiencies"
+   data (not invented). v24: rendered as shimmer-fill + count-up bars. */
 const LEVELS = {
   "React.js": 90,
   "JavaScript (ES6+)": 88,
@@ -33,6 +35,73 @@ const LEVELS = {
   "Firebase": 84,
   "Supabase": 84,
 };
+
+/* v24 — the six core bars (real percentages, one proficiency visualization) */
+const CORE_PROFICIENCIES = [
+  { name: "React.js", pct: 90 },
+  { name: "Tailwind CSS", pct: 92 },
+  { name: "JavaScript", pct: 88 },
+  { name: "Node.js", pct: 80 },
+  { name: "SQL", pct: 85 },
+  { name: "Firebase", pct: 84 },
+];
+
+function ProfBar({ name, pct, delay }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.6 });
+  const reduced = useReducedMotion();
+  const mv = useMotionValue(0);
+  const label = useTransform(mv, (v) => `${Math.round(v)}%`);
+
+  useEffect(() => {
+    if (!inView) return undefined;
+    const controls = animate(mv, pct, { duration: reduced ? 0 : 1.15, ease: EASE_OUT, delay: reduced ? 0 : 0.2 + delay });
+    return () => controls.stop();
+  }, [inView, pct, reduced, delay, mv]);
+
+  return (
+    <div ref={ref} className={`prof-bar${inView ? " visible" : ""}`} role="img" aria-label={`${name} proficiency ${pct} percent`}>
+      <div className="prof-row">
+        <span className="prof-ico" aria-hidden="true"><TechIcon name={name} className="w-4 h-4" /></span>
+        <span className="prof-name">{name}</span>
+        <motion.span className="prof-pct" aria-hidden="true">{label}</motion.span>
+      </div>
+      <div className="prof-track" aria-hidden="true">
+        <motion.div
+          className="prof-fill"
+          initial={reduced ? false : { width: 0 }}
+          animate={inView ? { width: `${pct}%` } : undefined}
+          style={reduced ? { width: `${pct}%` } : undefined}
+          transition={{ duration: reduced ? 0 : 1.15, ease: EASE_OUT, delay: reduced ? 0 : 0.2 + delay }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ProficiencyBars() {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div
+      className="prof-block"
+      initial={reduced ? undefined : { opacity: 0, y: 12 }}
+      whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.5, ease: EASE_OUT }}
+    >
+      <div className="prof-head">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent-indigo" aria-hidden="true" />
+        Core proficiency
+        <span className="grad-line flex-1 max-w-24" aria-hidden="true" />
+      </div>
+      <div className="prof-grid">
+        {CORE_PROFICIENCIES.map((s, i) => (
+          <ProfBar key={s.name} name={s.name} pct={s.pct} delay={i * 0.08} />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SkillRails — infinite two-row marquee, opposite directions, edge fade mask,
@@ -173,21 +242,24 @@ export default function Skills() {
     <section id="skills" ref={ref} className="section-y relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-indigo/[0.015] to-transparent pointer-events-none" />
       <div className="container-x">
-        <div className="animate-on-scroll flex items-center gap-4 mb-4">
-          <span className="section-label">Skills</span>
-          <div className="grad-line flex-1 max-w-16" />
-        </div>
-        <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
-          My <span className="text-gradient-indigo">toolkit.</span>
-        </h2>
-        <p className="animate-on-scroll font-body text-text-secondary text-lg mb-8 max-w-xl" style={{ transitionDelay: "0.1s" }}>
-          Technologies I use to build, ship, and maintain real products — every one of them battle-tested in the projects below.
-        </p>
+        <SectionHeader
+          index="02"
+          icon={Code2}
+          tint="#22d3ee"
+          label="Skills"
+          title="Technologies I build with."
+          accent={["build", "with"]}
+          subtitle="Technologies I use to build, ship, and maintain real products — every one of them battle-tested in the projects below."
+        />
 
         <SkillRails skills={Object.entries(skills)} />
 
-        {/* v22: ONE visualization — marquee + categorized chips. Equal-height cards. */}
-        <SkillGroups skills={skills} />
+        <ProficiencyBars />
+
+        {/* v24: marquee + core bars + categorized chips — the spec'd trio */}
+        <div className="mt-9">
+          <SkillGroups skills={skills} />
+        </div>
       </div>
     </section>
   );

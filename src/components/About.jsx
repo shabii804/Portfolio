@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { GraduationCap, Rocket, Building2, Globe2 } from "lucide-react";
+import { GraduationCap, Rocket, Building2, Globe2, User } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import TechIcon from "./TechIcon";
 import Terminal from "./Terminal";
+import SectionHeader from "./motion/SectionHeader";
 
 export default function About() {
   const { personal } = usePortfolio();
@@ -32,16 +33,15 @@ export default function About() {
   return (
     <section id="about" ref={ref} className="section-y relative">
       <div className="container-x">
-        <div className="animate-on-scroll flex items-center gap-4 mb-6">
-          <span className="section-label">About</span>
-          <div className="grad-line flex-1 max-w-16" />
-        </div>
-
-        {/* Full-width heading — no column owns the title, grid stays balanced */}
-        <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl leading-tight mb-7 lg:mb-8 max-w-2xl">
-          Building software that<br />
-          <span className="text-gradient-indigo">actually ships.</span>
-        </h2>
+        <SectionHeader
+          index="01"
+          icon={User}
+          tint="#818cf8"
+          label="About"
+          title="Building software that actually ships."
+          accent={["actually", "ships"]}
+          subtitle="A 4.0 CGPA software engineering student who treats every project as a product — deployed, in use, or both."
+        />
 
         <div className="grid lg:grid-cols-[1.08fr_0.92fr] gap-12 lg:gap-16 items-center">
           {/* Left — story */}
