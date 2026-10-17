@@ -2088,6 +2088,22 @@ img.hero-video-img {
    tuned for the left-aligned single-column copy) and the copy veil now
    covers all viewports. */
 
+/* ─── v31.2 — MOBILE VIDEO SPAN (user call) ────────────────────────────────
+   The clip is 16:9 landscape; stretching it over the whole content-tall
+   hero (~115svh on phones) zooms it into a narrow center sliver. Cover
+   just past the fold instead: the layer stays FULL mobile width but its
+   height caps at ~105svh ("a little long, not too"), and the section's
+   dark cinema canvas + fade-bottom melt seamlessly take over below —
+   stats/marquee keep floating on the same dark tone. Desktop untouched. */
+@media (max-width: 768px) {
+  .hero-video-bg {
+    bottom: auto;
+    height: 105vh;
+    height: 105svh;
+    min-height: 640px;
+  }
+}
+
 /* ─── v31 — NAVBAR · mobile at-top glass pill + full-screen menu ────────── */
 /* Dark theme: at the very top the mobile bar floats as a glass capsule
    (light theme already had its frosted pill at every width). Desktop

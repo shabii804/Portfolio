@@ -32,10 +32,13 @@ export default function Footer() {
       <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] rounded-full opacity-[0.015] blur-[80px] bg-accent-cyan pointer-events-none z-0 bg-blob-cyan" />
 
       <div className="container-x relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-9">
+        {/* v31.2 — mobile: 2-2 grid (Brand | Navigation side by side, Contact
+            spans both columns with its links in a 2×2 and buttons inline) so
+            the footer stops stacking into one long column on phones. */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-7 mb-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2.5 mb-4">
+            <div className="flex items-start gap-2.5 mb-4">
               <div className="w-9 h-9 rounded-xl bg-accent-indigo/10 border border-accent-indigo/25 flex items-center justify-center shadow-inner">
                 <span className="font-mono font-bold text-sm text-accent-indigo">SA</span>
               </div>
@@ -58,8 +61,8 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="font-mono text-[10px] uppercase tracking-widest text-text-muted mb-5">Navigation</h4>
-            <div className="space-y-2.5">
+            <h4 className="font-mono text-[10px] uppercase tracking-widest text-text-muted mb-4">Navigation</h4>
+            <div className="space-y-2">
               {footerNav.map(({ label, to }) => (
                 <Link
                   key={to}
@@ -72,10 +75,10 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Contact & Resume */}
-          <div>
-            <h4 className="font-mono text-[10px] uppercase tracking-widest text-text-muted mb-5">Get in touch</h4>
-            <div className="space-y-3 mb-6">
+          {/* Contact & Resume — spans both columns on mobile */}
+          <div className="col-span-2 md:col-span-1">
+            <h4 className="font-mono text-[10px] uppercase tracking-widest text-text-muted mb-4">Get in touch</h4>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 mb-5">
               <a href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!`} target="_blank" rel="noreferrer"
                   className="flex items-center gap-2.5 font-body text-sm text-text-secondary hover:text-accent-indigo transition-colors group">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-text-muted group-hover:text-accent-indigo transition-colors"><path d="M12.012 2c-5.506 0-9.988 4.482-9.988 9.988 0 1.758.455 3.414 1.258 4.868L2 22l5.312-1.392c1.401.763 3.001 1.196 4.7 1.196 5.506 0 9.988-4.482 9.988-9.988C22 6.482 17.518 2 12.012 2zm4.786 14.193c-.272.763-1.392 1.4-2.155 1.508-.654.098-1.503.185-4.408-.98-3.723-1.492-6.13-5.267-6.315-5.512-.185-.245-1.503-2-1.503-3.816 0-1.815.959-2.709 1.303-3.069.344-.36.758-.45.998-.45.24 0 .48.01.688.02.218.01.512-.08.8-.08.288 0 .584.09.83.676.24.58.83 2.02.9 2.16.07.14.12.3.02.5-.1.2-.15.33-.3.51-.15.18-.32.4-.46.54-.15.15-.31.31-.13.62.18.3.8 1.31 1.71 2.12.91.81 1.67 1.06 1.91 1.19.24.13.38.11.52-.05.14-.17.62-.72.79-.97.17-.25.34-.21.58-.12.24.09 1.52.72 1.79.85.27.14.45.2.51.31.06.11.06.66-.21 1.42z"/></svg>
@@ -101,7 +104,7 @@ export default function Footer() {
             </div>
 
             {/* Resume actions */}
-            <div className="flex flex-col sm:flex-row gap-2.5">
+            <div className="flex flex-row gap-2.5">
               <a
                 href={personal.resumePdf}
                 target="_blank"
@@ -124,7 +127,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-6 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="pt-5 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-3">
           <span className="font-mono text-[10px] text-text-muted text-center sm:text-left">
             © 2026 {personal.name} · Built with React, Vite & Tailwind CSS · AI answers grounded in the fact sheet
           </span>
