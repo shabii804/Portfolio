@@ -1982,6 +1982,9 @@ img.hero-video-img {
 @media (max-width: 768px) {
   .hero-video-scrim {
     background:
+      /* v31.3 — pocket of shade over the contain-fit video band so the name
+         stays readable over the bright glowing core */
+      radial-gradient(64% 16% at 50% 20%, rgba(5, 6, 15, 0.6), transparent 72%),
       linear-gradient(180deg, rgba(5, 6, 15, 0.6) 0%, rgba(5, 6, 15, 0.34) 38%, rgba(5, 6, 15, 0.52) 68%, rgba(5, 6, 15, 0.85) 100%),
       linear-gradient(90deg, rgba(5, 6, 15, 0.5) 0%, rgba(5, 6, 15, 0.3) 50%, rgba(5, 6, 15, 0.5) 100%);
   }
@@ -2088,19 +2091,19 @@ img.hero-video-img {
    tuned for the left-aligned single-column copy) and the copy veil now
    covers all viewports. */
 
-/* ─── v31.2 — MOBILE VIDEO SPAN (user call) ────────────────────────────────
-   The clip is 16:9 landscape; stretching it over the whole content-tall
-   hero (~115svh on phones) zooms it into a narrow center sliver. Cover
-   just past the fold instead: the layer stays FULL mobile width but its
-   height caps at ~105svh ("a little long, not too"), and the section's
-   dark cinema canvas + fade-bottom melt seamlessly take over below —
-   stats/marquee keep floating on the same dark tone. Desktop untouched. */
+/* ─── v31.3 — MOBILE VIDEO = FULL FRAME IN THE HERO BOX (user call) ────────
+   "Same width & height as the hero section, full video resolution fits":
+   the layer spans the hero box exactly (105svh cap removed) and the clip
+   renders object-fit: contain — the ENTIRE 16:9 frame visible edge-to-edge
+   at native sharpness (downscaled 1280→390, never cropped or over-zoomed),
+   floating as a glowing cinema screen behind the name while the cover-fit
+   poster underlay keeps ambient full-bleed depth in the letterbox zones
+   (the clip's baked rounded corners soften the band edges). Desktop keeps
+   object-fit: cover full-bleed. */
 @media (max-width: 768px) {
-  .hero-video-bg {
-    bottom: auto;
-    height: 105vh;
-    height: 105svh;
-    min-height: 640px;
+  .hero-video {
+    object-fit: contain;
+    object-position: center 18%;
   }
 }
 
@@ -2110,13 +2113,20 @@ img.hero-video-img {
    at-top stays the transparent full-width bar. */
 @media (max-width: 767px) {
   .nav-shell.nav-top { padding-top: 10px; padding-left: 14px; padding-right: 14px; }
+  /* v31.3 — "nav bar not clearly seen": heavier glass (0.78 vs 0.55),
+     indigo-tinted hairline + soft brand glow so the pill reads instantly
+     over any footage. Blur lives on the max-md:backdrop-blur-xl Tailwind
+     utility (Lightning CSS strips raw backdrop-filter in prod). */
   .nav-shell.nav-top > .nav-bar {
-    background: rgba(9, 9, 15, 0.55);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgb(var(--border-subtle));
+    background: rgba(9, 9, 15, 0.78);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(129, 140, 248, 0.32);
     border-radius: 1rem;
-    box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.85);
+    box-shadow:
+      0 18px 42px -18px rgba(0, 0, 0, 0.9),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 32px -14px rgba(99, 102, 241, 0.5);
   }
 }
 

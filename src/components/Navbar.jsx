@@ -117,7 +117,7 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
         scrolled ? "top-3 md:top-4 px-4 sm:px-6" : "nav-top top-0 px-0"
       }`}
     >
-      <div className={`nav-bar mx-auto max-w-5xl transition-all duration-500 max-md:backdrop-blur-xl ${
+      <div className={`nav-bar mx-auto max-w-5xl transition-all duration-500 max-md:backdrop-blur-xl max-md:backdrop-saturate-150 ${
         scrolled
           ? "bg-bg-card/85 backdrop-blur-xl border border-border-subtle rounded-2xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.7)]"
           : "bg-transparent border-b border-transparent"
