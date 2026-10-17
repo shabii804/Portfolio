@@ -1982,11 +1982,16 @@ img.hero-video-img {
 @media (max-width: 768px) {
   .hero-video-scrim {
     background:
-      /* v31.3 — pocket of shade over the contain-fit video band so the name
-         stays readable over the bright glowing core */
-      radial-gradient(64% 16% at 50% 20%, rgba(5, 6, 15, 0.6), transparent 72%),
-      linear-gradient(180deg, rgba(5, 6, 15, 0.6) 0%, rgba(5, 6, 15, 0.34) 38%, rgba(5, 6, 15, 0.52) 68%, rgba(5, 6, 15, 0.85) 100%),
-      linear-gradient(90deg, rgba(5, 6, 15, 0.5) 0%, rgba(5, 6, 15, 0.3) 50%, rgba(5, 6, 15, 0.5) 100%);
+      /* v31.4 — soft pocket of shade over the cinema strip (band core ≈
+         140-300px of the hero box) so name/role stay readable over the
+         footage; light enough that the scene stays the visible centerpiece */
+      radial-gradient(70% 20% at 50% 27%, rgba(5, 6, 15, 0.32), transparent 74%),
+      linear-gradient(180deg, rgba(5, 6, 15, 0.62) 0%, rgba(5, 6, 15, 0.3) 30%, rgba(5, 6, 15, 0.36) 56%, rgba(5, 6, 15, 0.62) 80%, rgba(5, 6, 15, 0.88) 100%),
+      linear-gradient(90deg, rgba(5, 6, 15, 0.5) 0%, rgba(5, 6, 15, 0.26) 50%, rgba(5, 6, 15, 0.5) 100%);
+  }
+  /* deeper top melt so the fixed nav zone never fights bright footage */
+  .hero-video-fade-top {
+    background: linear-gradient(180deg, rgba(5, 6, 15, 0.72) 0%, rgba(5, 6, 15, 0) 26%);
   }
 }
 .hero-video-fade-bottom {
@@ -2091,19 +2096,40 @@ img.hero-video-img {
    tuned for the left-aligned single-column copy) and the copy veil now
    covers all viewports. */
 
-/* ─── v31.3 — MOBILE VIDEO = FULL FRAME IN THE HERO BOX (user call) ────────
-   "Same width & height as the hero section, full video resolution fits":
-   the layer spans the hero box exactly (105svh cap removed) and the clip
-   renders object-fit: contain — the ENTIRE 16:9 frame visible edge-to-edge
-   at native sharpness (downscaled 1280→390, never cropped or over-zoomed),
-   floating as a glowing cinema screen behind the name while the cover-fit
-   poster underlay keeps ambient full-bleed depth in the letterbox zones
-   (the clip's baked rounded corners soften the band edges). Desktop keeps
-   object-fit: cover full-bleed. */
+/* ─── v31.4 — MOBILE HERO: THE CINEMA STRIP ─────────────────────────────────
+   Keeps the v31.3 contract (FULL frame, full width, inside the hero box) but
+   fixes what looked broken: with object-fit contain in a portrait box the
+   band's position drifted with the device ratio, its edges cut hard through
+   the copy, and the near-white scenes washed the whole section gray.
+   Now the <video> itself IS the strip:
+     • absolute full-width band anchored at 31% of the hero box, 16:9 box →
+       the entire native frame renders at 100% width (identical pixels to
+       the contain fit, but position is deterministic on every device)
+     • edges feathered with a mask gradient — no hard letterbox seams
+     • self-graded darker (brightness .78) so bright scenes stop washing the
+       copy out; the scrims above add depth instead of doing rescue duty
+     • tamed Ken Burns drift (uniform scale only — the mask rides on the
+       element so the feather stays glued to the edges)
+   Letterbox zones keep the cover poster + grain ambient depth. Desktop
+   keeps object-fit: cover full-bleed, untouched. */
 @media (max-width: 768px) {
   .hero-video {
+    /* name sits at ~148px (pt-24 + badge, content-driven & stable), so the
+       strip anchors in px, not % — the core of the band carries the name +
+       role, the feather melts into the dark canvas before the bio starts */
+    top: clamp(120px, 14.5svh, 138px);
+    bottom: auto;
+    height: auto;
+    aspect-ratio: 16 / 9;
     object-fit: contain;
-    object-position: center 18%;
+    filter: brightness(0.88) saturate(1.08) contrast(1.05);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%);
+    animation: video-drift-mobile 30s ease-in-out infinite alternate;
+  }
+  @keyframes video-drift-mobile {
+    from { transform: scale(1.02); }
+    to { transform: scale(1.06) translateY(0.8%); }
   }
 }
 
@@ -2113,20 +2139,22 @@ img.hero-video-img {
    at-top stays the transparent full-width bar. */
 @media (max-width: 767px) {
   .nav-shell.nav-top { padding-top: 10px; padding-left: 14px; padding-right: 14px; }
-  /* v31.3 — "nav bar not clearly seen": heavier glass (0.78 vs 0.55),
-     indigo-tinted hairline + soft brand glow so the pill reads instantly
-     over any footage. Blur lives on the max-md:backdrop-blur-xl Tailwind
-     utility (Lightning CSS strips raw backdrop-filter in prod). */
+  /* v31.4 — "nav bar STILL not clearly seen": footage-proof pill. 0.78 glass
+     let bright montage scenes bleed through and wash the controls out — now
+     near-opaque (0.94) with a crisper indigo rim and stronger brand glow, so
+     the pill reads instantly over ANY frame. Blur lives on the
+     max-md:backdrop-blur-xl Tailwind utility (Lightning CSS strips raw
+     backdrop-filter in prod). */
   .nav-shell.nav-top > .nav-bar {
-    background: rgba(9, 9, 15, 0.78);
+    background: rgba(9, 9, 16, 0.94);
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
-    border: 1px solid rgba(129, 140, 248, 0.32);
+    border: 1px solid rgba(129, 140, 248, 0.45);
     border-radius: 1rem;
     box-shadow:
-      0 18px 42px -18px rgba(0, 0, 0, 0.9),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 32px -14px rgba(99, 102, 241, 0.5);
+      0 18px 42px -18px rgba(0, 0, 0, 0.95),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      0 0 34px -14px rgba(99, 102, 241, 0.55);
   }
 }
 

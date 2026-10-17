@@ -118,10 +118,10 @@ export default function Hero() {
               {/* Name — mask reveal, word by word */}
               <h1 className="font-display font-bold leading-[0.95] tracking-tight mb-4" style={{ "--d": "0.18s" }}>
                 <span className="name-mask name-mask-a">
-                  <span className="name-line text-[clamp(38px,5.2vw,60px)] text-text-primary">{personal.name.split(" ")[0]}</span>
+                  <span className="name-line text-[clamp(38px,5.2vw,60px)] max-md:text-[clamp(44px,12.5vw,64px)] text-text-primary">{personal.name.split(" ")[0]}</span>
                 </span>
                 <span className="name-mask name-mask-b">
-                  <span className="name-line text-[clamp(38px,5.2vw,60px)] text-shimmer">
+                  <span className="name-line text-[clamp(38px,5.2vw,60px)] max-md:text-[clamp(44px,12.5vw,64px)] text-shimmer">
                     {personal.name.split(" ").slice(1).join(" ")}.
                   </span>
                 </span>
@@ -147,7 +147,7 @@ export default function Hero() {
 
               {/* Bio */}
               <p
-                className="font-body text-text-secondary text-[15px] sm:text-base leading-relaxed mb-7 max-w-lg"
+                className="font-body text-text-secondary text-[15px] sm:text-base leading-relaxed mb-7 max-w-lg [text-wrap:pretty]"
                 style={{ "--d": "0.48s" }}
               >
                 {personal.bio}
