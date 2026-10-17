@@ -75,7 +75,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className={`${heroMediaOn ? "hero-video-active " : ""}relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-28 md:pt-24 pb-16`}
+      className={`${heroMediaOn ? "hero-video-active " : ""}relative min-h-[92svh] flex items-center justify-center overflow-hidden pt-24 md:pt-20 pb-10`}
     >
       {/* Cinematic video background — "floating code" clip + scrims +
           animated motion icons. Replaces the previous 3D/particle layers:
@@ -87,7 +87,7 @@ export default function Hero() {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
           <div className={`text-center lg:text-left hero-gate ${ready ? "is-ready" : ""} lg:max-w-[54%]`}>
             {/* Availability badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/[0.07] border border-emerald-500/20 mb-8" style={{ "--d": "0s" }}>
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/[0.07] border border-emerald-500/20 mb-5" style={{ "--d": "0s" }}>
                 <div className="relative flex h-2 w-2">
                   <span className="pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -106,23 +106,23 @@ export default function Hero() {
               </div>
 
               {/* Name — mask reveal, word by word */}
-              <h1 className="font-display font-bold leading-[0.95] tracking-tight mb-6" style={{ "--d": "0.18s" }}>
+              <h1 className="font-display font-bold leading-[0.95] tracking-tight mb-4" style={{ "--d": "0.18s" }}>
                 <span className="name-mask name-mask-a">
-                  <span className="name-line text-[clamp(44px,7vw,84px)] text-text-primary">{personal.name.split(" ")[0]}</span>
+                  <span className="name-line text-[clamp(38px,5.2vw,60px)] text-text-primary">{personal.name.split(" ")[0]}</span>
                 </span>
                 <span className="name-mask name-mask-b">
-                  <span className="name-line text-[clamp(44px,7vw,84px)] text-shimmer">
+                  <span className="name-line text-[clamp(38px,5.2vw,60px)] text-shimmer">
                     {personal.name.split(" ").slice(1).join(" ")}.
                   </span>
                 </span>
               </h1>
 
               {/* Typewriter role line */}
-              <div className="flex items-center justify-center lg:justify-start gap-2.5 mb-6" style={{ "--d": "0.4s" }}>
-                <span className="font-mono text-accent-cyan/50 text-base select-none">▶</span>
-                <div className="font-display text-lg sm:text-2xl font-medium text-text-secondary min-h-[30px] sm:min-h-[34px]">
+              <div className="flex items-center justify-center lg:justify-start gap-2.5 mb-3.5" style={{ "--d": "0.4s" }}>
+                <span className="font-mono text-accent-cyan/50 text-sm select-none">▶</span>
+                <div className="font-display text-base sm:text-xl font-medium text-text-secondary min-h-[24px] sm:min-h-[28px]">
                   {displayed}
-                  <span className="inline-block w-[2px] h-[20px] sm:h-[22px] bg-accent-indigo/80 ml-0.5 animate-blink align-middle rounded-full" />
+                  <span className="inline-block w-[2px] h-[16px] sm:h-[19px] bg-accent-indigo/80 ml-0.5 animate-blink align-middle rounded-full" />
                 </div>
               </div>
 
@@ -132,23 +132,23 @@ export default function Hero() {
                 accent={["build", "screens."]}
                 ready={ready}
                 delay={0.35}
-                className="font-display text-xl sm:text-2xl font-semibold text-text-secondary mb-5 justify-center lg:justify-start"
+                className="font-display text-lg sm:text-xl font-semibold text-text-secondary mb-4 justify-center lg:justify-start"
               />
 
               {/* Bio */}
               <p
-                className="font-body text-text-secondary text-base sm:text-lg leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0"
+                className="font-body text-text-secondary text-[15px] sm:text-base leading-relaxed mb-7 max-w-lg mx-auto lg:mx-0"
                 style={{ "--d": "0.48s" }}
               >
                 {personal.bio}
               </p>
 
               {/* CTAs */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-10" style={{ "--d": "0.56s" }}>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-7" style={{ "--d": "0.56s" }}>
                 <button
                   ref={magneticPrimary}
                   onClick={() => scrollToSection("projects")}
-                  className="magnetic btn-primary px-6 py-3.5 rounded-xl font-display font-semibold text-sm flex items-center gap-2.5 group glow-on-hover"
+                  className="magnetic btn-primary px-5 py-3 rounded-xl font-display font-semibold text-sm flex items-center gap-2.5 group glow-on-hover"
                 >
                   View My Work
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform group-hover:translate-x-1"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
@@ -157,7 +157,7 @@ export default function Hero() {
                   ref={magneticCv}
                   href={personal.resumePdf}
                   download
-                  className="magnetic btn-ghost px-5 py-3.5 rounded-xl font-display font-semibold text-sm flex items-center gap-2 group glow-on-hover"
+                  className="magnetic btn-ghost px-5 py-3 rounded-xl font-display font-semibold text-sm flex items-center gap-2 group glow-on-hover"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform group-hover:-translate-y-0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                   Download CV
@@ -165,7 +165,7 @@ export default function Hero() {
                 <button
                   ref={magneticTalk}
                   onClick={() => scrollToSection("contact")}
-                  className="magnetic btn-ghost px-5 py-3.5 rounded-xl font-display font-semibold text-sm group flex items-center gap-2 glow-on-hover"
+                  className="magnetic btn-ghost px-5 py-3 rounded-xl font-display font-semibold text-sm group flex items-center gap-2 glow-on-hover"
                 >
                   Let's Talk
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
@@ -189,7 +189,7 @@ export default function Hero() {
 
           {/* Stats strip */}
           <div
-            className={`hero-gate mt-14 lg:mt-10 pt-8 border-t border-border-subtle grid grid-cols-2 md:grid-cols-4 gap-8 ${ready ? "is-ready" : ""}`}
+            className={`hero-gate mt-9 lg:mt-7 pt-6 border-t border-border-subtle grid grid-cols-2 md:grid-cols-4 gap-6 ${ready ? "is-ready" : ""}`}
             style={{ "--d": "0.7s" }}
           >
             {[
@@ -199,7 +199,7 @@ export default function Hero() {
               { num: 4, suffix: "yrs", label: "Building Software", grad: "text-gradient-cyan" },
             ].map((s, i) => (
               <div key={s.label} className="text-center lg:text-left">
-                <div className={`font-display font-bold text-3xl sm:text-4xl ${s.grad}`}>
+                <div className={`font-display font-bold text-2xl sm:text-3xl ${s.grad}`}>
                   <StatValue num={s.num} decimals={s.decimals || 0} suffix={s.suffix || ""} delay={700 + i * 90} />
                 </div>
                 <div className="font-mono text-[10px] text-text-muted uppercase tracking-[0.12em] mt-1.5">{s.label}</div>
@@ -209,7 +209,7 @@ export default function Hero() {
 
           {/* Tech marquee */}
           <div
-            className={`hero-gate mt-10 marquee-mask ${ready ? "is-ready" : ""}`}
+            className={`hero-gate mt-7 marquee-mask ${ready ? "is-ready" : ""}`}
             style={{ "--d": "0.8s" }}
             aria-hidden="true"
           >
@@ -223,8 +223,8 @@ export default function Hero() {
       </div>
 
       {/* Scroll hint */}
-      <div className="hero-scroll-hint hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 opacity-35">
-        <div className="w-px h-10 bg-gradient-to-b from-transparent to-accent-indigo/60" />
+      <div className="hero-scroll-hint hidden md:flex absolute bottom-5 left-1/2 -translate-x-1/2 flex-col items-center gap-2 opacity-35">
+        <div className="w-px h-8 bg-gradient-to-b from-transparent to-accent-indigo/60" />
         <span className="font-mono text-[9px] tracking-[0.3em] text-text-muted">SCROLL</span>
       </div>
     </section>

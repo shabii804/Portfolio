@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ["'Space Grotesk'", "sans-serif"],
-        body: ["'Inter'", "sans-serif"],
+        display: ["'Clash Display'", "sans-serif"],
+        body: ["'Satoshi'", "sans-serif"],
         mono: ["'JetBrains Mono'", "monospace"],
       },
       boxShadow: {
