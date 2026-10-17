@@ -2109,13 +2109,16 @@ img.hero-video-img {
 
 
 /* ─── v21: timeline node pulse (once per node, on reach) ─────────────────── */
-.journey-node.pulse-once > div {
+/* v27 fix: the old selector was "> div" but the child is a <span> — the
+   arrival shockwave never fired. Now targets .journey-node-pop and picks up
+   the milestone color via --pulse-c / --pulse-e (set inline per row). */
+.journey-node.pulse-once > .journey-node-pop {
   animation: node-pulse 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 1 both;
 }
 @keyframes node-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.6); }
-  60% { box-shadow: 0 0 0 14px rgba(129, 140, 248, 0); }
-  100% { box-shadow: 0 0 12px rgba(129, 140, 248, 0.55); }
+  0% { box-shadow: 0 0 0 0 var(--pulse-c, rgba(129, 140, 248, 0.6)); }
+  60% { box-shadow: 0 0 0 14px transparent; }
+  100% { box-shadow: 0 0 12px var(--pulse-e, rgba(129, 140, 248, 0.55)); }
 }
 
 /* ─── v21: cursor light-reflection on project cards (fine pointers only) ── */
@@ -2624,7 +2627,9 @@ img.hero-video-img {
   0% { transform: scale(0.5); opacity: 1; }
   100% { transform: scale(1.6); opacity: 0; }
 }
-/* traveling glow tip on the spine */
+/* traveling glow tip on the spine — v27: color is driven by framer
+   (backgroundColor/color MotionValues); CSS keeps a static fallback and
+   adds an expanding ping ring via currentColor */
 .journey-tip {
   position: absolute;
   left: 50%;
@@ -2637,6 +2642,19 @@ img.hero-video-img {
   z-index: 5;
   pointer-events: none;
 }
+.journey-tip::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 1.5px solid currentColor;
+  opacity: 0.6;
+  animation: tip-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes tip-ping {
+  0% { transform: scale(0.55); opacity: 0.7; }
+  80%, 100% { transform: scale(1.9); opacity: 0; }
+}
 /* node pop spring */
 .journey-node-pop { transform-origin: center; }
 @media (max-width: 767px) {
@@ -2644,6 +2662,64 @@ img.hero-video-img {
 }
 @media (prefers-reduced-motion: reduce) {
   .tl-now .tl-live i::after { animation: none; opacity: 0; }
+  .journey-tip::after { animation: none; opacity: 0; }
+}
+
+/* ─── v27 — journey milestone rail (≥1440px): live scrub index + jump nav ── */
+.jy-rail {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 12px;
+}
+@media (min-width: 1440px) {
+  .jy-rail { display: flex; }
+}
+.jy-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  opacity: 0.38;
+  transition: opacity 0.3s ease, transform 0.3s var(--ease-out);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgb(var(--text-muted));
+}
+.jy-rail-item:hover { opacity: 0.78; }
+.jy-rail-item:focus-visible { outline-offset: 0; }
+.jy-rail-item.is-active {
+  opacity: 1;
+  color: rgb(var(--text-primary));
+  transform: translateX(-3px);
+}
+.jy-rail-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: var(--rc, #818cf8);
+  opacity: 0.5;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+}
+.jy-rail-item.is-active .jy-rail-dot {
+  opacity: 1;
+  box-shadow: 0 0 10px var(--rc, #818cf8);
+}
+@media (prefers-reduced-motion: reduce) {
+  .jy-rail-item { transition: opacity 0.15s ease; }
+  .jy-rail-item.is-active { transform: none; }
 }
 
 /* terminal ghost input + mirrored text + block caret */
