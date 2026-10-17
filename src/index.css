@@ -944,6 +944,9 @@ input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
   box-shadow: 0 12px 40px -14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .stat-value { filter: drop-shadow(0 3px 14px rgba(99, 102, 241, 0.5)); }
+/* v25: the glass picks up the white bottom-melt behind it in light theme,
+   washing the pale gradient values — go near-opaque so numbers pop */
+[data-theme="light"] .stats-panel { background: rgba(9, 9, 15, 0.8); }
 
 .name-mask {
   display: block;
