@@ -21,6 +21,11 @@ const ALIAS = {
   "microsoft sql server": "microsoftsqlserver", "mssql": "microsoftsqlserver", "sql server": "microsoftsqlserver",
   "oracle": "oracle", "oracle db": "oracle",
   "sql": "database", "database": "database", "databases": "database",
+  // v22 — extended brand set (local color bundle)
+  "typescript": "typescript", "ts": "typescript",
+  "flutter": "flutter", "dart": "dart",
+  "mysql": "mysql", "mongodb": "mongodb", "mongo": "mongodb",
+  "postman": "postman",
   // languages
   "c": "c", "c++": "cplusplus", "cpp": "cplusplus", "c#": "csharp", "csharp": "csharp",
   "java": "java", "swing": "java",
