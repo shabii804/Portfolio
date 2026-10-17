@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { GraduationCap, Rocket, Building2, Globe2 } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import TechIcon from "./TechIcon";
 import Terminal from "./Terminal";
 
 export default function About() {
@@ -61,7 +62,10 @@ export default function About() {
             {/* Focus areas */}
             <div className="animate-on-scroll mt-8 flex flex-wrap gap-2.5" style={{ transitionDelay: "0.15s" }}>
               {focusAreas.map((area) => (
-                <span key={area} className="skill-chip font-mono text-[11px] px-3.5 py-2 rounded-lg">{area}</span>
+                <span key={area} className="skill-chip font-mono text-[11px] px-3.5 py-2 rounded-lg">
+                  <TechIcon name={area} className="chip-ico w-3.5 h-3.5" />
+                  {area}
+                </span>
               ))}
             </div>
 

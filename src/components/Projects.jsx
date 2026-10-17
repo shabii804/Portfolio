@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import TechIcon from "./TechIcon";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Bento project cards — real screenshots where they exist (Farooq Agencies,
@@ -238,7 +239,8 @@ function CaseStudyModal({ project, onClose }) {
             <h4 className="font-mono text-[10px] text-text-muted uppercase tracking-[0.18em] mb-3">Tech Stack</h4>
             <div className="flex flex-wrap gap-2">
               {project.stack.map((t) => (
-                <span key={t} className="font-mono text-xs px-3 py-1.5 rounded-lg border" style={{ color: project.accentHex + "cc", borderColor: project.accentHex + "30", background: project.accentHex + "08" }}>
+                <span key={t} className="inline-flex items-center gap-1.5 font-mono text-xs px-3 py-1.5 rounded-lg border" style={{ color: project.accentHex + "cc", borderColor: project.accentHex + "30", background: project.accentHex + "08" }}>
+                  <TechIcon name={t} className="w-3.5 h-3.5 shrink-0" />
                   {t}
                 </span>
               ))}
@@ -343,7 +345,10 @@ function ProjectCard({ project, onClick, index }) {
 
       <div className="flex flex-wrap gap-2">
         {project.stack.slice(0, featured ? 5 : 4).map((tech) => (
-          <span key={tech} className="skill-chip font-mono text-[10px] px-2.5 py-1 rounded-md">{tech}</span>
+          <span key={tech} className="skill-chip font-mono text-[10px] px-2.5 py-1 rounded-md">
+            <TechIcon name={tech} className="chip-ico w-3 h-3" />
+            {tech}
+          </span>
         ))}
         {project.stack.length > (featured ? 5 : 4) && (
           <span className="font-mono text-[10px] px-2.5 py-1 rounded-md text-text-muted">+{project.stack.length - (featured ? 5 : 4)}</span>

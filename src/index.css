@@ -239,6 +239,9 @@ body {
 .btn-ghost:active { transform: translateY(0); }
 
 .skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgb(var(--border-mid));
   background: rgb(var(--bg-secondary));
@@ -249,6 +252,65 @@ body {
   background: rgba(129, 140, 248, 0.08);
   color: #a5b4fc;
   transform: translateY(-2px);
+}
+.skill-chip .chip-ico {
+  color: rgb(var(--text-muted));
+  transition: color 0.25s ease;
+  flex-shrink: 0;
+}
+.skill-chip:hover .chip-ico { color: #a5b4fc; }
+
+/* ─── v19: moving skill rails (icon carousel) ───────────────────────────── */
+.skill-rails {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 3.5rem;
+}
+.skill-rail {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+}
+.skill-rail-track {
+  display: flex;
+  gap: 0.75rem;
+  width: max-content;
+  padding: 2px 0;
+  animation: rail-scroll var(--rail-d, 44s) linear infinite;
+  will-change: transform;
+}
+.skill-rail-track.rail-rev { animation-direction: reverse; }
+.skill-rail:hover .skill-rail-track { animation-play-state: paused; }
+@keyframes rail-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.skill-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(var(--border-mid));
+  background: rgb(var(--bg-secondary));
+  color: rgb(var(--text-secondary));
+  white-space: nowrap;
+  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+}
+.skill-tile:hover {
+  border-color: rgba(129, 140, 248, 0.5);
+  background: rgba(129, 140, 248, 0.08);
+  color: #a5b4fc;
+}
+.skill-tile .tile-ico {
+  display: inline-flex;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(129, 140, 248, 0.35));
+}
+.skill-tile .tile-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
 }
 
 /* ─── Scroll reveal ──────────────────────────────────────────────────────── */
@@ -556,6 +618,9 @@ body {
   background: linear-gradient(120deg, #818cf8, #22d3ee);
   box-shadow: 0 0 8px rgba(129, 140, 248, 0.55);
 }
+/* v19: icon items carry their own mark — hide the dot */
+.marquee-item.has-ico::before { display: none; }
+.marquee-item.has-ico svg { opacity: 0.9; }
 
 /* ─── Gradient-border card hover (projects / skills) ─────────────────────── */
 .card-glow-border {
