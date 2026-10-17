@@ -220,7 +220,7 @@ export default function Hero() {
             <div className="marquee-track">
               {[...FLAT_SKILLS, ...FLAT_SKILLS].map((skill, i) => (
                 <span key={i} className="marquee-item has-ico">
-                  <TechIcon name={skill} className="w-3 h-3 shrink-0" />
+                  <TechIcon name={skill} className="w-4 h-4 shrink-0" />
                   {skill}
                 </span>
               ))}

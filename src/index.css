@@ -313,6 +313,59 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* ─── v20: circular avatar — rotating conic ring + glow ─────────────────── */
+.avatar-wrap {
+  position: relative;
+  width: fit-content;
+  margin-inline: auto;
+}
+.avatar-glow {
+  position: absolute;
+  inset: -34%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(34, 211, 238, 0.07) 45%, transparent 68%);
+  pointer-events: none;
+}
+.avatar-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, #6366f1, #22d3ee 28%, rgba(34, 211, 238, 0) 46%, rgba(99, 102, 241, 0) 62%, #6366f1 88%, #818cf8);
+  animation: avatar-spin 9s linear infinite;
+  filter: drop-shadow(0 0 14px rgba(99, 102, 241, 0.35));
+}
+@keyframes avatar-spin {
+  to { transform: rotate(360deg); }
+}
+.avatar-core {
+  position: relative;
+  width: 12.5rem;
+  height: 12.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--border-mid));
+  background: rgb(var(--bg-secondary));
+}
+@media (min-width: 640px) {
+  .avatar-core { width: 14rem; height: 14rem; }
+}
+.avatar-status {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
 /* ─── Scroll reveal ──────────────────────────────────────────────────────── */
 .animate-on-scroll {
   opacity: 0;
@@ -621,6 +674,16 @@ body {
 /* v19: icon items carry their own mark — hide the dot */
 .marquee-item.has-ico::before { display: none; }
 .marquee-item.has-ico svg { opacity: 0.9; }
+/* v20: HD marquee — bigger icons, brighter text (readable while moving) */
+.marquee-item.has-ico svg {
+  opacity: 1;
+  filter: drop-shadow(0 0 5px rgba(129, 140, 248, 0.4));
+}
+.marquee-item.has-ico {
+  color: rgb(var(--text-secondary));
+  gap: 0.55rem;
+  font-size: 12px;
+}
 
 /* ─── Gradient-border card hover (projects / skills) ─────────────────────── */
 .card-glow-border {

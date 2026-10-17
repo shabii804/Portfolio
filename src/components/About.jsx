@@ -30,19 +30,20 @@ export default function About() {
   return (
     <section id="about" ref={ref} className="py-24 md:py-28 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="animate-on-scroll flex items-center gap-4 mb-14">
+        <div className="animate-on-scroll flex items-center gap-4 mb-12">
           <span className="section-label">About</span>
           <div className="grad-line flex-1 max-w-16" />
         </div>
 
-        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-14 lg:gap-16 items-start">
+        {/* Full-width heading — no column owns the title, grid stays balanced */}
+        <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl leading-tight mb-10 lg:mb-12 max-w-2xl">
+          Building software that<br />
+          <span className="text-gradient-indigo">actually ships.</span>
+        </h2>
+
+        <div className="grid lg:grid-cols-[1.08fr_0.92fr] gap-12 lg:gap-16 items-center">
           {/* Left — story */}
           <div>
-            <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl leading-tight mb-8">
-              Building software that<br />
-              <span className="text-gradient-indigo">actually ships.</span>
-            </h2>
-
             <div className="animate-on-scroll space-y-5 font-body text-text-secondary leading-relaxed text-[15px] sm:text-base" style={{ transitionDelay: "0.1s" }}>
               <p>{personal.bio}</p>
               <p>
@@ -87,53 +88,51 @@ export default function About() {
             </div>
           </div>
 
-          {/* Right — portrait + highlights */}
-          <div className="space-y-6">
-            {/* Portrait card */}
-            <div className="animate-on-scroll relative card-border-glow rounded-3xl p-2.5 bg-bg-card" style={{ transitionDelay: "0.12s" }}>
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-bg-secondary">
+          {/* Right — circular portrait */}
+          <div className="animate-on-scroll" style={{ transitionDelay: "0.12s" }}>
+            <div className="avatar-wrap">
+              <div className="avatar-glow" aria-hidden="true" />
+              <div className="avatar-ring" aria-hidden="true" />
+              <div className="avatar-core">
                 {!imgError ? (
                   <img
                     src={personal.profilePic}
                     alt={`${personal.name} — portrait`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover grayscale-[30%] transition-[filter] duration-500 hover:grayscale-0"
                     loading="lazy"
                     onError={() => setImgError(true)}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="font-display font-bold text-7xl text-gradient-indigo">SA</span>
+                    <span className="font-display font-bold text-6xl text-gradient-indigo">SA</span>
                   </div>
                 )}
-                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-bg-primary/80 to-transparent pointer-events-none" />
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-display font-semibold text-white text-sm">{personal.name}</div>
-                    <div className="font-mono text-[10px] text-white/70">{personal.location}</div>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 border border-white/10 backdrop-blur">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-mono text-[9px] text-white/85">Open to work</span>
-                  </div>
-                </div>
+              </div>
+              <div className="avatar-status">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-mono text-[9px] text-white/85">Open to work</span>
               </div>
             </div>
-
-            {/* Highlight tiles */}
-            <div className="grid grid-cols-2 gap-4">
-              {highlights.map((h, i) => (
-                <div key={h.label} className="animate-on-scroll card-border-glow card-glow-border rounded-2xl p-5 bg-bg-card" style={{ transitionDelay: `${0.16 + 0.06 * i}s` }}>
-                  <h.Icon className="w-5 h-5 text-accent-indigo mb-3" strokeWidth={1.8} aria-hidden="true" />
-                  <div className="font-display font-semibold text-text-primary text-sm mb-1">{h.label}</div>
-                  <div className="font-mono text-[10px] text-text-muted leading-relaxed">{h.sub}</div>
-                </div>
-              ))}
+            <div className="text-center mt-7">
+              <div className="font-display font-semibold text-text-primary text-lg leading-tight">{personal.name}</div>
+              <div className="font-mono text-[10px] text-text-muted mt-1.5 tracking-[0.14em] uppercase">{personal.location}</div>
             </div>
           </div>
         </div>
 
+        {/* Highlight strip — full width band, kills the old column dead-space */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-12 lg:mt-14">
+          {highlights.map((h, i) => (
+            <div key={h.label} className="animate-on-scroll card-border-glow card-glow-border rounded-2xl p-5 bg-bg-card" style={{ transitionDelay: `${0.16 + 0.06 * i}s` }}>
+              <h.Icon className="w-5 h-5 text-accent-indigo mb-3" strokeWidth={1.8} aria-hidden="true" />
+              <div className="font-display font-semibold text-text-primary text-sm mb-1">{h.label}</div>
+              <div className="font-mono text-[10px] text-text-muted leading-relaxed">{h.sub}</div>
+            </div>
+          ))}
+        </div>
+
         {/* Interactive terminal — query the portfolio like a CLI */}
-        <div className="animate-on-scroll mt-16 max-w-3xl mx-auto">
+        <div className="animate-on-scroll mt-14 max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <span className="font-mono text-[10px] text-accent-cyan/70 uppercase tracking-[0.18em]">Interactive</span>
             <div className="h-px flex-1 max-w-24" style={{ background: "linear-gradient(to right, rgba(34,211,238,0.4), transparent)" }} />
