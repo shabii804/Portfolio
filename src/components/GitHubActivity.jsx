@@ -168,7 +168,7 @@ export default function GitHubActivity() {
         <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
           <div>
             <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
-              In motion, live.
+              In motion, <span className="text-gradient-indigo">live.</span>
             </h2>
             <p className="animate-on-scroll font-body text-text-secondary text-lg max-w-xl" style={{ transitionDelay: "0.1s" }}>
               Straight from the GitHub API — what I'm building and shipping right now.

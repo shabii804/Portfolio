@@ -58,7 +58,7 @@ export default function Journey() {
           <div className="grad-line flex-1 max-w-16" />
         </div>
         <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
-          The road so far.
+          The road <span className="text-gradient-indigo">so far.</span>
         </h2>
         <p className="animate-on-scroll font-body text-text-secondary text-lg mb-10 max-w-xl" style={{ transitionDelay: "0.1s" }}>
           From first semester to a live client deployment — every step shipped something real.

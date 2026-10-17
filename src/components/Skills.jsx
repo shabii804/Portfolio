@@ -8,13 +8,15 @@ import TiltCard from "./motion/TiltCard";
 import { EASE_OUT } from "./motion/ease";
 
 /* Restrained two-accent system (PRD: indigo→cyan only) — icons are lucide slugs */
+/* v23 — six-hue category coding: each group owns a color (badge tint,
+   header text, divider wash) instead of the old indigo/cyan monocolor */
 const categoryMeta = {
-  Frontend: { icon: "code", color: "#818cf8" },
-  Backend: { icon: "server", color: "#22d3ee" },
-  Databases: { icon: "database", color: "#a5b4fc" },
-  Languages: { icon: "binary", color: "#67e8f9" },
-  Tools: { icon: "wrench", color: "#818cf8" },
-  "Soft Skills": { icon: "handshake", color: "#22d3ee" },
+  Frontend: { icon: "code", color: "#22d3ee" },
+  Backend: { icon: "server", color: "#34d399" },
+  Databases: { icon: "database", color: "#fbbf24" },
+  Languages: { icon: "binary", color: "#a78bfa" },
+  Tools: { icon: "wrench", color: "#f472b6" },
+  "Soft Skills": { icon: "handshake", color: "#60a5fa" },
 };
 
 /* Real proficiency numbers — reused from the site's own historical
@@ -117,7 +119,15 @@ function SkillGroups({ skills }) {
           <motion.div key={cat} variants={reduced ? undefined : cardVariants} className="min-h-0">
             <TiltCard className="skill-group h-full" tabIndex={0} aria-label={`${cat} skills`}>
               <div className="flex items-center gap-3 mb-4">
-                <span className="skill-group-badge" aria-hidden="true">
+                <span
+                  className="skill-group-badge"
+                  aria-hidden="true"
+                  style={{
+                    background: `linear-gradient(135deg, ${meta.color}26, ${meta.color}0d)`,
+                    borderColor: `${meta.color}55`,
+                    color: meta.color,
+                  }}
+                >
                   <TechIcon name={meta.icon} className="w-6 h-6" strokeWidth={1.7} />
                 </span>
                 <div className="min-w-0">
@@ -168,7 +178,7 @@ export default function Skills() {
           <div className="grad-line flex-1 max-w-16" />
         </div>
         <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
-          My toolkit.
+          My <span className="text-gradient-indigo">toolkit.</span>
         </h2>
         <p className="animate-on-scroll font-body text-text-secondary text-lg mb-8 max-w-xl" style={{ transitionDelay: "0.1s" }}>
           Technologies I use to build, ship, and maintain real products — every one of them battle-tested in the projects below.

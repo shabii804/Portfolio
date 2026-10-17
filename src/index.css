@@ -81,12 +81,13 @@
     --bg-secondary: 11 11 18;    /* #0B0B12 */
     --bg-card: 13 13 21;         /* #0D0D15 */
     --bg-hover: 20 20 30;        /* #14141E */
-    --border-subtle: 23 23 33;   /* #171721 — hairline */
-    --border-mid: 35 35 49;      /* #232331 */
+    --border-subtle: 32 32 46;   /* #20202E — v23 cards read against canvas */
+    --border-mid: 46 46 64;      /* #2E2E40 */
     --border-bright: 51 51 69;   /* #333345 */
-    --text-primary: 240 240 246; /* #F0F0F6 */
-    --text-secondary: 158 159 172; /* #9E9FAC */
-    --text-muted: 104 105 119;   /* #686977 */
+    /* v23 — contrast pass: body text no longer washed out on near-black */
+    --text-primary: 248 248 252; /* #F8F8FC — brighter headings */
+    --text-secondary: 192 194 208; /* #C0C2D0 — ~9.8:1 on canvas (was #9E9FAC) */
+    --text-muted: 148 151 170;   /* #9497AA — ~5.7:1 AA (was #686977 ~3.4:1 FAIL) */
     /* v21 — per-theme elevation: dark uses glow, light uses real shadows */
     --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 24px 60px -30px rgb(0 0 0 / 0.7);
     --shadow-lift: 0 18px 44px -18px rgb(0 0 0 / 0.75), 0 4px 12px -6px rgb(0 0 0 / 0.5);
@@ -283,8 +284,15 @@ input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
   color: #a5b4fc;
   transform: translateY(-2px);
 }
-.skill-chip .chip-ico {
-  color: rgb(var(--text-muted));
+/* v23 — dark theme gets the same backing-tile treatment light always had:
+   mono glyphs pop off the chip, colored brand marks keep their fills */
+.skill-chip .chip-ico,
+.about-chip .chip-ico {
+  color: rgb(var(--text-secondary));
+  background: rgb(255 255 255 / 0.055);
+  border: 1px solid rgb(255 255 255 / 0.07);
+  border-radius: 6px;
+  padding: 1.5px;
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.28s ease, color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
   flex-shrink: 0;
   align-self: center;
@@ -448,14 +456,15 @@ input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(165, 180, 252, 0.75);
+  color: #b9c2ff; /* v23 — full-strength accent, was 75% washed */
+  font-weight: 500;
 }
 
 .project-num {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.08em;
-  color: rgba(34,211,238,0.55);
+  color: rgba(34,211,238,0.85); /* v23 */
 }
 
 .timeline-line {
@@ -664,13 +673,13 @@ input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
 .aurora::before {
   top: -28%;
   left: -12%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.16) 0%, transparent 62%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.30) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 62%);
   animation: aurora-drift 22s ease-in-out infinite;
 }
 .aurora::after {
   bottom: -30%;
   right: -14%;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.11) 0%, transparent 62%);
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.20) 0%, rgba(232, 121, 249, 0.10) 42%, transparent 62%);
   animation: aurora-drift 27s ease-in-out infinite reverse;
 }
 @keyframes aurora-drift {
@@ -1075,8 +1084,8 @@ html.is-ready .name-line {
   --border-mid: 208 210 226;   /* #D0D2E2 */
   --border-bright: 181 184 208; /* #B5B8D0 */
   --text-primary: 18 18 30;    /* #12121E */
-  --text-secondary: 74 76 100; /* #4A4C64 — 7.4:1 on white (AA+) */
-  --text-muted: 100 103 138;   /* #64678A — 5.1:1 on white (AA) */
+  --text-secondary: 56 58 84;  /* #383A54 — v23 ~10.3:1 on white */
+  --text-muted: 84 88 122;     /* #54587A — v23 ~6.7:1 on white */
   /* Light uses REAL layered shadows — glow does not work on white */
   --shadow-card: 0 1px 2px rgb(23 23 58 / 0.05), 0 8px 24px -12px rgb(23 23 58 / 0.14), 0 24px 56px -28px rgb(23 23 58 / 0.12);
   --shadow-lift: 0 2px 4px rgb(23 23 58 / 0.06), 0 18px 44px -16px rgb(23 23 58 / 0.22);
@@ -1100,8 +1109,11 @@ html.is-ready .name-line {
   background-clip: text;
 }
 [data-theme="light"] .photo-glow-ring { opacity: 0.3; }
-[data-theme="light"] .aurora::before { background: radial-gradient(circle, rgba(99, 102, 241, 0.13) 0%, transparent 62%); }
-[data-theme="light"] .aurora::after { background: radial-gradient(circle, rgba(8, 145, 178, 0.09) 0%, transparent 62%); }
+[data-theme="light"] .aurora::before { background: radial-gradient(circle, rgba(99, 102, 241, 0.20) 0%, rgba(139, 92, 246, 0.10) 42%, transparent 62%); }
+[data-theme="light"] .aurora::after { background: radial-gradient(circle, rgba(8, 145, 178, 0.14) 0%, rgba(219, 39, 119, 0.07) 42%, transparent 62%); }
+/* v23 — light-theme label tints (pale indigo is unreadable on white) */
+[data-theme="light"] .section-label { color: #4f46e5; }
+[data-theme="light"] .project-num { color: #0e7490; }
 [data-theme="light"] .marquee-item { color: rgb(var(--text-muted)); }
 [data-theme="light"] .grid-pan {
   background-image:
@@ -2129,10 +2141,11 @@ img.hero-video-img {
 
 /* ─── Toolkit group cards (equal-height, content-sized) ─────────────────── */
 .skill-group {
+  position: relative; /* v23 — anchors the gradient top ring */
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid rgb(var(--border-subtle));
+  border: 1px solid rgb(var(--border-mid)); /* v23 — was border-subtle (invisible) */
   border-radius: 1rem;
   background: rgb(var(--bg-card));
   padding: 1.15rem 1.25rem 1.25rem;
@@ -2143,6 +2156,18 @@ img.hero-video-img {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lift);
 }
+/* v23 — gradient top ring: the signature hairline, now on group cards */
+.skill-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(129, 140, 248, 0.55), rgba(34, 211, 238, 0.40), transparent);
+  pointer-events: none;
+}
+[data-theme="light"] .skill-group::before { opacity: 0.55; }
 .skill-group-badge {
   width: 44px;
   height: 44px;

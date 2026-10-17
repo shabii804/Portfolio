@@ -446,7 +446,7 @@ export default function Projects() {
             <div className="grad-line flex-1 max-w-16" />
           </div>
           <h2 className="animate-on-scroll font-display font-bold text-4xl sm:text-5xl text-text-primary mb-4" style={{ transitionDelay: "0.05s" }}>
-            Case studies.
+            Case <span className="text-gradient-indigo">studies.</span>
           </h2>
           <p className="animate-on-scroll font-body text-text-secondary text-lg mb-8 max-w-2xl" style={{ transitionDelay: "0.1s" }}>
             Four production builds — every card opens the full story: the problem, the approach, the outcome.
