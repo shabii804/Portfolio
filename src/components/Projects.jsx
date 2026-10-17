@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Rocket } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
+import { useGithubRepos } from "../hooks/useGithubRepos";
+import { mapGithubRepos } from "../data/githubRepos";
 import TechIcon from "./TechIcon";
 import SectionHeader from "./motion/SectionHeader";
 import { EASE_OUT } from "./motion/ease";
@@ -202,6 +204,40 @@ export function CaseStudyModal({ project, onClose }) {
             </div>
           )}
 
+          {/* v32 — GitHub repository metadata (synced cards): stars / forks /
+              language / last push, straight from the API snapshot */}
+          {project.ghMeta && (
+            <div>
+              <h4 className="font-mono text-[10px] text-text-muted uppercase tracking-[0.18em] mb-3">Repository</h4>
+              <div className="rounded-xl border border-border-subtle bg-bg-secondary px-4 py-3.5">
+                <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[11px] text-text-secondary">
+                  <span className="flex items-center gap-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    {project.ghMeta.stars} stars
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                    {project.ghMeta.forks} forks
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: project.accentHex }} />
+                    {project.ghMeta.language}
+                  </span>
+                  {project.ghMeta.pushedAt && (
+                    <span>updated {new Date(project.ghMeta.pushedAt).toLocaleDateString("en-US", { year: "numeric", month: "short" })}</span>
+                  )}
+                </div>
+                {project.ghMeta.topics?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {project.ghMeta.topics.map((t) => (
+                      <span key={t} className="font-mono text-[10px] px-2 py-0.5 rounded-md border border-border-mid text-text-muted">#{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Problem → Approach → Outcome */}
           {cs ? (
             <>
@@ -241,8 +277,11 @@ export function CaseStudyModal({ project, onClose }) {
               </div>
             </>
           ) : (
-            /* Legacy fallback */
-            <p className="font-body text-text-secondary leading-relaxed">{project.description}</p>
+            /* Legacy fallback — skipped for GitHub-synced cards (their tagline
+               block above already carries the repo description verbatim) */
+            project.source !== "github" && (
+              <p className="font-body text-text-secondary leading-relaxed">{project.description}</p>
+            )
           )}
 
           {/* Key features */}
@@ -284,7 +323,7 @@ export function CaseStudyModal({ project, onClose }) {
             )}
             {project.github && (
               <a href={project.github} target="_blank" rel="noreferrer"
-                className="btn-ghost px-5 py-2.5 rounded-xl text-sm font-display font-medium flex items-center gap-2 group glow-on-hover">
+                className={`${project.live ? "btn-ghost" : "btn-primary"} px-5 py-2.5 rounded-xl text-sm font-display font-medium flex items-center gap-2 group glow-on-hover`}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="transition-transform group-hover:scale-110"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                 View Source
               </a>
@@ -355,9 +394,13 @@ export function ProjectCard({ project, onClick, index }) {
           {project.title}
         </h3>
         <p className="font-body text-text-secondary/70 text-xs italic mb-3">{project.tagline}</p>
-        <p className="font-body text-text-secondary text-sm leading-relaxed line-clamp-2">
-          {project.caseStudy?.problem || project.description}
-        </p>
+        {/* v32: GitHub-synced cards already carry their copy in the tagline —
+            a body line would just repeat it verbatim. */}
+        {!(project.source === "github") && (
+          <p className="font-body text-text-secondary text-sm leading-relaxed line-clamp-2">
+            {project.caseStudy?.problem || project.description}
+          </p>
+        )}
       </div>
 
       {/* Case-study metrics */}
@@ -384,9 +427,19 @@ export function ProjectCard({ project, onClick, index }) {
         )}
       </div>
 
-      <div className="flex items-center gap-2.5 pt-3 border-t border-border-subtle">
-        <span className="font-mono text-[10px] text-text-muted">{project.date}</span>
-        <div className="flex-1" />
+      {/* v32 — clear action buttons on every card: Case Study / Details opens
+          the modal, Live and Code are real outbound links. All stop
+          propagation so the card's own click handler doesn't double-fire. */}
+      <div className="flex items-center gap-2 pt-3 border-t border-border-subtle flex-wrap">
+        <button
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          aria-label={`Open ${project.title} case study`}
+          className="font-mono text-[10px] font-semibold px-3.5 py-2.5 min-h-[38px] rounded-lg flex items-center gap-1.5 transition-all duration-300 hover:gap-2.5"
+          style={{ color: project.accentHex, border: `1px solid ${project.accentHex}55`, background: `${project.accentHex}12` }}
+        >
+          {project.caseStudy ? "Case Study" : "Details"}
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
         {project.live && (
           <a
             href={project.live}
@@ -394,10 +447,10 @@ export function ProjectCard({ project, onClick, index }) {
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
             aria-label={`Visit ${project.title} live site`}
-            className="font-mono text-[10px] px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition-colors duration-300"
-            style={{ color: project.accentHex, borderColor: `${project.accentHex}45`, background: `${project.accentHex}0d` }}
+            className="font-mono text-[10px] px-3.5 py-2.5 min-h-[38px] rounded-lg border border-border-mid text-text-secondary hover:text-accent-cyan hover:border-accent-cyan/50 transition-colors duration-300 flex items-center gap-1.5"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />Live
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Live
           </a>
         )}
         {project.github && (
@@ -406,17 +459,14 @@ export function ProjectCard({ project, onClick, index }) {
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            aria-label={`View ${project.title} source code`}
-            className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-border-mid text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-colors duration-300 flex items-center gap-1.5"
+            aria-label={`View ${project.title} source on GitHub`}
+            className="font-mono text-[10px] px-3.5 py-2.5 min-h-[38px] rounded-lg border border-border-mid text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/50 transition-colors duration-300 flex items-center gap-1.5"
           >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
             Code
           </a>
         )}
-        <span className="font-mono text-[10px] text-text-muted flex items-center gap-1 group-hover:text-accent-indigo transition-colors">
-          Case study
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform group-hover:translate-x-0.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </span>
+        <span className="ml-auto font-mono text-[10px] text-text-muted">{project.date}</span>
       </div>
     </article>
     </motion.div>
@@ -428,17 +478,30 @@ const MAX_FILTERS = 9;
 
 export default function Projects() {
   const { projects } = usePortfolio();
+  const { repos: ghRaw, stale } = useGithubRepos(); // v32 — live GitHub archive
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState("");
   const [activeStack, setActiveStack] = useState("All");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const ref = useRef(null);
 
+  // v32 — every public repo that is NOT already a curated case study,
+  // mapped into the same card shape and numbered after the curated ones.
+  const curatedUrls = useMemo(
+    () => new Set(projects.map((p) => (p.github || "").replace(/\/$/, "").toLowerCase()).filter(Boolean)),
+    [projects]
+  );
+  const ghCards = useMemo(() => {
+    const mapped = mapGithubRepos(ghRaw, curatedUrls);
+    return mapped.map((p, i) => ({ ...p, num: String(projects.length + i + 1).padStart(2, "0") }));
+  }, [ghRaw, curatedUrls, projects.length]);
+  const all = useMemo(() => [...projects, ...ghCards], [projects, ghCards]);
+
   const allStacks = ["All", ...Array.from(
-    new Set(projects.flatMap((p) => p.stack || []))
+    new Set(all.flatMap((p) => p.stack || []))
   ).sort((a, b) => a.localeCompare(b))];
 
-  const filtered = projects.filter((p) => {
+  const filtered = all.filter((p) => {
     const matchesStack = activeStack === "All" || (p.stack || []).includes(activeStack);
     if (!matchesStack) return false;
     if (!query.trim()) return true;
@@ -475,7 +538,7 @@ export default function Projects() {
             label="Projects"
             title="Work that ships."
             accent={["ships"]}
-            subtitle={`${projects.length} production builds — every card opens the full story: the problem, the approach, the outcome.`}
+            subtitle={`${projects.length} case studies + ${ghCards.length} synced from GitHub — every card opens the full story.`}
           />
 
           {/* Search + Filter */}
@@ -531,9 +594,9 @@ export default function Projects() {
             </div>
 
             <div className="font-mono text-[10px] text-text-muted">
-              {filtered.length === projects.length
-                ? `Showing all ${projects.length} case studies`
-                : `Showing ${filtered.length} of ${projects.length} case studies`}
+              {filtered.length === all.length
+                ? `Showing all ${all.length} builds`
+                : `Showing ${filtered.length} of ${all.length} builds`}
               {(query || activeStack !== "All") && (
                 <button
                   onClick={() => { setQuery(""); setActiveStack("All"); }}
@@ -542,6 +605,15 @@ export default function Projects() {
                   Reset filters
                 </button>
               )}
+            </div>
+
+            {/* v32 — GitHub sync status, same honesty contract as the
+                GitHubActivity feed (stale data is never passed off as live) */}
+            <div className="font-mono text-[10px] text-text-muted flex items-center gap-1.5" data-testid="gh-sync-note">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
+              {stale
+                ? "GitHub archive — showing last synced data (API rate-limited right now)"
+                : "GitHub archive — synced live from github.com/shabii804 · cached 30 min"}
             </div>
           </div>
 

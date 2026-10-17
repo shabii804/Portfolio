@@ -133,7 +133,7 @@ export default function Contact() {
         {/* v26: joined the v24 SectionHeader system — same numbered eyebrow,
             blur-to-sharp H2 and drawn underline as About/Skills/Projects/Journey */}
         <SectionHeader
-          index="06"
+          index="07"
           icon={Mail}
           tint="#818cf8"
           label="Contact"

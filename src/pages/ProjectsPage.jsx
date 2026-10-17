@@ -36,7 +36,7 @@ function ProjectStats() {
 export default function ProjectsPage() {
   usePageSEO(
     "Projects — Shoaib Arshad",
-    "Every production build with full case studies: Farooq Agencies (live client site), SpendSmart, E-Shop and a School Management System — searchable and filterable by stack."
+    "Every build in one archive: full case studies (Farooq Agencies, SpendSmart, E-Shop, School Management System) plus every public repo synced live from GitHub — searchable and filterable by stack."
   );
 
   return (
