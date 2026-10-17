@@ -74,7 +74,8 @@ export default function CommandPalette() {
     { group: "Navigate", label: "Home", hint: "The landing page", icon: "⌂", to: "/" },
     { group: "Navigate", label: "About", hint: "Who Shoaib is", icon: "◉", to: "/about" },
     { group: "Navigate", label: "Skills", hint: "Toolkit & proficiencies", icon: "⚡", to: "/skills" },
-    { group: "Navigate", label: "Projects", hint: "4 case studies", icon: "▤", to: "/projects" },
+    { group: "Navigate", label: "Projects", hint: "Every case study", icon: "▤", to: "/projects" },
+    { group: "Navigate", label: "Services", hint: "Hire me — book a service", icon: "❖", to: "/services" },
     { group: "Navigate", label: "Journey", hint: "Timeline 2021 → now", icon: "⏱", to: "/journey" },
     // Admin-gated entries: hidden sections lose their palette shortcuts too
     ...(content?.settings?.showGitHubActivity !== false

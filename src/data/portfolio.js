@@ -154,7 +154,8 @@ export const content = {
       "date": "May 2026",
       "screenshots": [
         "farooq-home.webp"
-      ]
+      ],
+      "featured": true
     },
     {
       "id": "spendsmart",
@@ -239,7 +240,8 @@ export const content = {
       "date": "Jan 2023",
       "screenshots": [
         "spendsmart-home.webp"
-      ]
+      ],
+      "featured": true
     },
     {
       "id": "eshop",
@@ -295,7 +297,8 @@ export const content = {
       "accentHex": "#a5b4fc",
       "badge": "Frontend",
       "date": "Jan 2023",
-      "screenshots": []
+      "screenshots": [],
+      "featured": true
     },
     {
       "id": "sms",
@@ -366,7 +369,8 @@ export const content = {
         "sms-4.webp",
         "sms-5.webp",
         "sms-6.webp"
-      ]
+      ],
+      "featured": true
     }
   ],
   "experience": [
@@ -464,7 +468,99 @@ export const content = {
     "showBackToTop": true,
     "showChatbot": true,
     "showGitHubActivity": true
-  }
+  },
+  "services": [
+    {
+      "id": "web-app",
+      "icon": "globe",
+      "tint": "#818cf8",
+      "title": "Full-Stack Web Applications",
+      "tagline": "React frontends on Firebase/Supabase backends — built, deployed and handed over running.",
+      "deliverables": [
+        "Responsive React UI, desktop to mobile",
+        "Authentication & database layer",
+        "Hosting, domain & deployment",
+        "Post-launch support window"
+      ],
+      "timeline": "3–8 weeks",
+      "proof": "Farooq Agencies · SpendSmart"
+    },
+    {
+      "id": "dashboard",
+      "icon": "layout-dashboard",
+      "tint": "#22d3ee",
+      "title": "Admin Dashboards & Business Tools",
+      "tagline": "Role-based control panels that replace spreadsheets, registers and paperwork.",
+      "deliverables": [
+        "Secure role-based access",
+        "CRUD for products, orders & staff",
+        "Real-time data sync (Firestore/Supabase)",
+        "Reporting & export views"
+      ],
+      "timeline": "2–6 weeks",
+      "proof": "Farooq Agencies admin dashboard"
+    },
+    {
+      "id": "desktop",
+      "icon": "monitor",
+      "tint": "#34d399",
+      "title": "Java Desktop Applications",
+      "tagline": "Offline-capable systems for schools, labs and shops that run on local machines.",
+      "deliverables": [
+        "Java UI (Swing/JavaFX)",
+        "SQL Server / Oracle database",
+        "Installer & user guide",
+        "Hands-on training session"
+      ],
+      "timeline": "4–8 weeks",
+      "proof": "School Management System"
+    },
+    {
+      "id": "database",
+      "icon": "database",
+      "tint": "#fbbf24",
+      "title": "Database Design & SQL",
+      "tagline": "Clean schemas, fast queries and backups you can actually restore.",
+      "deliverables": [
+        "ER design & normalization",
+        "Queries, views & stored procedures",
+        "Migration & seed scripts",
+        "Performance review"
+      ],
+      "timeline": "1–3 weeks",
+      "proof": "MSSQL · Oracle · Firestore projects"
+    },
+    {
+      "id": "landing",
+      "icon": "rocket",
+      "tint": "#f472b6",
+      "title": "Landing Pages & Portfolios",
+      "tagline": "Fast, SEO-ready pages that load in under two seconds and look premium.",
+      "deliverables": [
+        "Custom design, no templates",
+        "Core Web Vitals pass",
+        "SEO meta + JSON-LD schema",
+        "Analytics wiring"
+      ],
+      "timeline": "1–2 weeks",
+      "proof": "This very portfolio"
+    },
+    {
+      "id": "maintenance",
+      "icon": "wrench",
+      "tint": "#a78bfa",
+      "title": "Maintenance & Performance",
+      "tagline": "Ongoing care for existing sites: fixes, speed work and content updates.",
+      "deliverables": [
+        "Bug triage & fixes",
+        "Performance audit & tune-up",
+        "Content / feature updates",
+        "Monthly health report"
+      ],
+      "timeline": "Ongoing / monthly",
+      "proof": "Zero-downtime support since Farooq launch"
+    }
+  ]
 };
 
 export const defaultProjects = content.projects;
@@ -472,4 +568,5 @@ export const defaultSkills = content.skills;
 export const defaultPersonal = content.personal;
 export const defaultExperience = content.experience;
 export const defaultJourney = content.journey;
+export const defaultServices = content.services;
 export const contentMeta = content.meta;

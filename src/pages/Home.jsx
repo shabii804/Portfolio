@@ -1,20 +1,23 @@
 import { Link } from "react-router-dom";
-import { User, Zap, Rocket, Milestone, ArrowUpRight } from "lucide-react";
+import { useState } from "react";
+import { User, Zap, Rocket, Milestone, Briefcase, Mail, ArrowUpRight, ArrowRight } from "lucide-react";
 import Hero from "../components/Hero";
 import GitHubActivity from "../components/GitHubActivity";
 import SectionHeader from "../components/motion/SectionHeader";
 import Reveal from "../components/motion/Reveal";
+import { ProjectCard, CaseStudyModal } from "../components/Projects";
 import usePageSEO from "../hooks/usePageSEO";
 import useSiteSettings from "../hooks/useSiteSettings";
+import { usePortfolio } from "../hooks/usePortfolio";
 import { content } from "../data/portfolio";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Home (v28) — the landing page of the multi-site build.
+   Home (v29) — the landing page of the multi-site build.
 
-   Hero (unchanged, full cinematic treatment) → Explore grid (four door-cards
-   into the sub-pages) → GitHub Activity (live proof) → contact CTA band.
-   The five old stacked sections now live on their own routes; this page
-   curates and links instead of duplicating.
+   Hero (unchanged, full cinematic treatment) → Explore grid (six door-cards
+   into the sub-pages) → Selected work (the admin-featured projects, same
+   bento cards + case-study modals as the Projects page) → GitHub Activity
+   (live proof) → contact CTA band.
    ────────────────────────────────────────────────────────────────────────── */
 
 const EXPLORE = [
@@ -42,17 +45,35 @@ const EXPLORE = [
     Icon: Rocket,
     tint: "#f472b6",
     title: "Projects",
-    desc: "Four production builds with full case studies — search, filter, and open the whole story.",
+    desc: "Every production build with full case studies — search, filter, and open the whole story.",
     stat: "4 shipped · 2 live in production",
   },
   {
-    to: "/journey",
+    to: "/services",
     index: "04",
+    Icon: Briefcase,
+    tint: "#fbbf24",
+    title: "Services",
+    desc: "Six ways to hire me — full-stack apps, dashboards, Java desktop tools — with a booking form built in.",
+    stat: "6 services · book directly",
+  },
+  {
+    to: "/journey",
+    index: "05",
     Icon: Milestone,
     tint: "#34d399",
     title: "Journey",
     desc: "From first semester to certified intern — a scroll-driven timeline, milestone by milestone.",
     stat: "2021 → now",
+  },
+  {
+    to: "/contact",
+    index: "06",
+    Icon: Mail,
+    tint: "#818cf8",
+    title: "Contact",
+    desc: "Every channel that reaches me — form, WhatsApp, email — answered from Islamabad.",
+    stat: "Form · WhatsApp · email",
   },
 ];
 
@@ -102,6 +123,49 @@ function ExploreCard({ to, index, Icon, tint, title, desc, stat, delay }) {
   );
 }
 
+/* ── Selected work — the admin-curated landing strip (v29). Reads the
+      `featured` flag from /admin → Projects; falls back to the first four. */
+function SelectedWork() {
+  const { projects } = usePortfolio();
+  const [selected, setSelected] = useState(null);
+
+  const flagged = projects.filter((p) => p.featured);
+  const list = (flagged.length ? flagged : projects).slice(0, 4);
+  if (!list.length) return null;
+
+  return (
+    <section id="work" className="section-y relative" aria-label="Selected work">
+      <div className="container-x">
+        <SectionHeader
+          index="02"
+          icon={Rocket}
+          tint="#f472b6"
+          label="Selected Work"
+          title="The builds I'd show first."
+          accent={["first."]}
+          subtitle="Hand-picked case studies — open any card for the full problem → approach → outcome story."
+        />
+        <div className="grid md:grid-cols-2 gap-6 items-stretch">
+          {list.map((p, i) => (
+            <ProjectCard key={p.id} project={p} index={i} onClick={() => setSelected(p)} />
+          ))}
+        </div>
+        <Reveal className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <Link
+            to="/projects"
+            className="btn-ghost px-6 py-3 rounded-xl font-display font-semibold text-sm inline-flex items-center gap-2.5 group glow-on-hover"
+          >
+            Browse the full archive
+            <span className="font-mono text-[10px] text-text-muted">{projects.length} case studies</span>
+            <ArrowRight size={14} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </Link>
+        </Reveal>
+      </div>
+      {selected && <CaseStudyModal project={selected} onClose={() => setSelected(null)} />}
+    </section>
+  );
+}
+
 export default function Home() {
   const settings = useSiteSettings();
 
@@ -117,7 +181,7 @@ export default function Home() {
     <>
       <Hero />
 
-      {/* Explore — the four rooms of the site */}
+      {/* Explore — the six rooms of the site */}
       <section id="explore" className="section-y relative" aria-label="Explore the site">
         <div className="container-x">
           <SectionHeader
@@ -125,19 +189,21 @@ export default function Home() {
             icon={Milestone}
             tint="#818cf8"
             label="Explore"
-            title={`Five rooms, one ${firstName}.`}
+            title={`Six rooms, one ${firstName}.`}
             accent={["rooms,"]}
             subtitle="The portfolio now lives on its own pages — pick a door and walk in."
           />
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
             {EXPLORE.map((card, i) => (
-              <ExploreCard key={card.to} {...card} delay={0.08 * i} />
+              <ExploreCard key={card.to} {...card} delay={0.06 * i} />
             ))}
           </div>
         </div>
       </section>
 
-      {settings.showGitHubActivity !== false && <GitHubActivity index="02" />}
+      <SelectedWork />
+
+      {settings.showGitHubActivity !== false && <GitHubActivity index="03" />}
 
       {/* CTA band — the last door */}
       <section className="section-y relative" aria-label="Contact call to action">

@@ -3,13 +3,14 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { getLenis } from "../hooks/useLenis";
 
-// v28 — multi-page navigation. Each link is a real route; NavLink drives the
-// active state (`.nav-link.active`), Home needs `end` so it only matches "/".
+// v28/v29 — multi-page navigation. Each link is a real route; NavLink drives
+// the active state (`.nav-link.active`), Home needs `end` so it only matches "/".
 const navLinks = [
   { label: "Home", to: "/", end: true },
   { label: "About", to: "/about" },
   { label: "Skills", to: "/skills" },
   { label: "Projects", to: "/projects" },
+  { label: "Services", to: "/services" },
   { label: "Journey", to: "/journey" },
   { label: "Contact", to: "/contact" },
 ];

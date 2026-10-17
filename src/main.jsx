@@ -13,6 +13,7 @@ import LoadingFallback from "./components/LoadingFallback.jsx";
 const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
 const SkillsPage = lazy(() => import("./pages/SkillsPage.jsx"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage.jsx"));
+const ServicesPage = lazy(() => import("./pages/ServicesPage.jsx"));
 const JourneyPage = lazy(() => import("./pages/JourneyPage.jsx"));
 const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
 const Admin = lazy(() => import("./pages/Admin.jsx"));
@@ -33,6 +34,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/about" element={page(AboutPage)} />
           <Route path="/skills" element={page(SkillsPage)} />
           <Route path="/projects" element={page(ProjectsPage)} />
+          <Route path="/services" element={page(ServicesPage)} />
           <Route path="/journey" element={page(JourneyPage)} />
           <Route path="/contact" element={page(ContactPage)} />
         </Route>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { defaultProjects, defaultSkills, defaultPersonal, defaultExperience, defaultJourney } from "../data/portfolio";
+import { defaultProjects, defaultSkills, defaultPersonal, defaultExperience, defaultJourney, defaultServices } from "../data/portfolio";
 import { PortfolioContext } from "./portfolioContextObject";
 import { setRuntimeContent } from "../data/runtimeContent";
 import { loadLocalContent, localModeOn } from "../data/localMedia";
@@ -18,6 +18,7 @@ export function PortfolioProvider({ children }) {
   const [personal, setPersonal] = useState(defaultPersonal);
   const [experience, setExperience] = useState(defaultExperience);
   const [journey, setJourney] = useState(defaultJourney);
+  const [services, setServices] = useState(defaultServices);
 
   const updateProjects = setProjects;
   const updateSkills = setSkills;
@@ -29,6 +30,7 @@ export function PortfolioProvider({ children }) {
     setSkills(defaultSkills);
     setPersonal(defaultPersonal);
     setExperience(defaultExperience);
+    setServices(defaultServices);
   };
 
   useEffect(() => {
@@ -44,6 +46,7 @@ export function PortfolioProvider({ children }) {
       if (c.personal && typeof c.personal === "object") setPersonal(c.personal);
       if (Array.isArray(c.experience)) setExperience(c.experience);
       if (Array.isArray(c.journey)) setJourney(c.journey);
+      if (Array.isArray(c.services)) setServices(c.services);
     };
 
     (async () => {
@@ -73,7 +76,7 @@ export function PortfolioProvider({ children }) {
   }, []);
 
   return (
-    <PortfolioContext.Provider value={{ projects, skills, personal, experience, journey, updateProjects, updateSkills, updatePersonal, updateExperience, resetAll }}>
+    <PortfolioContext.Provider value={{ projects, skills, personal, experience, journey, services, updateProjects, updateSkills, updatePersonal, updateExperience, resetAll }}>
       {children}
     </PortfolioContext.Provider>
   );

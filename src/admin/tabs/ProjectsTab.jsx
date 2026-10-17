@@ -28,6 +28,7 @@ const blank = (num) => ({
   impact: [],
   screenshots: [],
   caseStudy: null,
+  featured: false,
 });
 
 export default function ProjectsTab({ content, saveContent }) {
@@ -97,6 +98,7 @@ export default function ProjectsTab({ content, saveContent }) {
                   <div className="font-mono text-[10px] text-text-muted truncate">{p.subtitle || p.tagline || "—"}</div>
                 </div>
                 <div className="hidden sm:flex items-center gap-2">
+                  {p.featured && <Badge tone="green">Featured</Badge>}
                   {p.live && <Badge tone="green">Live</Badge>}
                   {p.github && <Badge tone="muted">Code</Badge>}
                   {p.badge && <Badge>{p.badge}</Badge>}
@@ -159,6 +161,28 @@ function ProjectEditor({ project, onChange, onDuplicate, onDelete }) {
         <TextInput label="Live URL" value={p.live || ""} onChange={(e) => set("live", e.target.value)} placeholder="https://…" />
         <TextInput label="GitHub URL" value={p.github || ""} onChange={(e) => set("github", e.target.value)} placeholder="https://github.com/…" />
         <TextInput label="Accent color (hex)" value={p.accentHex || ""} onChange={(e) => set("accentHex", e.target.value)} placeholder="#818cf8" />
+      </div>
+
+      {/* v29: landing-page curation — the Home featured strip reads this flag */}
+      <div>
+        <button
+          type="button"
+          onClick={() => set("featured", !p.featured)}
+          aria-pressed={!!p.featured}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border font-mono text-[11px] transition-all ${
+            p.featured
+              ? "bg-emerald-400/10 text-emerald-300 border-emerald-400/40"
+              : "bg-bg-primary text-text-muted border-border-mid hover:border-accent-indigo/40 hover:text-accent-indigo"
+          }`}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill={p.featured ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          Featured on the landing page: {p.featured ? "ON" : "OFF"}
+        </button>
+        <p className="font-mono text-[10px] text-text-muted mt-1.5">
+          The first 4 featured projects appear in Home's “Selected work” strip. The Projects page always shows every project.
+        </p>
       </div>
 
       <TextArea label="Description" rows={3} value={p.description || ""} onChange={(e) => set("description", e.target.value)} />

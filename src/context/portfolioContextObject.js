@@ -5,6 +5,7 @@ import {
   defaultPersonal,
   defaultExperience,
   defaultJourney,
+  defaultServices,
 } from "../data/portfolio";
 
 // Context object — kept separate from the Provider component so that
@@ -21,4 +22,5 @@ export const PortfolioContext = createContext({
   personal: defaultPersonal,
   experience: defaultExperience,
   journey: defaultJourney,
+  services: defaultServices,
 });

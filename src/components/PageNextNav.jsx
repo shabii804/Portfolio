@@ -6,7 +6,7 @@ import Reveal from "./motion/Reveal";
 
    A hairline, then "← Previous room" on the left and a large tinted
    "Next room →" card on the right. Gives each page a destination and makes
-   the five-page loop walkable without ever touching the navbar.
+   the six-page loop walkable without ever touching the navbar.
 
    <PageNextNav current="about" /> — current is the page's key below.
    ────────────────────────────────────────────────────────────────────────── */
@@ -14,7 +14,8 @@ import Reveal from "./motion/Reveal";
 const ORDER = [
   { key: "about", path: "/about", label: "About", hint: "Who I am & how I work", tint: "#818cf8" },
   { key: "skills", path: "/skills", label: "Skills", hint: "The full toolkit, in numbers", tint: "#22d3ee" },
-  { key: "projects", path: "/projects", label: "Projects", hint: "Four production builds", tint: "#f472b6" },
+  { key: "projects", path: "/projects", label: "Projects", hint: "Every production build", tint: "#f472b6" },
+  { key: "services", path: "/services", label: "Services", hint: "Hire me — book a service", tint: "#fbbf24" },
   { key: "journey", path: "/journey", label: "Journey", hint: "2021 → now, milestone by milestone", tint: "#34d399" },
   { key: "contact", path: "/contact", label: "Contact", hint: "Start a conversation", tint: "#818cf8" },
 ];

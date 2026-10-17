@@ -107,9 +107,9 @@ function ProjectVisual({ project }) {
 /* ─────────────────────────────────────────────────────────────────────────────
    Case-study modal: Problem → Approach → Outcome, with metrics, screenshots,
    features and the full stack. Falls back to the legacy details list when a
-   project has no caseStudy object.
+   project has no caseStudy object. Exported for reuse (Home featured strip).
    ──────────────────────────────────────────────────────────────────────────── */
-function CaseStudyModal({ project, onClose }) {
+export function CaseStudyModal({ project, onClose }) {
   const [imgIdx, setImgIdx] = useState(0);
   const dialogRef = useRef(null);
 
@@ -299,8 +299,9 @@ function CaseStudyModal({ project, onClose }) {
   );
 }
 
-/* ─── Bento card (v24): alternating slide-in, spotlight border, 16:9 ────── */
-function ProjectCard({ project, onClick, index }) {
+/* ─── Bento card (v24): alternating slide-in, spotlight border, 16:9 ──────
+    Exported for reuse — Home's "Selected work" strip renders the same card. */
+export function ProjectCard({ project, onClick, index }) {
   const [hovered, setHovered] = useState(false);
   const tiltRef = useTilt();
   const reduced = useReducedMotion();
@@ -474,7 +475,7 @@ export default function Projects() {
             label="Projects"
             title="Work that ships."
             accent={["ships"]}
-            subtitle="Four production builds — every card opens the full story: the problem, the approach, the outcome."
+            subtitle={`${projects.length} production builds — every card opens the full story: the problem, the approach, the outcome.`}
           />
 
           {/* Search + Filter */}

@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { getLenis } from "../hooks/useLenis";
 
-// v28 — footer navigation walks the real routes now.
+// v28/v29 — footer navigation walks the real routes now.
 const footerNav = [
   { label: "Home", to: "/" },
   { label: "About", to: "/about" },
   { label: "Skills", to: "/skills" },
   { label: "Projects", to: "/projects" },
+  { label: "Services", to: "/services" },
   { label: "Journey", to: "/journey" },
   { label: "Contact", to: "/contact" },
 ];
