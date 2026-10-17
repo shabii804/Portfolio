@@ -35,10 +35,28 @@ function useReady() {
   return ready;
 }
 
+/* v31 — desktop (≥1024px) keeps the full-bleed cinema background; below lg
+   the hero becomes the stacked layout: left-aligned copy + the clip fitted
+   into a framed stage panel (single mounted instance — the variant swaps
+   with the breakpoint via this hook). */
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = (e) => setIsDesktop(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isDesktop;
+}
+
 export default function Hero() {
   const { personal } = usePortfolio();
   const navigate = useNavigate();
   const ready = useReady();
+  const isDesktop = useIsDesktop();
   const [roleIdx, setRoleIdx] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -79,14 +97,15 @@ export default function Hero() {
       id="home"
       className={`${heroMediaOn ? "hero-video-active " : ""}relative min-h-[92svh] flex items-center justify-center overflow-hidden pt-24 md:pt-20 pb-10`}
     >
-      {/* Cinematic video background — "floating code" clip + scrims +
-          animated motion icons. Replaces the previous 3D/particle layers:
-          one hero, one animation, zero loop contention. */}
-      <HeroVideo />
+      {/* Cinematic video — desktop: full-bleed background. Mobile/tablet:
+          the same clip fitted into a framed stage panel in the content flow
+          (placed after the CTAs below), so it FITS the hero instead of
+          hiding behind the copy. */}
+      {isDesktop && <HeroVideo variant="bg" />}
 
-      {/* Copy-side legibility veil — keeps text/CTAs/stats readable over any
-          footage (dark radial behind the copy column + bottom melt) */}
-      {heroMediaOn && <div className="hero-copy-veil" aria-hidden="true" />}
+      {/* Copy-side legibility veil — desktop only (the mobile stage does not
+          sit under the copy, so there is nothing to veil). */}
+      {heroMediaOn && isDesktop && <div className="hero-copy-veil" aria-hidden="true" />}
 
       {/* Main content (outer layer takes the scroll-parallax exit).
           z-10: the parallax transform creates a stacking context, so without
@@ -94,7 +113,7 @@ export default function Hero() {
           gradient sibling — washing the stats panel out in light theme. */}
       <div ref={parallaxRef} className="hero-parallax relative z-10 w-full">
         <div className="relative z-10 container-x w-full">
-          <div className={`text-center lg:text-left hero-gate ${ready ? "is-ready" : ""} lg:max-w-[54%]`}>
+          <div className={`text-left hero-gate ${ready ? "is-ready" : ""} lg:max-w-[54%]`}>
             {/* Availability badge */}
               <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/[0.12] border border-emerald-500/30 backdrop-blur-md mb-5" style={{ "--d": "0s" }}>
                 <div className="relative flex h-2 w-2">
@@ -127,7 +146,7 @@ export default function Hero() {
               </h1>
 
               {/* Typewriter role line */}
-              <div className="flex items-center justify-center lg:justify-start gap-2.5 mb-3.5" style={{ "--d": "0.4s" }}>
+              <div className="flex items-center justify-start gap-2.5 mb-3.5" style={{ "--d": "0.4s" }}>
                 <span className="font-mono text-accent-cyan/50 text-sm select-none">▶</span>
                 <div className="font-display text-base sm:text-xl font-medium text-text-secondary min-h-[24px] sm:min-h-[28px]">
                   {displayed}
@@ -141,19 +160,19 @@ export default function Hero() {
                 accent={["build", "screens."]}
                 ready={ready}
                 delay={0.35}
-                className="font-display text-lg sm:text-xl font-semibold text-text-secondary mb-4 justify-center lg:justify-start"
+                className="font-display text-lg sm:text-xl font-semibold text-text-secondary mb-4 justify-start"
               />
 
               {/* Bio */}
               <p
-                className="font-body text-text-secondary text-[15px] sm:text-base leading-relaxed mb-7 max-w-lg mx-auto lg:mx-0"
+                className="font-body text-text-secondary text-[15px] sm:text-base leading-relaxed mb-7 max-w-lg"
                 style={{ "--d": "0.48s" }}
               >
                 {personal.bio}
               </p>
 
               {/* CTAs */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-7" style={{ "--d": "0.56s" }}>
+              <div className="flex flex-wrap justify-start gap-3 mb-7" style={{ "--d": "0.56s" }}>
                 <button
                   ref={magneticPrimary}
                   onClick={() => navigate("/projects")}
@@ -182,7 +201,7 @@ export default function Hero() {
               </div>
 
               {/* Socials */}
-              <div className="flex flex-wrap justify-center lg:justify-start items-center gap-5" style={{ "--d": "0.64s" }}>
+              <div className="flex flex-wrap justify-start items-center gap-5" style={{ "--d": "0.64s" }}>
                 {[
                   { label: "GitHub", href: personal.github, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg> },
                   { label: "LinkedIn", href: personal.linkedin, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg> },
@@ -196,6 +215,18 @@ export default function Hero() {
               </div>
             </div>
 
+          {/* v31 — the fitted hero stage (mobile/tablet): the same admin-driven
+              clip, framed like a title card between the CTAs and the stats. */}
+          {!isDesktop && (
+            <div
+              className={`hero-gate hero-stage-slot mt-8 ${ready ? "is-ready" : ""}`}
+              style={{ "--d": "0.68s" }}
+              data-hero-stage
+            >
+              <HeroVideo variant="stage" />
+            </div>
+          )}
+
           {/* Stats strip — glass panel so numbers stay clearly visible over any footage */}
           <div className={`hero-gate mt-9 lg:mt-7 ${ready ? "is-ready" : ""}`} style={{ "--d": "0.7s" }}>
             <div className="stats-panel relative z-10 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 rounded-2xl px-6 py-5 sm:px-8 sm:py-6">
@@ -205,7 +236,7 @@ export default function Hero() {
                 { num: 2, label: "Live Deployments", grad: "text-gradient-indigo" },
                 { num: 4, suffix: "yrs", label: "Building Software", grad: "text-gradient-cyan" },
               ].map((s, i) => (
-                <div key={s.label} className="text-center lg:text-left">
+                <div key={s.label} className="text-left">
                   <div className={`stat-value font-display font-bold text-3xl sm:text-[34px] ${s.grad}`}>
                     <StatValue num={s.num} decimals={s.decimals || 0} suffix={s.suffix || ""} delay={700 + i * 90} />
                   </div>

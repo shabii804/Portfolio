@@ -1855,9 +1855,11 @@ html.custom-cursor textarea { cursor: text; }
 }
 
 /* ─── Navbar hide-on-scroll-down ─────────────────────────────────────────── */
+/* NOTE: no `will-change: transform` here — it would turn the nav into the
+   containing block for position:fixed descendants, clipping the v31
+   full-screen mobile menu overlay to the nav's own box. */
 .nav-shell {
   transition: transform 0.45s var(--ease-out), top 0.45s var(--ease-out);
-  will-change: transform;
 }
 .nav-shell.nav-hidden { transform: translateY(-130%); }
 
@@ -2079,10 +2081,165 @@ img.hero-video-img {
   .hero-video { display: none; }
 }
 
+/* ─── v31 — MOBILE HERO STAGE · the clip fitted into a framed panel ───────
+   Below lg the hero no longer paints the footage full-bleed behind the
+   copy. The same admin-driven media stack renders IN FLOW as a title-card
+   panel (16/10, rounded, hairline border) between the CTAs and the stats:
+   the video FITS the hero instead of smearing behind the text. The scroll
+   exit choreography (scale + melt) keeps working — rootRef is the panel. */
+.hero-video-stage {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(129, 140, 248, 0.22);
+  box-shadow:
+    0 24px 60px -24px rgba(0, 0, 0, 0.65),
+    0 0 44px -18px rgba(99, 102, 241, 0.35);
+}
+/* The panel is small and sits on the dark cinema canvas — swap the heavy
+   left/vertical scrims for a whisper of top shade and a soft floor so the
+   footage reads bright and complete inside its frame. */
+.hero-video-stage .hero-video-scrim {
+  background: linear-gradient(180deg, rgba(5, 6, 15, 0.12) 0%, rgba(5, 6, 15, 0.04) 55%, rgba(5, 6, 15, 0.38) 100%);
+}
+.hero-video-stage .hero-video-fade-top,
+.hero-video-stage .hero-video-fade-bottom { display: none; }
+/* Keep the framed panel clear of the section's absolute bottom-melt. */
+.hero-stage-slot { position: relative; z-index: 1; }
+
+/* ─── v31 — NAVBAR · mobile at-top glass pill + full-screen menu ────────── */
+/* Dark theme: at the very top the mobile bar floats as a glass capsule
+   (light theme already had its frosted pill at every width). Desktop
+   at-top stays the transparent full-width bar. */
+@media (max-width: 767px) {
+  .nav-shell.nav-top { padding-top: 10px; padding-left: 14px; padding-right: 14px; }
+  .nav-shell.nav-top > .nav-bar {
+    background: rgba(9, 9, 15, 0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgb(var(--border-subtle));
+    border-radius: 1rem;
+    box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.85);
+  }
+}
+
+/* Full-screen staggered mobile menu. Inside the nav stacking context
+   (root z-50): paints above the page and the FABs; z:-1 keeps it just
+   under the bar so logo/theme/close stay visible. Fixed light-on-dark
+   palette — the overlay is dark glass in BOTH themes. */
+.nav-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: flex;
+  flex-direction: column;
+  padding: 108px 26px 30px;
+  background:
+    radial-gradient(60% 42% at 82% 8%, rgba(99, 102, 241, 0.12), transparent 60%),
+    radial-gradient(48% 36% at 12% 92%, rgba(34, 211, 238, 0.08), transparent 60%),
+    rgba(5, 6, 15, 0.92);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  animation: nm-fade 0.32s var(--ease-out) both;
+}
+.nm-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  list-style: none;
+  padding: 0;
+}
+.nm-list li {
+  animation: nm-rise 0.5s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 48ms + 70ms);
+}
+.nm-link {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  color: #c5c8da;
+  text-decoration: none;
+  transition: background 0.25s var(--ease-out), color 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+}
+.nm-link:active { background: rgba(129, 140, 248, 0.1); }
+.nm-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: #9799ae;
+  min-width: 20px;
+}
+.nm-label {
+  font-family: "Clash Display", sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+.nm-arrow {
+  margin-left: auto;
+  align-self: center;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+  color: #a5b4fc;
+}
+.nm-link.active {
+  color: #f0f0f6;
+  background: rgba(129, 140, 248, 0.1);
+  border-color: rgba(129, 140, 248, 0.26);
+}
+.nm-link.active .nm-num { color: #a5b4fc; }
+.nm-link.active .nm-arrow { opacity: 1; transform: none; }
+.nm-foot {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  animation: nm-rise 0.5s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 48ms + 70ms);
+}
+.nm-foot .nm-note {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #9799ae;
+}
+@keyframes nm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes nm-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+/* The floating chat/WhatsApp buttons sit at root z-50 (after the nav in DOM),
+   so they would poke through the full-screen menu — park them while open. */
+body.menu-open .fab-stack {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-menu-overlay,
+  .nm-list li,
+  .nm-foot { animation: none; }
+}
+
 /* Light theme over the cinema-dark hero:
    1) the at-top transparent nav gets a frosted light pill so its dark text
       stays readable against the dark footage (morphs into the scrolled pill) */
-[data-theme="light"] .nav-shell.nav-top > div {
+[data-theme="light"] .nav-shell.nav-top > .nav-bar {
   background: rgba(243, 243, 248, 0.8);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
