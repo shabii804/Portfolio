@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { defaultProjects, defaultSkills, defaultPersonal, defaultExperience, defaultJourney, defaultServices } from "../data/portfolio";
+import { defaultProjects, defaultSkills, defaultPersonal, defaultExperience, defaultJourney, defaultServices, defaultCertificates } from "../data/portfolio";
 import { PortfolioContext } from "./portfolioContextObject";
 import { setRuntimeContent } from "../data/runtimeContent";
 import { loadLocalContent, localModeOn } from "../data/localMedia";
@@ -19,11 +19,13 @@ export function PortfolioProvider({ children }) {
   const [experience, setExperience] = useState(defaultExperience);
   const [journey, setJourney] = useState(defaultJourney);
   const [services, setServices] = useState(defaultServices);
+  const [certificates, setCertificates] = useState(defaultCertificates);
 
   const updateProjects = setProjects;
   const updateSkills = setSkills;
   const updatePersonal = setPersonal;
   const updateExperience = setExperience;
+  const updateCertificates = setCertificates;
 
   const resetAll = () => {
     setProjects(defaultProjects);
@@ -31,6 +33,7 @@ export function PortfolioProvider({ children }) {
     setPersonal(defaultPersonal);
     setExperience(defaultExperience);
     setServices(defaultServices);
+    setCertificates(defaultCertificates);
   };
 
   useEffect(() => {
@@ -47,6 +50,7 @@ export function PortfolioProvider({ children }) {
       if (Array.isArray(c.experience)) setExperience(c.experience);
       if (Array.isArray(c.journey)) setJourney(c.journey);
       if (Array.isArray(c.services)) setServices(c.services);
+      if (Array.isArray(c.certificates)) setCertificates(c.certificates);
     };
 
     (async () => {
@@ -76,7 +80,7 @@ export function PortfolioProvider({ children }) {
   }, []);
 
   return (
-    <PortfolioContext.Provider value={{ projects, skills, personal, experience, journey, services, updateProjects, updateSkills, updatePersonal, updateExperience, resetAll }}>
+    <PortfolioContext.Provider value={{ projects, skills, personal, experience, journey, services, certificates, updateProjects, updateSkills, updatePersonal, updateExperience, updateCertificates, resetAll }}>
       {children}
     </PortfolioContext.Provider>
   );

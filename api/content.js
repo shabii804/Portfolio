@@ -3,7 +3,8 @@
 //
 //   GET  public  → { ok, content }
 //   PUT  admin   body { content: { personal?, media?, settings?, skills?,
-//                                projects?, experience?, journey? } }
+//                                projects?, experience?, journey?, services?,
+//                                certificates? } }
 //                → merges the provided sections, updates meta, persists.
 //
 // Persisting = committing src/data/content.json + regenerating
@@ -15,7 +16,7 @@ import { applyCors, deepSanitize, error, json, optionsEcho, parseBody } from "..
 import { isAuthorized } from "../server/admin/auth.js";
 import { readContent, sendStoreError, writeContent } from "../server/admin/store.js";
 
-const SECTIONS = ["personal", "media", "settings", "skills", "projects", "experience", "journey"];
+const SECTIONS = ["personal", "media", "settings", "skills", "projects", "experience", "journey", "services", "certificates"];
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return optionsEcho(res);
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
   if (patch.skills !== undefined && (typeof patch.skills !== "object" || Array.isArray(patch.skills))) {
     return error(res, 400, "skills must be an object of arrays");
   }
-  for (const key of ["projects", "experience", "journey"]) {
+  for (const key of ["projects", "experience", "journey", "services", "certificates"]) {
     if (patch[key] !== undefined && !Array.isArray(patch[key])) {
       return error(res, 400, `${key} must be an array`);
     }

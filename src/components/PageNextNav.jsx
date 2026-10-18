@@ -17,6 +17,7 @@ const ORDER = [
   { key: "projects", path: "/projects", label: "Projects", hint: "Every production build", tint: "#f472b6" },
   { key: "services", path: "/services", label: "Services", hint: "Hire me — book a service", tint: "#fbbf24" },
   { key: "journey", path: "/journey", label: "Journey", hint: "2021 → now, milestone by milestone", tint: "#34d399" },
+  { key: "certificates", path: "/certificates", label: "Certificates", hint: "Verified credentials & scans", tint: "#a78bfa" },
   { key: "contact", path: "/contact", label: "Contact", hint: "Start a conversation", tint: "#818cf8" },
 ];
 

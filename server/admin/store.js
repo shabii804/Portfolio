@@ -71,6 +71,7 @@ export const defaultPersonal = content.personal;
 export const defaultExperience = content.experience;
 export const defaultJourney = content.journey;
 export const defaultServices = content.services;
+export const defaultCertificates = content.certificates;
 export const contentMeta = content.meta;
 `;
 }

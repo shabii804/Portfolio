@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { getLenis } from "../hooks/useLenis";
 
-// v28/v29 — multi-page navigation. Each link is a real route; NavLink drives
+// v28/v33 — multi-page navigation. Each link is a real route; NavLink drives
 // the active state (`.nav-link.active`), Home needs `end` so it only matches "/".
 const navLinks = [
   { label: "Home", to: "/", end: true },
@@ -12,6 +12,7 @@ const navLinks = [
   { label: "Projects", to: "/projects" },
   { label: "Services", to: "/services" },
   { label: "Journey", to: "/journey" },
+  { label: "Certificates", to: "/certificates" },
   { label: "Contact", to: "/contact" },
 ];
 
@@ -34,7 +35,6 @@ function MoonIcon() {
 export default function Navbar({ theme = "dark", onToggleTheme }) {
   const { personal } = usePortfolio();
   const [scrolled, setScrolled] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isApple] = useState(() =>
     /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
@@ -42,18 +42,12 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
   const location = useLocation();
 
   useEffect(() => {
-    let last = window.scrollY;
     let ticking = false;
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        const y = window.scrollY;
-        setScrolled(y > 50);
-        // Hide when scrolling down past the hero, reveal on any upward move
-        if (y > 180 && y > last + 4) setHidden(true);
-        else if (y < last - 4 || y <= 180) setHidden(false);
-        last = y;
+        setScrolled(window.scrollY > 50);
         ticking = false;
       });
     };
@@ -113,23 +107,25 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
 
   return (
     <nav
-      className={`nav-shell fixed left-0 right-0 z-50 ${hidden ? "nav-hidden" : ""} transition-all duration-500 ${
-        scrolled ? "top-3 md:top-4 px-4 sm:px-6" : "nav-top top-0 px-0"
-      }`}
+      className="nav-shell fixed left-0 right-0 z-50 top-2.5 md:top-3 px-3 sm:px-5"
     >
-      <div className={`nav-bar mx-auto max-w-5xl transition-all duration-500 max-md:backdrop-blur-xl max-md:backdrop-saturate-150 ${
+      {/* v33 — ONE compact glass pill for every state and viewport. Same
+          geometry at the top and scrolled (only the shadow deepens), so the
+          bar never morphs, never overlaps another bar and never disappears —
+          near-opaque glass keeps it legible over any footage. */}
+      <div className={`nav-bar mx-auto max-w-6xl rounded-2xl backdrop-blur-xl backdrop-saturate-150 bg-bg-card/85 border transition-all duration-500 ${
         scrolled
-          ? "bg-bg-card/85 backdrop-blur-xl border border-border-subtle rounded-2xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.7)]"
-          : "bg-transparent border-b border-transparent"
+          ? "border-border-mid/60 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
+          : "border-border-subtle shadow-[0_12px_36px_-20px_rgba(0,0,0,0.65)]"
       }`}>
-        <div className="px-4 sm:px-6 py-3.5 flex items-center justify-between">
+        <div className="px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
           <Link
             to="/"
             onClick={goHome}
-            className="group flex items-center gap-3"
+            className="group flex items-center gap-2.5"
             aria-label="Back to top"
           >
-            <div className="relative w-9 h-9 rounded-full overflow-hidden border border-accent-indigo/35 shadow-md shadow-accent-indigo/10 transition-all duration-300 group-hover:border-accent-indigo group-hover:scale-105 flex-shrink-0">
+            <div className="relative w-8 h-8 rounded-full overflow-hidden border border-accent-indigo/35 shadow-md shadow-accent-indigo/10 transition-all duration-300 group-hover:border-accent-indigo group-hover:scale-105 flex-shrink-0">
               <img
                 src={personal.profilePic}
                 alt={personal.name}
@@ -137,19 +133,19 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
                 loading="eager"
               />
             </div>
-            <span className="font-display font-bold text-sm tracking-tight text-text-primary group-hover:text-accent-indigo transition-colors duration-300 hidden sm:inline-block">
+            <span className="font-display font-bold text-[13px] tracking-tight text-text-primary group-hover:text-accent-indigo transition-colors duration-300 hidden sm:inline-block">
               {personal.name}
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1 lg:gap-2">
+          <div className="hidden md:flex items-center gap-0.5 lg:gap-1">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `nav-link font-body text-[13px] lg:text-sm font-medium ${isActive ? "active" : ""}`
+                  `nav-link font-body text-[13px] font-medium ${isActive ? "active" : ""}`
                 }
               >
                 {link.label}
@@ -159,19 +155,19 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
               href={`https://wa.me/${(personal.phone||"").replace(/\D/g, "")}?text=Hi%20${encodeURIComponent(personal.name.split(" ")[0])}!%20I%27d%20like%20to%20talk.`}
               target="_blank"
               rel="noreferrer"
-              className="btn-primary px-4 lg:px-5 py-2 rounded-full text-xs lg:text-sm font-medium font-display transition-all hover:scale-[1.03] ml-1.5 glow-on-hover"
+              className="btn-primary px-3.5 lg:px-4 py-1.5 rounded-full text-xs font-medium font-display transition-all hover:scale-[1.03] ml-1 glow-on-hover"
             >
               Hire Me
             </a>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {/* Theme toggle */}
             <button
               onClick={(e) => onToggleTheme({ x: e.clientX, y: e.clientY })}
               aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
               title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-bg-secondary border border-border-subtle text-text-secondary hover:text-accent-indigo hover:border-accent-indigo/40 transition-all"
             >
               {theme === "dark" ? <SunIcon /> : <MoonIcon />}
             </button>
@@ -190,7 +186,7 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
 
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden flex flex-col items-center justify-center gap-1.5 p-2.5 -m-1 w-11 h-11"
+              className="md:hidden flex flex-col items-center justify-center gap-1.5 p-2.5 -m-1 w-10 h-10"
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
             >

@@ -211,10 +211,13 @@ input::placeholder, textarea::placeholder { color: rgb(var(--text-muted)); }
 /* ─── Nav ────────────────────────────────────────────────────────────────── */
 .nav-link {
   position: relative;
-  padding: 8px 14px;
+  padding: 7px 10px;
   border-radius: 9999px;
   color: rgb(var(--text-secondary));
   transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (min-width: 1024px) {
+  .nav-link { padding: 7px 13px; }
 }
 .nav-link:hover { color: rgb(var(--text-primary)); }
 .nav-link::after {
@@ -1854,14 +1857,13 @@ html.custom-cursor textarea { cursor: text; }
   will-change: transform;
 }
 
-/* ─── Navbar hide-on-scroll-down ─────────────────────────────────────────── */
+/* ─── Navbar (v33) — one pill, always visible ────────────────────────────── */
 /* NOTE: no `will-change: transform` here — it would turn the nav into the
    containing block for position:fixed descendants, clipping the v31
    full-screen mobile menu overlay to the nav's own box. */
 .nav-shell {
-  transition: transform 0.45s var(--ease-out), top 0.45s var(--ease-out);
+  transition: top 0.45s var(--ease-out);
 }
-.nav-shell.nav-hidden { transform: translateY(-130%); }
 
 /* ─── Light theme fix for hero orb badge glass ───────────────────────── */
 [data-theme="light"] .hero-orb-badge { background: rgba(255, 255, 255, 0.85); }
@@ -2138,14 +2140,11 @@ img.hero-video-img {
    (light theme already had its frosted pill at every width). Desktop
    at-top stays the transparent full-width bar. */
 @media (max-width: 767px) {
-  .nav-shell.nav-top { padding-top: 10px; padding-left: 14px; padding-right: 14px; }
-  /* v31.4 — "nav bar STILL not clearly seen": footage-proof pill. 0.78 glass
-     let bright montage scenes bleed through and wash the controls out — now
-     near-opaque (0.94) with a crisper indigo rim and stronger brand glow, so
-     the pill reads instantly over ANY frame. Blur lives on the
-     max-md:backdrop-blur-xl Tailwind utility (Lightning CSS strips raw
-     backdrop-filter in prod). */
-  .nav-shell.nav-top > .nav-bar {
+  /* v33 — mobile keeps the v31.4 "footage-proof" pill in EVERY scroll state:
+     near-opaque 0.94 glass + crisp indigo rim + brand glow, so the compact
+     bar reads instantly over any frame. Blur arrives via the JSX Tailwind
+     utilities (Lightning CSS strips raw backdrop-filter in prod). */
+  .nav-shell > .nav-bar {
     background: rgba(9, 9, 16, 0.94);
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
@@ -2168,7 +2167,7 @@ img.hero-video-img {
   z-index: -1;
   display: flex;
   flex-direction: column;
-  padding: 108px 26px 30px;
+  padding: 96px 26px 30px;
   background:
     radial-gradient(60% 42% at 82% 8%, rgba(99, 102, 241, 0.12), transparent 60%),
     radial-gradient(48% 36% at 12% 92%, rgba(34, 211, 238, 0.08), transparent 60%),
@@ -2269,16 +2268,14 @@ body.menu-open .fab-stack {
   .nm-foot { animation: none; }
 }
 
-/* Light theme over the cinema-dark hero:
-   1) the at-top transparent nav gets a frosted light pill so its dark text
-      stays readable against the dark footage (morphs into the scrolled pill) */
-[data-theme="light"] .nav-shell.nav-top > .nav-bar {
-  background: rgba(243, 243, 248, 0.8);
+/* Light theme — the pill turns frosted light in EVERY state so its dark text
+   stays readable against the cinema-dark footage (v33: one pill, both states) */
+[data-theme="light"] .nav-shell > .nav-bar {
+  background: rgba(243, 243, 248, 0.88);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgb(var(--border-subtle));
-  border-radius: 1rem;
-  box-shadow: 0 16px 40px -18px rgba(10, 10, 30, 0.45);
+  box-shadow: 0 16px 40px -18px rgba(10, 10, 30, 0.35);
 }
 /* 2) a soft dark→light bridge in the hero's bottom padding zone melts the
       cinema slab into the light page below */

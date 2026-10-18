@@ -10,6 +10,7 @@ const footerNav = [
   { label: "Projects", to: "/projects" },
   { label: "Services", to: "/services" },
   { label: "Journey", to: "/journey" },
+  { label: "Certificates", to: "/certificates" },
   { label: "Contact", to: "/contact" },
 ];
 

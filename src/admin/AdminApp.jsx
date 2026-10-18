@@ -21,6 +21,7 @@ import ContentTab from "./tabs/ContentTab.jsx";
 import MediaTab from "./tabs/MediaTab.jsx";
 import ProjectsTab from "./tabs/ProjectsTab.jsx";
 import ServicesTab from "./tabs/ServicesTab.jsx";
+import CertificatesTab from "./tabs/CertificatesTab.jsx";
 import SkillsTab from "./tabs/SkillsTab.jsx";
 import MessagesTab from "./tabs/MessagesTab.jsx";
 import SettingsTab from "./tabs/SettingsTab.jsx";
@@ -32,6 +33,7 @@ const TABS = [
   { id: "media", label: "Hero & Media" },
   { id: "projects", label: "Projects" },
   { id: "services", label: "Services" },
+  { id: "certificates", label: "Certificates" },
   { id: "skills", label: "Skills & Journey" },
   { id: "messages", label: "Messages" },
   { id: "settings", label: "Settings" },
@@ -278,6 +280,7 @@ export default function AdminApp() {
             {tab === "media" && "Hero & media"}
             {tab === "projects" && "Projects"}
             {tab === "services" && "Services"}
+            {tab === "certificates" && "Certificates"}
             {tab === "skills" && "Skills, experience & journey"}
             {tab === "messages" && "Inbox"}
             {tab === "settings" && "Settings & API"}
@@ -289,6 +292,7 @@ export default function AdminApp() {
             {tab === "media" && "The hero background — video/image uploads, framing, film look. What visitors see behind everything."}
             {tab === "projects" && "Case studies with full CRUD, reordering and deep case-study JSON."}
             {tab === "services" && "The Services page catalog — what you offer, deliverables, timelines. Booking form reads from here."}
+            {tab === "certificates" && "Certifications, courses and official completions — upload the scan, add the verify link, and /certificates updates live."}
             {tab === "skills" && "Structured editors for skills, experience roles and the journey timeline."}
             {tab === "messages" && "Messages submitted through the site's contact form."}
             {tab === "settings" && "Site-wide switches, deployment health, environment setup and the full API reference."}
@@ -302,6 +306,7 @@ export default function AdminApp() {
             {tab === "media" && <MediaTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} notify={notify} />}
             {tab === "projects" && <ProjectsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "services" && <ServicesTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
+            {tab === "certificates" && <CertificatesTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} notify={notify} />}
             {tab === "skills" && <SkillsTab key={content?.meta?.updatedAt || "init"} content={content} saveContent={saveContent} />}
             {tab === "messages" && <MessagesTab notify={notify} />}
             {tab === "settings" && <SettingsTab key={content?.meta?.updatedAt || "init"} status={status} content={content} saveContent={saveContent} onGhChanged={bumpGh} onModeChanged={toggleLocalMode} />}

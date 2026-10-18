@@ -435,10 +435,10 @@
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-17T08:58:41.816Z",
+    "updatedAt": "2026-10-18T10:12:56.070Z",
     "note": "Canonical portfolio content — managed via the Admin panel (/admin → PUT /api/content).",
     "updatedSections": [
-      "personal"
+      "certificates"
     ]
   },
   "media": {
@@ -556,6 +556,57 @@
       ],
       "timeline": "Ongoing / monthly",
       "proof": "Zero-downtime support since Farooq launch"
+    }
+  ],
+  "certificates": [
+    {
+      "id": "cert-cisco-cpp",
+      "title": "C++ Programming Certificate",
+      "issuer": "Cisco Networking Academy",
+      "date": "Mar 2024",
+      "credentialId": "",
+      "url": "",
+      "image": "",
+      "description": "Validates proficiency in C++ — object-oriented programming, memory management and core data structures, with hands-on graded lab work.",
+      "skills": [
+        "C++",
+        "OOP",
+        "Data Structures",
+        "Memory Management"
+      ],
+      "featured": true
+    },
+    {
+      "id": "cert-cisco-advanced",
+      "title": "Advanced Programming Certificate",
+      "issuer": "Cisco Networking Academy",
+      "date": "2024",
+      "credentialId": "",
+      "url": "",
+      "image": "",
+      "description": "Advanced algorithms, systems programming and performance optimization — the follow-up to the C++ Programming Certificate.",
+      "skills": [
+        "Algorithms",
+        "Systems Programming",
+        "Performance"
+      ],
+      "featured": true
+    },
+    {
+      "id": "cert-devhub-internship",
+      "title": "Frontend Internship Completion",
+      "issuer": "Developer Hub Corporation",
+      "date": "2024",
+      "credentialId": "",
+      "url": "",
+      "image": "",
+      "description": "Official completion and recommendation certificate for the certified frontend internship — production React work under senior review.",
+      "skills": [
+        "React",
+        "Frontend",
+        "Team Workflow"
+      ],
+      "featured": false
     }
   ]
 }

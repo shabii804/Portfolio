@@ -16,6 +16,7 @@ const ProjectsPage = lazy(() => import("./pages/ProjectsPage.jsx"));
 const ServicesPage = lazy(() => import("./pages/ServicesPage.jsx"));
 const JourneyPage = lazy(() => import("./pages/JourneyPage.jsx"));
 const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
+const CertificatesPage = lazy(() => import("./pages/CertificatesPage.jsx"));
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
 
@@ -36,6 +37,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/projects" element={page(ProjectsPage)} />
           <Route path="/services" element={page(ServicesPage)} />
           <Route path="/journey" element={page(JourneyPage)} />
+          <Route path="/certificates" element={page(CertificatesPage)} />
           <Route path="/contact" element={page(ContactPage)} />
         </Route>
         <Route path="/admin" element={page(Admin)} />
