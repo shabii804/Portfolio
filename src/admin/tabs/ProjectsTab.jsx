@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import { Badge, Btn, ConfirmBtn, Field, ListEditor, Panel, TextArea, TextInput } from "../ui.jsx";
+import ReposPanel from "./ReposPanel.jsx";
 
 // Module-scope helpers (pure-ish + impure-time calls live outside render)
 const newId = () => `p-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -29,6 +30,7 @@ const blank = (num) => ({
   screenshots: [],
   caseStudy: null,
   featured: false,
+  pinned: false,
 });
 
 export default function ProjectsTab({ content, saveContent }) {
@@ -71,11 +73,15 @@ export default function ProjectsTab({ content, saveContent }) {
 
   const remove = (p) => setProjects(projects.filter((x) => x.id !== p.id));
 
+  // v34 — row-level pin: pinned builds float to the top of /projects.
+  const togglePin = (p) =>
+    setProjects(projects.map((x) => (x.id === p.id ? { ...x, pinned: !x.pinned } : x)));
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Panel
         title="Projects"
-        desc="Case studies shown in the Projects section — order, links, stack, screenshots and the deep case study."
+        desc="Case studies shown on /projects and Home — order, links, stack, screenshots, the deep case study, and the pin & featured flags."
         actions={
           <>
             <Btn onClick={save} disabled={saving || !dirty}>{saving ? "Saving…" : "Save projects"}</Btn>
@@ -85,7 +91,8 @@ export default function ProjectsTab({ content, saveContent }) {
       >
         {dirty && (
           <p className="font-mono text-[10px] text-amber-400 mb-4">
-            Unsaved changes — remember to hit “Save projects”.
+            Unsaved changes — remember to hit “Save projects”. (Saving the GitHub archive below also
+            reloads this tab.)
           </p>
         )}
         <div className="space-y-3">
@@ -98,12 +105,30 @@ export default function ProjectsTab({ content, saveContent }) {
                   <div className="font-mono text-[10px] text-text-muted truncate">{p.subtitle || p.tagline || "—"}</div>
                 </div>
                 <div className="hidden sm:flex items-center gap-2">
+                  {p.pinned && <Badge tone="amber">Pinned</Badge>}
                   {p.featured && <Badge tone="green">Featured</Badge>}
                   {p.live && <Badge tone="green">Live</Badge>}
                   {p.github && <Badge tone="muted">Code</Badge>}
                   {p.badge && <Badge>{p.badge}</Badge>}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => togglePin(p)}
+                    aria-pressed={!!p.pinned}
+                    aria-label={`${p.pinned ? "Unpin" : "Pin"} ${p.title}`}
+                    title={p.pinned ? "Pinned to the top of /projects — click to unpin" : "Pin to the top of /projects"}
+                    className={`inline-flex items-center justify-center w-7 h-7 rounded-lg border transition-all ${
+                      p.pinned
+                        ? "text-amber-400 border-amber-500/40 bg-amber-500/10"
+                        : "text-text-muted border-transparent hover:text-amber-400 hover:border-amber-500/40"
+                    }`}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill={p.pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 17v5" />
+                      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1" />
+                    </svg>
+                  </button>
                   <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={`Move ${p.title} up`} className="font-mono text-xs text-text-muted hover:text-accent-indigo disabled:opacity-30 px-1">↑</button>
                   <button type="button" onClick={() => move(i, 1)} disabled={i === projects.length - 1} aria-label={`Move ${p.title} down`} className="font-mono text-xs text-text-muted hover:text-accent-indigo disabled:opacity-30 px-1">↓</button>
                   <button type="button" onClick={() => setEditingId(editingId === p.id ? null : p.id)} className="btn-ghost px-3 py-1.5 rounded-lg font-mono text-[10px]">
@@ -127,6 +152,10 @@ export default function ProjectsTab({ content, saveContent }) {
           )}
         </div>
       </Panel>
+
+      {/* v34 — the GitHub-synced section of /projects, under admin control:
+          pin / hide / retitle every synced repo. */}
+      <ReposPanel content={content} saveContent={saveContent} />
     </div>
   );
 }
@@ -181,7 +210,8 @@ function ProjectEditor({ project, onChange, onDuplicate, onDelete }) {
           Featured on the landing page: {p.featured ? "ON" : "OFF"}
         </button>
         <p className="font-mono text-[10px] text-text-muted mt-1.5">
-          The first 4 featured projects appear in Home's “Selected work” strip. The Projects page always shows every project.
+          Featured = the first 4 appear in Home's “Selected work” strip. Pinned (the pin button in each
+          row) = floats to the top of the /projects archive. The Projects page always shows every project.
         </p>
       </div>
 

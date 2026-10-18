@@ -152,7 +152,8 @@
       "screenshots": [
         "farooq-home.webp"
       ],
-      "featured": true
+      "featured": true,
+      "pinned": true
     },
     {
       "id": "spendsmart",
@@ -238,7 +239,8 @@
       "screenshots": [
         "spendsmart-home.webp"
       ],
-      "featured": true
+      "featured": true,
+      "pinned": false
     },
     {
       "id": "eshop",
@@ -295,7 +297,8 @@
       "badge": "Frontend",
       "date": "Jan 2023",
       "screenshots": [],
-      "featured": true
+      "featured": true,
+      "pinned": false
     },
     {
       "id": "sms",
@@ -367,7 +370,8 @@
         "sms-5.webp",
         "sms-6.webp"
       ],
-      "featured": true
+      "featured": true,
+      "pinned": false
     }
   ],
   "experience": [
@@ -464,7 +468,10 @@
     "showScrollProgress": true,
     "showBackToTop": true,
     "showChatbot": true,
-    "showGitHubActivity": true
+    "showGitHubActivity": true,
+    "pinnedRepos": [],
+    "hiddenRepos": [],
+    "repoOverrides": {}
   },
   "services": [
     {

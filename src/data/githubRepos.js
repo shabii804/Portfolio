@@ -92,6 +92,60 @@ export const SEED_REPOS = [
   { name: "School-Mangment-System-C-", description: "A C++ Console-Based Student Management System using structures.", language: "C++", stargazers_count: 4, forks_count: 0, homepage: "", html_url: "https://github.com/shabii804/School-Mangment-System-C-", topics: [], pushed_at: "2025-10-25T00:00:00Z", created_at: "2025-10-25T00:00:00Z" },
 ];
 
+/* ─── v34 — settings-aware pipeline (pure, unit-tested) ─────────────────────
+   applyRepoSettings: raw repos → visible, override-applied cards + pinned set.
+   orderArchive:      pinned curated → rest curated → pinned repos → rest repos,
+                      with display numbering following the final order. With no
+                      pins this is byte-identical to the v32 ordering. */
+const norm = (s) => String(s || "").toLowerCase();
+
+export function applyRepoSettings(ghRaw, curatedUrls, settings) {
+  const hidden = new Set(
+    (Array.isArray(settings?.hiddenRepos) ? settings.hiddenRepos : []).map(norm)
+  );
+  const pinnedSet = new Set(
+    (Array.isArray(settings?.pinnedRepos) ? settings.pinnedRepos : []).map(norm)
+  );
+  const ovRaw =
+    settings?.repoOverrides && typeof settings.repoOverrides === "object"
+      ? settings.repoOverrides
+      : {};
+  const overrides = {};
+  for (const [k, v] of Object.entries(ovRaw)) {
+    if (v && typeof v === "object") overrides[norm(k)] = v;
+  }
+
+  const visible = (Array.isArray(ghRaw) ? ghRaw : []).filter(
+    (r) => r?.name && !hidden.has(norm(r.name))
+  );
+  const cards = mapGithubRepos(visible, curatedUrls).map((p) => {
+    const o = overrides[norm(p.repoName)];
+    if (!o) return p;
+    return {
+      ...p,
+      title: o.title?.trim() || p.title,
+      tagline: o.description?.trim() || p.tagline,
+      description: o.description?.trim() || p.description,
+    };
+  });
+  return { cards, pinnedSet };
+}
+
+export function orderArchive(projects, ghCards, pinnedSet) {
+  const pinned = pinnedSet instanceof Set ? pinnedSet : new Set();
+  const isPinnedRepo = (p) => pinned.has(norm(p.repoName));
+  return [
+    ...projects.filter((p) => p.pinned),
+    ...projects.filter((p) => !p.pinned),
+    ...ghCards.filter(isPinnedRepo),
+    ...ghCards.filter((p) => !isPinnedRepo(p)),
+  ].map((p, i) => ({
+    ...p,
+    pinned: p.source === "github" ? isPinnedRepo(p) : !!p.pinned,
+    num: String(i + 1).padStart(2, "0"), // display numbering follows the final order
+  }));
+}
+
 /* ─── Mapper: raw GitHub API repos → ProjectCard-shape objects ──────────────
    curatedUrls: Set of lowercase github URLs already presented as case
    studies — those repos are skipped so nothing appears twice. */
@@ -115,6 +169,7 @@ export function mapGithubRepos(rawRepos, curatedUrls) {
     out.push({
       id: `gh-${r.name.toLowerCase().replace(/[^a-z0-9-]/g, "-")}`,
       num: null, // assigned by the consumer (continues after the curated ones)
+      repoName: r.name, // v34 — stable key for admin pin/hide/override settings
       title,
       subtitle: `${language} · synced from GitHub`,
       tagline: desc || `${title} — ${language} build, straight from GitHub.`,

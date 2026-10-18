@@ -14,6 +14,7 @@
 import { useEffect, useState } from "react";
 import { api, clearToken, getToken, login, timeAgo } from "./api.js";
 import { bridgeSaveContent, ghConnected } from "./ghBridge.js";
+import { setRuntimeContent } from "../data/runtimeContent"; // v34 — admin saves reach the live site in-session
 import { clearAllLocalData, loadLocalContent, localModeOn, localSaveContent, seedLocalContent, setLocalMode } from "./localStore.js";
 import { Badge, Btn, Spinner } from "./ui.jsx";
 import OverviewTab from "./tabs/OverviewTab.jsx";
@@ -114,6 +115,7 @@ export default function AdminApp() {
       if (localModeOn()) {
         const next = localSaveContent(content, patch);
         setContent(next);
+        try { setRuntimeContent(next); } catch { /* v34 — same-session overlay */ }
         notify(`${label} saved — test mode, live in this browser instantly`, "ok");
         return { content: next, storage: "local" };
       }
@@ -125,6 +127,15 @@ export default function AdminApp() {
         res = { content: next, storage: "github-browser" };
       }
       setContent(res.content);
+      // v34 — proper admin↔site integration: push the saved snapshot into the
+      // runtime overlay so the public pages IN THIS SESSION update immediately
+      // (hero config, settings, and — via the PortfolioContext subscription —
+      // projects/skills/personal/experience/journey/services/certificates).
+      // With Supabase this is the true live state; with the GitHub driver it
+      // matches what the commit will serve within ~1 min.
+      try {
+        setRuntimeContent(res.content);
+      } catch { /* overlay is best-effort — the save itself already landed */ }
       const instant = res.storage === "supabase";
       notify(
         instant

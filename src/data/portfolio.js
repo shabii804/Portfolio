@@ -155,7 +155,8 @@ export const content = {
       "screenshots": [
         "farooq-home.webp"
       ],
-      "featured": true
+      "featured": true,
+      "pinned": true
     },
     {
       "id": "spendsmart",
@@ -241,7 +242,8 @@ export const content = {
       "screenshots": [
         "spendsmart-home.webp"
       ],
-      "featured": true
+      "featured": true,
+      "pinned": false
     },
     {
       "id": "eshop",
@@ -298,7 +300,8 @@ export const content = {
       "badge": "Frontend",
       "date": "Jan 2023",
       "screenshots": [],
-      "featured": true
+      "featured": true,
+      "pinned": false
     },
     {
       "id": "sms",
@@ -370,7 +373,8 @@ export const content = {
         "sms-5.webp",
         "sms-6.webp"
       ],
-      "featured": true
+      "featured": true,
+      "pinned": false
     }
   ],
   "experience": [
@@ -467,7 +471,10 @@ export const content = {
     "showScrollProgress": true,
     "showBackToTop": true,
     "showChatbot": true,
-    "showGitHubActivity": true
+    "showGitHubActivity": true,
+    "pinnedRepos": [],
+    "hiddenRepos": [],
+    "repoOverrides": {}
   },
   "services": [
     {

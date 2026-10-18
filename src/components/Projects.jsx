@@ -3,7 +3,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Rocket } from "lucide-react";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { useGithubRepos } from "../hooks/useGithubRepos";
-import { mapGithubRepos } from "../data/githubRepos";
+import useSiteSettings from "../hooks/useSiteSettings";
+import { applyRepoSettings, orderArchive } from "../data/githubRepos";
 import TechIcon from "./TechIcon";
 import SectionHeader from "./motion/SectionHeader";
 import { EASE_OUT } from "./motion/ease";
@@ -373,7 +374,16 @@ export function ProjectCard({ project, onClick, index }) {
       <ProjectVisual project={project} />
 
       <div className="flex items-start justify-between gap-3">
-        <span className="project-num">{project.num} /</span>
+        <div className="flex items-center gap-2 min-w-0 flex-wrap">
+          <span className="project-num">{project.num} /</span>
+          {/* v34 — admin pin: pinned builds float to the top of the archive */}
+          {project.pinned && (
+            <span data-pinned="true" className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-1 font-mono text-[9px] uppercase tracking-wider text-amber-300 leading-none" title="Pinned from the admin panel">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1" /></svg>
+              Pinned
+            </span>
+          )}
+        </div>
         <span
           className="font-mono text-[10px] px-2.5 py-1 rounded-full border transition-all duration-300"
           style={{
@@ -479,23 +489,33 @@ const MAX_FILTERS = 9;
 export default function Projects() {
   const { projects } = usePortfolio();
   const { repos: ghRaw, stale } = useGithubRepos(); // v32 — live GitHub archive
+  // v34 — the admin's GitHub-archive controls ride in through settings and
+  // apply without a rebuild (Supabase) or after one (GitHub driver).
+  const settings = useSiteSettings();
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState("");
   const [activeStack, setActiveStack] = useState("All");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const ref = useRef(null);
 
-  // v32 — every public repo that is NOT already a curated case study,
-  // mapped into the same card shape and numbered after the curated ones.
+  // v34 — settings-driven archive controls (stable refs: the runtime
+  // snapshot's own arrays, or undefined — both memo-safe).
+  const { pinnedRepos, hiddenRepos, repoOverrides } = settings;
+
   const curatedUrls = useMemo(
     () => new Set(projects.map((p) => (p.github || "").replace(/\/$/, "").toLowerCase()).filter(Boolean)),
     [projects]
   );
-  const ghCards = useMemo(() => {
-    const mapped = mapGithubRepos(ghRaw, curatedUrls);
-    return mapped.map((p, i) => ({ ...p, num: String(projects.length + i + 1).padStart(2, "0") }));
-  }, [ghRaw, curatedUrls, projects.length]);
-  const all = useMemo(() => [...projects, ...ghCards], [projects, ghCards]);
+  const gh = useMemo(
+    () => applyRepoSettings(ghRaw, curatedUrls, { pinnedRepos, hiddenRepos, repoOverrides }),
+    [ghRaw, curatedUrls, pinnedRepos, hiddenRepos, repoOverrides]
+  );
+  const ghCards = gh.cards;
+
+  const all = useMemo(
+    () => orderArchive(projects, ghCards, gh.pinnedSet),
+    [projects, ghCards, gh.pinnedSet]
+  );
 
   const allStacks = ["All", ...Array.from(
     new Set(all.flatMap((p) => p.stack || []))
@@ -538,7 +558,7 @@ export default function Projects() {
             label="Projects"
             title="Work that ships."
             accent={["ships"]}
-            subtitle={`${projects.length} case studies + ${ghCards.length} synced from GitHub — every card opens the full story.`}
+            subtitle={`${projects.length} case studies + ${ghCards.length} synced from GitHub — every card opens the full story. Pinned builds float to the top.`}
           />
 
           {/* Search + Filter */}
